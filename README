@@ -1,14 +1,21 @@
-Shared Paint
-============
+SPaint
+------
+Shared painting over TCP/IP.
 
-Simple graphic editor with an ability of cooperation among users in real time.
+Prerequisites
+-------------
+G++ (GCC)
+CMake >=2.6
+Qt >=4.4.0
 
-Project for ITU course (User Interface Programming)
-Brno University of Technology
-Faculty of Information Technology
-October-December 2009
+Howto INSTALL
+------------- 
+mkdir build && cd build # create build dir
+cmake ..                # create Makefile
+make                    # compile project
+sudo make install       # install project
 
----
-Marek Vavrusa <marek -at- vavrusa.com>
-Marek Vantuch <xvantu00 -at- stud.fit.vutbr.cz>
-Vojtech Vitek (V-Teq) <vojtech.vitek -at- gmail.com>
+How to UNINSTALL
+----------------
+cd build               # enter build dir
+sudo cmake uninstall   # uninstall project
