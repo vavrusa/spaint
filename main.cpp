@@ -21,6 +21,9 @@
 
 #include <QApplication>
 #include <cstdlib>
+#include "canvas.h"
+#include "networkservice.h"
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
@@ -28,11 +31,21 @@ int main(int argc, char *argv[])
    QApplication app(argc, argv);
    app.setOrganizationName("VUT FIT");
    app.setOrganizationDomain("fit.vutbr.cz");
-   app.setApplicationName("SPaint");
+   app.setApplicationName("SharedPaint");
 
-   // Create application
-   //CanvasMgr mgr;
-   //mgr.start();
+   // Create canvas manager
+   CanvasMgr cm;
+   cm.create(cm.tr("Main Canvas"));
+
+   // Create application window
+   MainWindow window;
+   window.observe(&cm);
+   window.show();
+
+   // Create network service
+   NetworkService net;
+   net.observe(&cm);
+   net.start();
 
    // Run event-loop
    return app.exec();

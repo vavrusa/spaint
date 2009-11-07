@@ -21,9 +21,17 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
 # Source files
 set(project_src         main.cpp
+                        canvas.cpp
+                        canvasmgr.cpp
+                        networkservice.cpp
+                        mainwindow.cpp
                         )
 
-set(project_headers     )
+set(project_headers     canvas.h
+                        canvasmgr.h
+                        networkservice.h
+                        mainwindow.h
+                        )
 
 # Qt4
 set(QT_MIN_VERSION 4.4.0)
