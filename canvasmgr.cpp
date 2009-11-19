@@ -16,6 +16,7 @@ Canvas* CanvasMgr::create(const QString& name)
 
    // Emit signal
    emit canvasCreated(c);
+   return c;
 }
 
 bool CanvasMgr::remove(Canvas* canvas)

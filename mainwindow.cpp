@@ -1,6 +1,7 @@
 #include <QCloseEvent>
 #include <QSettings>
 #include "mainwindow.h"
+#include "canvasview.h"
 
 // Const
 #define DEFAULT_WIDTH 800
@@ -33,6 +34,7 @@ void MainWindow::load()
 
 bool MainWindow::observe(CanvasMgr* cm)
 {
+   setCentralWidget(new CanvasView(cm->create("Main"), this));
    return true;
 }
 
