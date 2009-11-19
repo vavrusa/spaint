@@ -3,6 +3,7 @@
 
 #include <QGraphicsScene>
 class CanvasMgr;
+class QPainter;
 class QGraphicsSceneMouseEvent;
 
 class Canvas : public QGraphicsScene
@@ -26,6 +27,7 @@ class Canvas : public QGraphicsScene
    void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
    void mousePressEvent(QGraphicsSceneMouseEvent* e);
    void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
+   void drawBackground(QPainter* p, const QRectF& re);
 
    private:
    int mState;
