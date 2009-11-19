@@ -1,18 +1,28 @@
+#include <QList>
 #include "canvasmgr.h"
 
+struct CanvasMgr::Private {
+   QList<Canvas*> list;
+};
+
 CanvasMgr::CanvasMgr(QObject* parent)
-      : QObject(parent)
+      : QObject(parent), d(new Private)
 {
 }
 
 CanvasMgr::~CanvasMgr()
 {
+   QList<Canvas*>::iterator it;
+   for(it = d->list.begin(); it < d->list.end(); ++it)
+      remove(*it);
+
+   delete d;
 }
 
 Canvas* CanvasMgr::create(const QString& name)
 {
    // TODO
-   Canvas* c = new Canvas(this);
+   Canvas* c = new Canvas(name, this);
 
    // Emit signal
    emit canvasCreated(c);
@@ -28,5 +38,6 @@ bool CanvasMgr::remove(Canvas* canvas)
    canvas->deleteLater();
    return true;
 }
+
 
 #include "canvasmgr.moc"

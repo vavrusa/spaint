@@ -5,12 +5,9 @@
 #include "canvas.h"
 #include "canvasmgr.h"
 
-Canvas::Canvas(CanvasMgr* parent)
-      : QGraphicsScene(parent), mState(Idle), mGlyph(0)
+Canvas::Canvas(const QString& name, CanvasMgr* parent)
+      : QGraphicsScene(parent), mState(Idle), mGlyph(0), mName(name)
 {
-   addRect(0, -100, 100, 100, QPen(Qt::black), QBrush(Qt::red));
-   addRect(-50, 0, 100, 100, QPen(Qt::black), QBrush(Qt::green));
-   addRect(50, 0, 100, 100, QPen(Qt::black), QBrush(Qt::blue));
 }
 
 void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)

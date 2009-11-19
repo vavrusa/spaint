@@ -3,6 +3,7 @@
 
 #include <QGraphicsView>
 #include "canvas.h"
+class QPainter;
 
 class CanvasView : public QGraphicsView
 {
@@ -10,6 +11,9 @@ class CanvasView : public QGraphicsView
 
    public:
    CanvasView(Canvas* canvas, QWidget* parent = 0);
+
+   protected:
+   void drawForeground(QPainter* p, const QRectF& rect);
 
    private:
    Canvas* mCanvas;

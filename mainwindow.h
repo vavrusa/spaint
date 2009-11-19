@@ -11,6 +11,7 @@ class MainWindow : public QMainWindow
 
    public:
    MainWindow(QWidget* parent = 0);
+   ~MainWindow();
 
    void load();
    bool observe(CanvasMgr* cm);
@@ -21,6 +22,9 @@ class MainWindow : public QMainWindow
    void closeEvent(QCloseEvent *event);
 
    private:
+   struct Private;
+   Private* d;
+
    QMenuBar* createMenuBar();
 };
 

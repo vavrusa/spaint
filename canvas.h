@@ -8,9 +8,13 @@ class QGraphicsSceneMouseEvent;
 class Canvas : public QGraphicsScene
 {
    Q_OBJECT
+   Q_PROPERTY(QString name READ name);
 
    public:
-   Canvas(CanvasMgr* parent = 0);
+   Canvas(const QString& name = QString(), CanvasMgr* parent = 0);
+
+   // Properties
+   const QString& name() { return mName; }
 
    // State tracking
    enum State {
@@ -26,6 +30,7 @@ class Canvas : public QGraphicsScene
    private:
    int mState;
    QGraphicsPathItem* mGlyph;
+   QString mName;
 
 };
 

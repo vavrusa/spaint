@@ -1,14 +1,18 @@
 #include <QCloseEvent>
 #include <QSettings>
 #include "mainwindow.h"
-#include "canvasview.h"
+#include "canvascontainment.h"
 
 // Const
 #define DEFAULT_WIDTH 800
 #define DEFAULT_HEIGHT 600
 
+struct MainWindow::Private {
+   CanvasContainment* containment;
+};
+
 MainWindow::MainWindow(QWidget* parent)
-      : QMainWindow(parent)
+      : QMainWindow(parent), d(new Private)
 {
    // Load window defaults
    setWindowTitle(tr("Shared paint"));
@@ -22,11 +26,16 @@ MainWindow::MainWindow(QWidget* parent)
    loadSettings();
 }
 
+MainWindow::~MainWindow()
+{
+   delete d;
+}
+
 void MainWindow::load()
 {
    // Main widget
-   QWidget* mainWidget = new QWidget(this);
-   setCentralWidget(mainWidget);
+   d->containment = new CanvasContainment(this);
+   setCentralWidget(d->containment);
 
    // Menu
    setMenuBar(createMenuBar());
@@ -34,7 +43,8 @@ void MainWindow::load()
 
 bool MainWindow::observe(CanvasMgr* cm)
 {
-   setCentralWidget(new CanvasView(cm->create("Main"), this));
+   connect(cm, SIGNAL(canvasCreated(Canvas*)), d->containment, SLOT(addCanvas(Canvas*)));
+   connect(cm, SIGNAL(canvasRemoved(Canvas*)), d->containment, SLOT(removeCanvas(Canvas*)));
    return true;
 }
 

@@ -20,6 +20,10 @@ class CanvasMgr : public QObject
    void canvasCreated(Canvas* canvas);
    void canvasRemoved(Canvas* canvas);
 
+   private:
+   struct Private;
+   Private* d;
+
 };
 
 #endif // CANVASMGR_H
