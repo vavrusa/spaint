@@ -1,7 +1,9 @@
 #include <QGraphicsView>
 #include <QCloseEvent>
+#include <QApplication>
 #include <QSettings>
 #include <QTimer>
+#include <QMessageBox>
 #include "mainwindow.h"
 #include "canvascontainment.h"
 
@@ -39,6 +41,13 @@ MainWindow::~MainWindow()
    delete d;
 }
 
+void MainWindow::about()
+{
+    QMessageBox::about(this, tr("About Shared Paint"),
+            tr("The <b>Shared Paint</b> project "
+               "is aimed to create simple editor..."));
+}
+
 void MainWindow::init()
 {
    emit initialized();
@@ -59,21 +68,28 @@ QMenuBar* MainWindow::createMenuBar()
 {
    QMenuBar* bar = new QMenuBar(this);
 
-   QMenu* sessionMenu = bar->addMenu(tr("Session"));
+   QMenu* fileMenu = bar->addMenu(tr("&File"));
+   fileMenu->addAction(tr("E&xit"), this, SLOT(close()), tr("Ctrl+Q"));
+
+   QMenu* sessionMenu = bar->addMenu(tr("&Session"));
    sessionMenu->addAction(tr("C&onnect"));
    sessionMenu->addAction(tr("&Save as image"));
    sessionMenu->addSeparator();
    sessionMenu->addAction(tr("&Quit"));
 
-   QMenu* canvasMenu = bar->addMenu(tr("Canvas"));
-   sessionMenu->addAction(tr("&Clear"));
+   QMenu* canvasMenu = bar->addMenu(tr("&Canvas"));
+   canvasMenu->addAction(tr("&Clear"));
 
-   QMenu* windowMenu = bar->addMenu(tr("Window"));
+   QMenu* windowMenu = bar->addMenu(tr("&Window"));
 
-   QMenu* optionsMenu = bar->addMenu(tr("Options"));
-   optionsMenu->addAction(tr("Options"));
-   optionsMenu->addSeparator();
-   optionsMenu->addAction(tr("Help"));
+   QMenu* optionsMenu = bar->addMenu(tr("&Options"));
+   optionsMenu->addAction(tr("&Options"));
+
+   QMenu* helpMenu = bar->addMenu(tr("&Help"));
+   helpMenu->addAction(tr("&Help"));
+   helpMenu->addSeparator();
+   helpMenu->addAction(tr("&About"), this, SLOT(about()));
+   helpMenu->addAction(tr("About &Qt"), qApp, SLOT(aboutQt()));
 
    return bar;
 }
@@ -84,7 +100,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
    saveSettings();
 
    // TODO disconnect canvases
-
    event->accept();
 }
 

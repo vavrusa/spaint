@@ -26,6 +26,9 @@ class MainWindow : public QMainWindow
    void loadSettings();
    void closeEvent(QCloseEvent *event);
 
+   private slots:
+   void about();
+
    private:
    struct Private;
    Private* d;
