@@ -15,6 +15,9 @@ Canvas::Canvas(const QString& name, CanvasMgr* parent)
 
 void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
+   if(!mGlyph)
+      return;
+
    QPointF pt = e->scenePos();
 
    // Clip to scene rect
@@ -26,7 +29,7 @@ void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
    }
 
    static QPointF lastPos = pt;
-   if((pt - lastPos).manhattanLength() > 40) {
+   if((pt - lastPos).toPoint().manhattanLength() > 40) {
 
       QPainterPath path = mGlyph->path();
       if(path.isEmpty()) {
@@ -56,6 +59,7 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
    if(e->button() == Qt::LeftButton) {
       qDebug() << "Polygon finished - pts:" << mGlyph->path().elementCount()
                << "~length: " << mGlyph->path().length();
+      mGlyph = 0;
       mState = Idle;
    }
 
