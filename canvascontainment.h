@@ -17,12 +17,6 @@ class CanvasContainment : public QGraphicsScene
 
    QGraphicsView* view();
 
-   // State tracking
-   enum State {
-      Focused = 0x00,
-      Exposed = 0x01
-   };
-
    signals:
 
    public slots:

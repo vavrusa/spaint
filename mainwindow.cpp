@@ -33,7 +33,12 @@ MainWindow::MainWindow(QWidget* parent)
 
    // Load settings
    loadSettings();
-   QTimer::singleShot(0, this, SLOT(init()));
+
+   // Menu
+   setMenuBar(createMenuBar());
+
+   // Delay canvases init
+   QTimer::singleShot(100, this, SLOT(init()));
 }
 
 MainWindow::~MainWindow()
@@ -45,15 +50,12 @@ void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Shared Paint"),
             tr("The <b>Shared Paint</b> project "
-               "is aimed to create simple editor..."));
+               "is aimed to create simple editor... WTF Vojtechu?"));
 }
 
 void MainWindow::init()
 {
    emit initialized();
-
-   // Menu
-   setMenuBar(createMenuBar());
 }
 
 bool MainWindow::observe(CanvasMgr* cm)

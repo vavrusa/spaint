@@ -10,13 +10,10 @@
 
 struct CanvasContainment::Private {
 
-   Private()
-      : current(0), view(0), state(CanvasContainment::Focused)
+   Private() : view(0)
    {}
 
-   Canvas*                   current;// Current canvas
    QGraphicsView*            view;   // Graphics scene
-   CanvasContainment::State  state;  // State tracking
    QMap<Canvas*,QGraphicsProxyWidget*> map; // Map Canvas -> Widget
 };
 
@@ -26,6 +23,9 @@ CanvasContainment::CanvasContainment(QWidget *parent)
    d->view = new QGraphicsView(this, parent);
    d->view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    d->view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+   d->view->setResizeAnchor(QGraphicsView::AnchorViewCenter);
+   d->view->setSceneRect(0,-250,640,500);
+   setBackgroundBrush(Qt::gray);
 }
 
 CanvasContainment::~CanvasContainment()
@@ -42,11 +42,11 @@ void CanvasContainment::addCanvas(Canvas* c)
 {
    CanvasView* view = new CanvasView(c);
    QGraphicsProxyWidget* proxy = addWidget(view);
-   setSceneRect(-320, -240, (d->map.size() + 1) * (640 + 320) + 320, 480);
+   setSceneRect(-320, -250, (d->map.size() + 1) * (640 + 320) + 320, 500);
    proxy->setPos(d->map.size() * (640 + 320), -240);
-   d->view->centerOn(proxy);
+   proxy->adjustSize();
    d->map.insert(c, proxy);
-   d->current = c;
+   invalidate(sceneRect());
 }
 
 void CanvasContainment::removeCanvas(Canvas* c)
@@ -66,20 +66,27 @@ void CanvasContainment::removeCanvas(Canvas* c)
 
 void CanvasContainment::wheelEvent(QGraphicsSceneWheelEvent* e)
 {
-   // TODO trigger animation -> shift
-   if(d->state == Focused) {
-      qDebug() << "Exposed";
-      d->state = Exposed;
+   // Get direction
+   int shift = 0;
+   if(e->delta() < 0) { // Back
+      if(d->view->sceneRect().left() > 0)
+         shift = -640-320;
    }
-   else {
-      d->state = Focused;
+   else { // Forward
+      if(d->view->sceneRect().left() + (640+320) < (640+320) * d->map.size())
+         shift = 640+320;
    }
+
+   QSizeF prevSize = d->view->sceneRect().size();
+   d->view->setSceneRect(QRectF(d->view->sceneRect().topLeft(), QSizeF(640,480))); // Zoom out
+   d->view->setSceneRect(d->view->sceneRect().adjusted(shift,0,shift,0)); // Move
+   d->view->setSceneRect(QRectF(d->view->sceneRect().topLeft(), prevSize)); // Zoom in
 }
 
 void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)
 {
-   // Draw background
-   p->fillRect(re, Qt::gray);
+   // Paint background
+   QGraphicsScene::drawBackground(p, re);
 
    // Draw shadow
    int borderWidth = 10;
@@ -97,7 +104,7 @@ void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)
       grad.setStart(currentRect.topLeft());
       grad.setFinalStop(grad.start() - QPointF(0, borderWidth));
 
-      QPointF aPt(borderWidth * 0.5, borderWidth * 0.5);
+      QPointF aPt(borderWidth * 0.45, borderWidth * 0.45);
       QRectF aRect(grad.start() - aPt,
                    QSizeF(aPt.x(), aPt.y()));
       QRectF bRect(grad.start() - QPointF(0, borderWidth),
