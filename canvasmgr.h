@@ -13,6 +13,7 @@ class CanvasMgr : public QObject
    ~CanvasMgr();
 
    public slots:
+   void init();
    Canvas* create(const QString& name = QString());
    bool remove(Canvas* canvas);
 

@@ -13,8 +13,13 @@ class MainWindow : public QMainWindow
    MainWindow(QWidget* parent = 0);
    ~MainWindow();
 
-   void load();
    bool observe(CanvasMgr* cm);
+
+   public slots:
+   void init();
+
+   signals:
+   void initialized();
 
    protected:
    void saveSettings();

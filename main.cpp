@@ -46,10 +46,6 @@ int main(int argc, char *argv[])
    net.observe(&cm);
    net.start();
 
-   // Create main canvas
-   cm.create(cm.tr("Main Canvas"));
-   cm.create(cm.tr("Canvas #2")); // TODO
-
    // Run event-loop
    return app.exec();
 }

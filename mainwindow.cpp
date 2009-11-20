@@ -1,5 +1,7 @@
+#include <QGraphicsView>
 #include <QCloseEvent>
 #include <QSettings>
+#include <QTimer>
 #include "mainwindow.h"
 #include "canvascontainment.h"
 
@@ -8,6 +10,10 @@
 #define DEFAULT_HEIGHT 600
 
 struct MainWindow::Private {
+
+   Private() : containment(0)
+   {}
+
    CanvasContainment* containment;
 };
 
@@ -20,10 +26,12 @@ MainWindow::MainWindow(QWidget* parent)
    resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
    // Load UI
-   load();
+   d->containment = new CanvasContainment(this);
+   setCentralWidget(d->containment->view());
 
    // Load settings
    loadSettings();
+   QTimer::singleShot(0, this, SLOT(init()));
 }
 
 MainWindow::~MainWindow()
@@ -31,11 +39,9 @@ MainWindow::~MainWindow()
    delete d;
 }
 
-void MainWindow::load()
+void MainWindow::init()
 {
-   // Main widget
-   d->containment = new CanvasContainment(this);
-   setCentralWidget(d->containment);
+   emit initialized();
 
    // Menu
    setMenuBar(createMenuBar());
@@ -43,8 +49,9 @@ void MainWindow::load()
 
 bool MainWindow::observe(CanvasMgr* cm)
 {
-   connect(cm, SIGNAL(canvasCreated(Canvas*)), d->containment, SLOT(addCanvas(Canvas*)));
-   connect(cm, SIGNAL(canvasRemoved(Canvas*)), d->containment, SLOT(removeCanvas(Canvas*)));
+   connect(this, SIGNAL(initialized()),          cm,             SLOT(init()));
+   connect(cm,   SIGNAL(canvasCreated(Canvas*)), d->containment, SLOT(addCanvas(Canvas*)));
+   connect(cm,   SIGNAL(canvasRemoved(Canvas*)), d->containment, SLOT(removeCanvas(Canvas*)));
    return true;
 }
 

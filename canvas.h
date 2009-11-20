@@ -27,7 +27,6 @@ class Canvas : public QGraphicsScene
    void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
    void mousePressEvent(QGraphicsSceneMouseEvent* e);
    void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
-   void drawBackground(QPainter* p, const QRectF& re);
 
    private:
    int mState;

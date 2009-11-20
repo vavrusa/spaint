@@ -1,17 +1,27 @@
 #ifndef CANVASCONTAINMENT_H
 #define CANVASCONTAINMENT_H
 
-#include <QStackedWidget>
-class QWheelEvent;
+#include <QGraphicsScene>
+class QGraphicsSceneWheelEvent;
+class QGraphicsView;
+class QPainter;
 class Canvas;
 
-class CanvasContainment : public QStackedWidget
+class CanvasContainment : public QGraphicsScene
 {
    Q_OBJECT
 
    public:
    CanvasContainment(QWidget *parent = 0);
    ~CanvasContainment();
+
+   QGraphicsView* view();
+
+   // State tracking
+   enum State {
+      Focused = 0x00,
+      Exposed = 0x01
+   };
 
    signals:
 
@@ -20,7 +30,8 @@ class CanvasContainment : public QStackedWidget
    void removeCanvas(Canvas* c);
 
    protected:
-   void wheelEvent(QWheelEvent* e);
+   void drawBackground(QPainter* p, const QRectF& re);
+   void wheelEvent(QGraphicsSceneWheelEvent* e);
 
    private:
    struct Private;

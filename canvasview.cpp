@@ -4,6 +4,7 @@
 CanvasView::CanvasView(Canvas* canvas, QWidget* parent)
       : QGraphicsView(canvas, parent), mCanvas(canvas)
 {
+   setFrameStyle(QFrame::Box);
    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
