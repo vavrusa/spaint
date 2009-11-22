@@ -15,7 +15,8 @@ Canvas::Canvas(const QString& name, CanvasMgr* parent)
 
 void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
-   if(!mGlyph)
+   // Don't process events when not painting
+   if(mState == Idle || mGlyph == 0)
       return;
 
    QPointF pt = e->scenePos();
@@ -28,12 +29,15 @@ void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
       if(pt.y() > sceneRect().bottom()) pt.setY(sceneRect().bottom());
    }
 
+   // Measure distance from last point
+   // TODO: sample in time intervals
+   int difference = (mState == Drawing) ? 10 : 60;
    static QPointF lastPos = pt;
-   if((pt - lastPos).toPoint().manhattanLength() > 10) {
+   if((pt - lastPos).toPoint().manhattanLength() > difference) {
 
       QPainterPath path = mGlyph->path();
       if(path.isEmpty()) {
-         path.moveTo(e->buttonDownScenePos(Qt::LeftButton));
+         path.moveTo(e->lastScenePos());
       }
 
       path.lineTo(pt);
@@ -41,14 +45,25 @@ void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
       lastPos = pt;
    }
 
+   // Default action
    QGraphicsScene::mouseMoveEvent(e);
 }
 
 void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
+   // Left mouse starts drawing
    if(e->button() == Qt::LeftButton) {
       mGlyph = addPath(QPainterPath(), QPen(Qt::black));
       mState = Drawing;
+   }
+
+   // Right mouse starts gesture
+   if(e->button() == Qt::RightButton) {
+      QPen pen;
+      pen.setColor(QColor(215, 0, 25, 64)); // Transparent red
+      pen.setWidth(8);
+      mGlyph = addPath(QPainterPath(), pen);
+      mState = Gesture;
    }
 
    QGraphicsScene::mousePressEvent(e);
@@ -56,9 +71,20 @@ void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
 
 void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
-   if(e->button() == Qt::LeftButton) {
+   // End of drawing
+   if(mState == Drawing) {
       qDebug() << "Polygon finished - pts:" << mGlyph->path().elementCount()
                << "~length: " << mGlyph->path().length();
+      mGlyph = 0;
+      mState = Idle;
+   }
+
+   // End of gesture
+   if(mState == Gesture) {
+      qDebug() << "Gesture finished - pts:" << mGlyph->path().elementCount()
+               << "~length: " << mGlyph->path().length();
+      removeItem(mGlyph);
+      delete mGlyph;
       mGlyph = 0;
       mState = Idle;
    }

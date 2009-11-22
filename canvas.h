@@ -9,19 +9,35 @@ class QGraphicsSceneMouseEvent;
 class Canvas : public QGraphicsScene
 {
    Q_OBJECT
-   Q_PROPERTY(QString name READ name);
+   Q_PROPERTY(QString name READ name WRITE setName)
 
    public:
-   Canvas(const QString& name = QString(), CanvasMgr* parent = 0);
+   Canvas(const QString& name = "Canvas", CanvasMgr* parent = 0);
 
-   // Properties
+   /** Return canvas name.
+     * \return canvas name
+     */
    const QString& name() { return mName; }
+   /** Set canvas name to given value.
+     * \param name new name
+     */
+   void setName(const QString& name) {
+      mName = name;
+   }
 
-   // State tracking
+   /// State tracking
    enum State {
-      Idle    = 0x00,
-      Drawing = 0x01,
+      Idle    = 0x00, // Not interacting
+      Drawing = 0x01, // Drawing path
+      Gesture = 0x02  // Drawing mouse gesture
    };
+
+   /** Return default canvas size.
+       \return canvas size
+     */
+   static QSize defaultSizeHint() {
+      return QSize(640, 480);
+   }
 
    protected:
    void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
