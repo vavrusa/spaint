@@ -9,6 +9,9 @@
 #include "canvasview.h"
 #include "canvas.h"
 
+// Static settings
+const static int BorderWidth = 10;
+
 struct CanvasContainment::Private {
 
    Private() : animation(0), view(0)
@@ -24,11 +27,13 @@ struct CanvasContainment::Private {
 CanvasContainment::CanvasContainment(QWidget *parent)
    : QGraphicsScene(parent), d(new Private)
 {
+   QSize defaultSize = Canvas::defaultSizeHint();
    d->view = new QGraphicsView(this, parent);
    d->view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    d->view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    d->view->setResizeAnchor(QGraphicsView::AnchorViewCenter);
-   d->view->setSceneRect(0,-250,640,500);
+   d->view->setSceneRect(0, - defaultSize.height() * 0.5,
+                         defaultSize.width(), defaultSize.height());
    setBackgroundBrush(Qt::gray);
    d->current = d->list.end();
 }
@@ -46,9 +51,13 @@ QGraphicsView* CanvasContainment::view()
 void CanvasContainment::addCanvas(Canvas* c)
 {
    CanvasView* view = new CanvasView(c);
+   QSize defaultSize = Canvas::defaultSizeHint();
    QGraphicsProxyWidget* proxy = addWidget(view);
-   setSceneRect(-160, -250, (d->map.size() + 1) * (640 + 160) + 160, 500);
-   proxy->setPos(d->map.size() * (640 + 2*160), -240);
+
+   setSceneRect(-defaultSize.width(), -defaultSize.height() * 0.5 - BorderWidth,
+                (d->map.size() + 1) * (defaultSize.width() * 1.5) + defaultSize.width() * 0.5,
+                defaultSize.height() + BorderWidth);
+   proxy->setPos(d->map.size() * defaultSize.width() * 1.5, -defaultSize.height() * 0.5);
    d->view->setSceneRect(proxy->sceneBoundingRect());
    d->list.append(c);
    d->current = d->list.end() - 1;
