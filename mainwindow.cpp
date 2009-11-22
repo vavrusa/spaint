@@ -69,7 +69,7 @@ QMenuBar* MainWindow::createMenuBar()
    sessionMenu->addAction(QIcon(":/icons/16x16/exit.png"), tr("&Quit"), this, SLOT(close()), tr("Ctrl+Q"));
 
    QMenu* editMenu = bar->addMenu(tr("&Edit"));
-   editMenu->addAction(QIcon(":/icons/16x16/canvas-clear.png"), tr("&Clear"));
+   editMenu->addAction(QIcon(":/icons/16x16/canvas-clear.png"), tr("&Clear"), d->containment, SLOT(clearCanvas()));
    editMenu->addSeparator();
    editMenu->addAction(QIcon(":/icons/16x16/configure.png"), tr("&Options"))->setEnabled(false);
 

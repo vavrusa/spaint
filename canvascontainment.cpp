@@ -71,6 +71,10 @@ void CanvasContainment::addCanvas(Canvas* c)
 
 void CanvasContainment::removeCanvas(Canvas* c)
 {
+   // Current canvas
+   if(c == 0)
+      c = *d->current;
+
    // Fetch proxy
    QGraphicsProxyWidget* proxy = d->map.take(c);
    if(proxy == 0)
@@ -139,6 +143,18 @@ void CanvasContainment::focusToCanvas(Canvas* c)
       QRectF targetRect(proxy->sceneBoundingRect());
       d->view->setSceneRect(targetRect);
    }
+}
+
+void CanvasContainment::clearCanvas(Canvas* c)
+{
+   // Current canvas
+   if(c == 0)
+      c = *d->current;
+
+   QList<QGraphicsItem*>::iterator it;
+   QList<QGraphicsItem*> list(c->items());
+   for(it = list.begin(); it < list.end(); ++it)
+      c->removeItem(*it);
 }
 
 void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)

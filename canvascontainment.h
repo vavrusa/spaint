@@ -21,8 +21,9 @@ class CanvasContainment : public QGraphicsScene
 
    public slots:
    void addCanvas(Canvas* c);
-   void removeCanvas(Canvas* c);
+   void removeCanvas(Canvas* c = 0);
    void focusToCanvas(Canvas* c);
+   void clearCanvas(Canvas* c = 0);
    void renderCanvas(QIODevice& device, Canvas* c = 0);
 
    protected:
