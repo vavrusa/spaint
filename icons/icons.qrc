@@ -1,4 +1,12 @@
 <RCC>
   <qresource prefix="icons">
+      <file>16x16/exit.png</file>
+      <file>16x16/canvas-add.png</file>
+      <file>16x16/canvas-remove.png</file>
+      <file>16x16/canvas-clear.png</file>
+      <file>16x16/save-as.png</file>
+      <file>16x16/configure.png</file>
+      <file>16x16/help-contents.png</file>
+      <file>16x16/application.png</file>
   </qresource>
 </RCC>
