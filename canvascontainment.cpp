@@ -16,7 +16,9 @@ struct CanvasContainment::Private {
    Private() : view(0)
    {}
 
-   QGraphicsView*            view;   // Graphics scene
+   QGraphicsView*            view;          // Graphics scene
+   QList<Canvas*>            list;          // Ordered list
+   QList<Canvas*>::iterator  current;       // Focused widget
    QMap<Canvas*,QGraphicsProxyWidget*> map; // Map Canvas -> Widget
 };
 
@@ -31,6 +33,7 @@ CanvasContainment::CanvasContainment(QWidget *parent)
    d->view->setSceneRect(0, - defaultSize.height() * 0.5,
                          defaultSize.width(), defaultSize.height());
    setBackgroundBrush(Qt::gray);
+   d->current = d->list.end();
 }
 
 CanvasContainment::~CanvasContainment()
@@ -52,9 +55,12 @@ void CanvasContainment::addCanvas(Canvas* c)
                 (d->map.size() + 1) * (defaultSize.width() * 1.5) + defaultSize.width() * 0.5,
                 defaultSize.height() + BorderWidth);
    proxy->setPos(d->map.size() * defaultSize.width() * 1.5, -defaultSize.height() * 0.5);
-   proxy->adjustSize();
+   d->view->setSceneRect(proxy->sceneBoundingRect());
+   d->list.append(c);
+   d->current = d->list.end() - 1;
    d->map.insert(c, proxy);
    invalidate(sceneRect());
+   qDebug() << "New canvas: " << (*d->current)->name();
 }
 
 void CanvasContainment::removeCanvas(Canvas* c)
@@ -65,6 +71,10 @@ void CanvasContainment::removeCanvas(Canvas* c)
       return;
 
    // Remove from scene
+   d->current--;
+   d->list.erase(d->current + 1);
+   focusToCanvas(*d->current);
+
    removeItem(proxy);
 
    // Delete widget
@@ -76,23 +86,56 @@ void CanvasContainment::renderCanvas(QIODevice& device, Canvas* c)
 {
    // Available with kinetic
    qDebug() << "CanvasContainment::renderCanvas() called";
+
+   // No canvas given, use current
+   if(c == 0) {
+      c = *d->current;
+   }
+
+   // Render
+   QGraphicsProxyWidget* proxy = d->map[c];
+   QWidget* widget = proxy->widget();
+   QPixmap pixmap(widget->size());
+   widget->render(&pixmap);
+   pixmap.save(&device, "PNG");
 }
 
 void CanvasContainment::wheelEvent(QGraphicsSceneWheelEvent* e)
 {
    // Get direction
-   int shift = 0;
-   QSize defaultSize(Canvas::defaultSizeHint());
-   if(e->delta() < 0) { // Back
-      if(d->view->sceneRect().left() > 0)
-         shift = - defaultSize.width() * 1.5;
+   if(d->current == d->list.end())
+      return;
+
+   // Scroll backward
+   QList<Canvas*>::iterator prev(d->current);
+   if(e->delta() < 0) {
+      if(d->current != d->list.begin()) {
+         --d->current;
+      }
    }
-   else { // Forward
-      if(d->view->sceneRect().left() + defaultSize.width() * 1.5 < (defaultSize.width() * 1.5) * d->map.size())
-         shift = defaultSize.width() * 1.5;
+   // Scroll forward
+   else {
+      if(d->current != d->list.end() - 1) {
+         ++d->current;
+      }
    }
 
-   d->view->setSceneRect(d->view->sceneRect().adjusted(shift,0,shift,0)); // Move
+   // Focus to current canvas
+   if(prev != d->current) {
+      qDebug() << "Current canvas: " << (*prev)->name() << " -> " << (*d->current)->name();
+      focusToCanvas(*d->current);
+   }
+}
+
+void CanvasContainment::focusToCanvas(Canvas* c)
+{
+   QGraphicsProxyWidget* proxy = d->map[c];
+   if(proxy != 0) {
+
+      // Shift current viewport to target rect
+      QRectF targetRect(proxy->sceneBoundingRect());
+      d->view->setSceneRect(targetRect);
+   }
 }
 
 void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)
