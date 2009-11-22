@@ -8,6 +8,9 @@
 #include "canvasview.h"
 #include "canvas.h"
 
+// Static settings
+const static int BorderWidth = 10;
+
 struct CanvasContainment::Private {
 
    Private() : view(0)
@@ -20,11 +23,13 @@ struct CanvasContainment::Private {
 CanvasContainment::CanvasContainment(QWidget *parent)
    : QGraphicsScene(parent), d(new Private)
 {
+   QSize defaultSize = Canvas::defaultSizeHint();
    d->view = new QGraphicsView(this, parent);
    d->view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    d->view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    d->view->setResizeAnchor(QGraphicsView::AnchorViewCenter);
-   d->view->setSceneRect(0,-250,640,500);
+   d->view->setSceneRect(0, - defaultSize.height() * 0.5,
+                         defaultSize.width(), defaultSize.height());
    setBackgroundBrush(Qt::gray);
 }
 
@@ -41,9 +46,12 @@ QGraphicsView* CanvasContainment::view()
 void CanvasContainment::addCanvas(Canvas* c)
 {
    CanvasView* view = new CanvasView(c);
+   QSize defaultSize = Canvas::defaultSizeHint();
    QGraphicsProxyWidget* proxy = addWidget(view);
-   setSceneRect(-320, -250, (d->map.size() + 1) * (640 + 320) + 320, 500);
-   proxy->setPos(d->map.size() * (640 + 320), -240);
+   setSceneRect(-defaultSize.width(), -defaultSize.height() * 0.5 - BorderWidth,
+                (d->map.size() + 1) * (defaultSize.width() * 1.5) + defaultSize.width() * 0.5,
+                defaultSize.height() + BorderWidth);
+   proxy->setPos(d->map.size() * defaultSize.width() * 1.5, -defaultSize.height() * 0.5);
    proxy->adjustSize();
    d->map.insert(c, proxy);
    invalidate(sceneRect());
@@ -68,19 +76,17 @@ void CanvasContainment::wheelEvent(QGraphicsSceneWheelEvent* e)
 {
    // Get direction
    int shift = 0;
+   QSize defaultSize(Canvas::defaultSizeHint());
    if(e->delta() < 0) { // Back
       if(d->view->sceneRect().left() > 0)
-         shift = -640-320;
+         shift = - defaultSize.width() * 1.5;
    }
    else { // Forward
-      if(d->view->sceneRect().left() + (640+320) < (640+320) * d->map.size())
-         shift = 640+320;
+      if(d->view->sceneRect().left() + defaultSize.width() * 1.5 < (defaultSize.width() * 1.5) * d->map.size())
+         shift = defaultSize.width() * 1.5;
    }
 
-   QSizeF prevSize = d->view->sceneRect().size();
-   d->view->setSceneRect(QRectF(d->view->sceneRect().topLeft(), QSizeF(640,480))); // Zoom out
    d->view->setSceneRect(d->view->sceneRect().adjusted(shift,0,shift,0)); // Move
-   d->view->setSceneRect(QRectF(d->view->sceneRect().topLeft(), prevSize)); // Zoom in
 }
 
 void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)
