@@ -25,14 +25,16 @@ struct CanvasContainment::Private {
 CanvasContainment::CanvasContainment(QWidget *parent)
    : QGraphicsScene(parent), d(new Private)
 {
-   QSize defaultSize = Canvas::defaultSizeHint();
+   // Create graphics view
    d->view = new QGraphicsView(this, parent);
+
+   // Disable scrollbars and set anchor for resizing
    d->view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    d->view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    d->view->setResizeAnchor(QGraphicsView::AnchorViewCenter);
-   d->view->setSceneRect(0, - defaultSize.height() * 0.5,
-                         defaultSize.width(), defaultSize.height());
    setBackgroundBrush(Qt::gray);
+
+   // Invalidate current canvas ptr
    d->current = d->list.end();
 }
 
@@ -48,18 +50,22 @@ QGraphicsView* CanvasContainment::view()
 
 void CanvasContainment::addCanvas(Canvas* c)
 {
+   // Create canvas viewport
    CanvasView* view = new CanvasView(c);
+
+   // Create graphics proxy
    QSize defaultSize = Canvas::defaultSizeHint();
    QGraphicsProxyWidget* proxy = addWidget(view);
-   setSceneRect(-defaultSize.width(), -defaultSize.height() * 0.5 - BorderWidth,
-                (d->map.size() + 1) * (defaultSize.width() * 1.5) + defaultSize.width() * 0.5,
-                defaultSize.height() + BorderWidth);
-   proxy->setPos(d->map.size() * defaultSize.width() * 1.5, -defaultSize.height() * 0.5);
-   d->view->setSceneRect(proxy->sceneBoundingRect());
+
+   // Add canvas to list
    d->list.append(c);
    d->current = d->list.end() - 1;
    d->map.insert(c, proxy);
-   invalidate(sceneRect());
+
+   // Place proxy in scene
+   proxy->setPos(d->map.size() * defaultSize.width() * 1.5, -defaultSize.height() * 0.5);
+   d->view->setSceneRect(proxy->sceneBoundingRect());
+
    qDebug() << "New canvas: " << (*d->current)->name();
 }
 
@@ -84,9 +90,6 @@ void CanvasContainment::removeCanvas(Canvas* c)
 
 void CanvasContainment::renderCanvas(QIODevice& device, Canvas* c)
 {
-   // Available with kinetic
-   qDebug() << "CanvasContainment::renderCanvas() called";
-
    // No canvas given, use current
    if(c == 0) {
       c = *d->current;
@@ -151,14 +154,16 @@ void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)
    grad.setColorAt(1,   Qt::gray);
 
    // Iterate visible canvases
-   QList<QGraphicsItem*> list = items();
-   QList<QGraphicsItem*>::iterator it;
-   for(it = list.begin(); it < list.end(); ++it) {
+   QList<Canvas*>::iterator it;
+   for(it = d->list.begin(); it < d->list.end(); ++it) {
 
-      QRectF currentRect((*it)->sceneBoundingRect());
+      // Get current rect
+      p->save();
+      QRectF currentRect(d->map[*it]->sceneBoundingRect());
       grad.setStart(currentRect.topLeft());
       grad.setFinalStop(grad.start() - QPointF(0, borderWidth));
 
+      // Corner and border rects
       QPointF aPt(borderWidth * 0.45, borderWidth * 0.45);
       QRectF aRect(grad.start() - aPt,
                    QSizeF(aPt.x(), aPt.y()));
@@ -205,6 +210,26 @@ void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)
       grad.setStart(aRect.topLeft());
       grad.setFinalStop(aRect.bottomRight());
       p->fillRect(aRect, QBrush(grad));
+
+      // Calculate font metrics
+      QFont labelFont(font());
+      labelFont.setPixelSize(18);
+      QFontMetrics fnm(labelFont);
+
+      // Get label rect
+      QString label(tr("Canvas: ") + (*it)->name());
+      QRectF labelRect(fnm.boundingRect(label));
+      QPointF labelPt(currentRect.topRight());
+      labelPt.setX(labelPt.x() - labelRect.width());
+      labelPt.setY(labelPt.y() - 1.25 * labelRect.height());
+      labelRect.moveTo(labelPt);
+
+      // Draw text
+      p->setOpacity(0.85);
+      p->setFont(labelFont);
+      p->setPen(Qt::white);
+      p->drawText(labelRect.bottomLeft(), label);
+      p->restore();
    }
 }
 
