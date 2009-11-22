@@ -37,9 +37,6 @@ MainWindow::MainWindow(QWidget* parent)
 
    // Menu
    setMenuBar(createMenuBar());
-
-   // Delay canvases init
-   QTimer::singleShot(100, this, SLOT(init()));
 }
 
 MainWindow::~MainWindow()
@@ -54,14 +51,8 @@ void MainWindow::about()
                "is aimed to create simple editor... WTF Vojtechu?"));
 }
 
-void MainWindow::init()
-{
-   emit initialized();
-}
-
 bool MainWindow::observe(CanvasMgr* cm)
 {
-   connect(this, SIGNAL(initialized()),          cm,             SLOT(init()));
    connect(cm,   SIGNAL(canvasCreated(Canvas*)), d->containment, SLOT(addCanvas(Canvas*)));
    connect(cm,   SIGNAL(canvasRemoved(Canvas*)), d->containment, SLOT(removeCanvas(Canvas*)));
    return true;
@@ -97,6 +88,11 @@ void MainWindow::renderCanvas()
    QString fileName = QFileDialog::getSaveFileName(this,
                       tr("Save Image As"), QDir::homePath(),
                       tr("Image Files (*.png)"));
+   
+   // Check extension
+   if(!fileName.endsWith(".png",Qt::CaseInsensitive))
+      fileName.append(".png");
+
    // Emit render request event
    if(!fileName.isEmpty()) {
       QFile file(fileName);
