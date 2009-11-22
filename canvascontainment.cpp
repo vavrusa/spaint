@@ -2,6 +2,7 @@
 #include <QGraphicsView>
 #include <QGraphicsSceneWheelEvent>
 #include <QGraphicsItem>
+#include <QPropertyAnimation>
 #include <QDebug>
 #include <QMap>
 #include "canvascontainment.h"
@@ -10,10 +11,13 @@
 
 struct CanvasContainment::Private {
 
-   Private() : view(0)
+   Private() : animation(0), view(0)
    {}
 
-   QGraphicsView*            view;   // Graphics scene
+   QPropertyAnimation*       animation;     // Current animation
+   QGraphicsView*            view;          // Graphics scene
+   QList<Canvas*>            list;          // Ordered list
+   QList<Canvas*>::iterator  current;       // Focused widget
    QMap<Canvas*,QGraphicsProxyWidget*> map; // Map Canvas -> Widget
 };
 
@@ -26,6 +30,7 @@ CanvasContainment::CanvasContainment(QWidget *parent)
    d->view->setResizeAnchor(QGraphicsView::AnchorViewCenter);
    d->view->setSceneRect(0,-250,640,500);
    setBackgroundBrush(Qt::gray);
+   d->current = d->list.end();
 }
 
 CanvasContainment::~CanvasContainment()
@@ -42,11 +47,14 @@ void CanvasContainment::addCanvas(Canvas* c)
 {
    CanvasView* view = new CanvasView(c);
    QGraphicsProxyWidget* proxy = addWidget(view);
-   setSceneRect(-320, -250, (d->map.size() + 1) * (640 + 320) + 320, 500);
-   proxy->setPos(d->map.size() * (640 + 320), -240);
-   proxy->adjustSize();
+   setSceneRect(-160, -250, (d->map.size() + 1) * (640 + 160) + 160, 500);
+   proxy->setPos(d->map.size() * (640 + 2*160), -240);
+   d->view->setSceneRect(proxy->sceneBoundingRect());
+   d->list.append(c);
+   d->current = d->list.end() - 1;
    d->map.insert(c, proxy);
    invalidate(sceneRect());
+   qDebug() << "New canvas: " << (*d->current)->name();
 }
 
 void CanvasContainment::removeCanvas(Canvas* c)
@@ -57,6 +65,10 @@ void CanvasContainment::removeCanvas(Canvas* c)
       return;
 
    // Remove from scene
+   d->current--;
+   d->list.erase(d->current + 1);
+   focusTo(*d->current);
+
    removeItem(proxy);
 
    // Delete widget
@@ -64,23 +76,52 @@ void CanvasContainment::removeCanvas(Canvas* c)
    view->deleteLater();
 }
 
+void CanvasContainment::focusTo(Canvas* c)
+{
+   QGraphicsProxyWidget* proxy = d->map[c];
+   if(proxy != 0) {
+
+      // Create animation
+      if(d->animation == 0) {
+         d->animation = new QPropertyAnimation(d->view, "sceneRect");
+      }
+
+      // Plan animation to shift current viewport to target rect
+      QRectF targetRect(proxy->sceneBoundingRect());
+      d->animation->stop();
+      d->animation->setDuration(600);
+      d->animation->setEasingCurve(QEasingCurve::OutBack);
+      d->animation->setStartValue(d->view->sceneRect());
+      d->animation->setEndValue(targetRect);
+      d->animation->start();
+   }
+}
+
 void CanvasContainment::wheelEvent(QGraphicsSceneWheelEvent* e)
 {
    // Get direction
-   int shift = 0;
-   if(e->delta() < 0) { // Back
-      if(d->view->sceneRect().left() > 0)
-         shift = -640-320;
+   if(d->current == d->list.end())
+      return;
+
+   // Scroll backward
+   QList<Canvas*>::iterator prev(d->current);
+   if(e->delta() < 0) {
+      if(d->current != d->list.begin()) {
+         --d->current;
+      }
    }
-   else { // Forward
-      if(d->view->sceneRect().left() + (640+320) < (640+320) * d->map.size())
-         shift = 640+320;
+   // Scroll forward
+   else {
+      if(d->current != d->list.end() - 1) {
+         ++d->current;
+      }
    }
 
-   QSizeF prevSize = d->view->sceneRect().size();
-   d->view->setSceneRect(QRectF(d->view->sceneRect().topLeft(), QSizeF(640,480))); // Zoom out
-   d->view->setSceneRect(d->view->sceneRect().adjusted(shift,0,shift,0)); // Move
-   d->view->setSceneRect(QRectF(d->view->sceneRect().topLeft(), prevSize)); // Zoom in
+   // Focus to current canvas
+   if(prev != d->current) {
+      qDebug() << "Current canvas: " << (*prev)->name() << " -> " << (*d->current)->name();
+      focusTo(*d->current);
+   }
 }
 
 void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)
