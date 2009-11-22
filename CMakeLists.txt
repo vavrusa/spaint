@@ -42,7 +42,7 @@ set(QT_MIN_VERSION 4.4.0)
 find_package(Qt4 REQUIRED)
 
 qt4_automoc(${project_src})
-#qt4_add_resources(project_src       icons/icons.qrc)
+qt4_add_resources(project_src       icons/icons.qrc)
 #qt4_add_translation(project_i18n    i18n/${PROJECT_NAME}_cs.ts)
 
 
