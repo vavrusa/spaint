@@ -22,9 +22,9 @@ CanvasMgr::~CanvasMgr()
 void CanvasMgr::init()
 {
    // Load main canvas
-   create("Main canvas");
-   create("Dummy #1");
-   create("Dummy #2");
+   create(tr("Main Canvas"));
+   create("Test #1");
+   create("Test #2");
 }
 
 Canvas* CanvasMgr::create(const QString& name)

@@ -46,6 +46,9 @@ int main(int argc, char *argv[])
    net.observe(&cm);
    net.start();
 
+   // Initialize canvases
+   cm.init();
+
    // Run event-loop
    return app.exec();
 }

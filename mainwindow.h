@@ -15,12 +15,6 @@ class MainWindow : public QMainWindow
 
    bool observe(CanvasMgr* cm);
 
-   public slots:
-   void init();
-
-   signals:
-   void initialized();
-
    protected:
    void saveSettings();
    void loadSettings();
