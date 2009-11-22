@@ -1,4 +1,5 @@
 #include <QGraphicsView>
+#include <QFileDialog>
 #include <QCloseEvent>
 #include <QApplication>
 #include <QSettings>
@@ -70,30 +71,40 @@ QMenuBar* MainWindow::createMenuBar()
 {
    QMenuBar* bar = new QMenuBar(this);
 
-   QMenu* fileMenu = bar->addMenu(tr("&File"));
-   fileMenu->addAction(tr("E&xit"), this, SLOT(close()), tr("Ctrl+Q"));
-
-   QMenu* sessionMenu = bar->addMenu(tr("&Session"));
-   sessionMenu->addAction(tr("C&onnect"));
-   sessionMenu->addAction(tr("&Save as image"));
+   QMenu* sessionMenu = bar->addMenu(tr("&File"));
+   sessionMenu->addAction(tr("C&onnect"))->setEnabled(false);
+   sessionMenu->addAction(tr("&Save Image"), this, SLOT(renderCanvas()), tr("Ctrl+S"));
    sessionMenu->addSeparator();
-   sessionMenu->addAction(tr("&Quit"));
+   sessionMenu->addAction(tr("&Quit"), this, SLOT(close()), tr("Ctrl+Q"));
 
-   QMenu* canvasMenu = bar->addMenu(tr("&Canvas"));
-   canvasMenu->addAction(tr("&Clear"));
-
-   QMenu* windowMenu = bar->addMenu(tr("&Window"));
-
-   QMenu* optionsMenu = bar->addMenu(tr("&Options"));
-   optionsMenu->addAction(tr("&Options"));
+   QMenu* editMenu = bar->addMenu(tr("&Edit"));
+   editMenu->addAction(tr("&Clear"));
+   editMenu->addSeparator();
+   editMenu->addAction(tr("&Options"))->setEnabled(false);
 
    QMenu* helpMenu = bar->addMenu(tr("&Help"));
-   helpMenu->addAction(tr("&Help"));
+   helpMenu->addAction(tr("&Help"))->setEnabled(false);
    helpMenu->addSeparator();
    helpMenu->addAction(tr("&About"), this, SLOT(about()));
    helpMenu->addAction(tr("About &Qt"), qApp, SLOT(aboutQt()));
 
    return bar;
+}
+
+void MainWindow::renderCanvas()
+{
+   // Get file location
+   QString fileName = QFileDialog::getSaveFileName(this,
+                      tr("Save Image As"), QDir::homePath(),
+                      tr("Image Files (*.png)"));
+   // Emit render request event
+   if(!fileName.isEmpty()) {
+      QFile file(fileName);
+      if(file.open(QFile::ReadWrite)) {
+         d->containment->renderCanvas(file);
+         file.close();
+      }
+   }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

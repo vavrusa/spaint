@@ -22,6 +22,7 @@ class CanvasContainment : public QGraphicsScene
    public slots:
    void addCanvas(Canvas* c);
    void removeCanvas(Canvas* c);
+   void renderCanvas(QIODevice& device, Canvas* c = 0);
 
    protected:
    void drawBackground(QPainter* p, const QRectF& re);

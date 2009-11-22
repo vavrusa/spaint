@@ -28,6 +28,7 @@ class MainWindow : public QMainWindow
 
    private slots:
    void about();
+   void renderCanvas();
 
    private:
    struct Private;

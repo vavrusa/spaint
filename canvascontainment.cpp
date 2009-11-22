@@ -72,6 +72,12 @@ void CanvasContainment::removeCanvas(Canvas* c)
    view->deleteLater();
 }
 
+void CanvasContainment::renderCanvas(QIODevice& device, Canvas* c)
+{
+   // Available with kinetic
+   qDebug() << "CanvasContainment::renderCanvas() called";
+}
+
 void CanvasContainment::wheelEvent(QGraphicsSceneWheelEvent* e)
 {
    // Get direction
