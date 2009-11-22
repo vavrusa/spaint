@@ -76,7 +76,7 @@ void CanvasContainment::removeCanvas(Canvas* c)
    // Remove from scene
    d->current--;
    d->list.erase(d->current + 1);
-   focusTo(*d->current);
+   focusToCanvas(*d->current);
 
    removeItem(proxy);
 
@@ -85,25 +85,22 @@ void CanvasContainment::removeCanvas(Canvas* c)
    view->deleteLater();
 }
 
-void CanvasContainment::focusTo(Canvas* c)
+void CanvasContainment::renderCanvas(QIODevice& device, Canvas* c)
 {
-   QGraphicsProxyWidget* proxy = d->map[c];
-   if(proxy != 0) {
+   // Available with kinetic
+   qDebug() << "CanvasContainment::renderCanvas() called";
 
-      // Create animation
-      if(d->animation == 0) {
-         d->animation = new QPropertyAnimation(d->view, "sceneRect");
-      }
-
-      // Plan animation to shift current viewport to target rect
-      QRectF targetRect(proxy->sceneBoundingRect());
-      d->animation->stop();
-      d->animation->setDuration(600);
-      d->animation->setEasingCurve(QEasingCurve::OutBack);
-      d->animation->setStartValue(d->view->sceneRect());
-      d->animation->setEndValue(targetRect);
-      d->animation->start();
+   // No canvas given, use current
+   if(c == 0) {
+      c = *d->current;
    }
+
+   // Render
+   QGraphicsProxyWidget* proxy = d->map[c];
+   QWidget* widget = proxy->widget();
+   QPixmap pixmap(widget->size());
+   widget->render(&pixmap);
+   pixmap.save(&device, "PNG");
 }
 
 void CanvasContainment::wheelEvent(QGraphicsSceneWheelEvent* e)
@@ -129,7 +126,28 @@ void CanvasContainment::wheelEvent(QGraphicsSceneWheelEvent* e)
    // Focus to current canvas
    if(prev != d->current) {
       qDebug() << "Current canvas: " << (*prev)->name() << " -> " << (*d->current)->name();
-      focusTo(*d->current);
+      focusToCanvas(*d->current);
+   }
+}
+
+void CanvasContainment::focusToCanvas(Canvas* c)
+{
+   QGraphicsProxyWidget* proxy = d->map[c];
+   if(proxy != 0) {
+
+      // Create animation
+      if(d->animation == 0) {
+         d->animation = new QPropertyAnimation(d->view, "sceneRect");
+      }
+
+      // Plan animation to shift current viewport to target rect
+      QRectF targetRect(proxy->sceneBoundingRect());
+      d->animation->stop();
+      d->animation->setDuration(600);
+      d->animation->setEasingCurve(QEasingCurve::OutBack);
+      d->animation->setStartValue(d->view->sceneRect());
+      d->animation->setEndValue(targetRect);
+      d->animation->start();
    }
 }
 

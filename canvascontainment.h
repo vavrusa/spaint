@@ -20,9 +20,10 @@ class CanvasContainment : public QGraphicsScene
    signals:
 
    public slots:
-   void focusTo(Canvas* c);
    void addCanvas(Canvas* c);
    void removeCanvas(Canvas* c);
+   void focusToCanvas(Canvas* c);
+   void renderCanvas(QIODevice& device, Canvas* c = 0);
 
    protected:
    void drawBackground(QPainter* p, const QRectF& re);
