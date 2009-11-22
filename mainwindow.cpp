@@ -63,20 +63,20 @@ QMenuBar* MainWindow::createMenuBar()
    QMenuBar* bar = new QMenuBar(this);
 
    QMenu* sessionMenu = bar->addMenu(tr("&File"));
-   sessionMenu->addAction(tr("C&onnect"))->setEnabled(false);
-   sessionMenu->addAction(tr("&Save Image"), this, SLOT(renderCanvas()), tr("Ctrl+S"));
+   sessionMenu->addAction(QIcon(":/icons/16x16/canvas-add.png"), tr("C&onnect"))->setEnabled(false);
+   sessionMenu->addAction(QIcon(":/icons/16x16/save-as.png"), tr("&Save Image"), this, SLOT(renderCanvas()), tr("Ctrl+S"));
    sessionMenu->addSeparator();
-   sessionMenu->addAction(tr("&Quit"), this, SLOT(close()), tr("Ctrl+Q"));
+   sessionMenu->addAction(QIcon(":/icons/16x16/exit.png"), tr("&Quit"), this, SLOT(close()), tr("Ctrl+Q"));
 
    QMenu* editMenu = bar->addMenu(tr("&Edit"));
-   editMenu->addAction(tr("&Clear"));
+   editMenu->addAction(QIcon(":/icons/16x16/canvas-clear.png"), tr("&Clear"));
    editMenu->addSeparator();
-   editMenu->addAction(tr("&Options"))->setEnabled(false);
+   editMenu->addAction(QIcon(":/icons/16x16/configure.png"), tr("&Options"))->setEnabled(false);
 
    QMenu* helpMenu = bar->addMenu(tr("&Help"));
-   helpMenu->addAction(tr("&Help"))->setEnabled(false);
+   helpMenu->addAction(QIcon(":/icons/16x16/help-contents.png"), tr("&Help"))->setEnabled(false);
    helpMenu->addSeparator();
-   helpMenu->addAction(tr("&About"), this, SLOT(about()));
+   helpMenu->addAction(QIcon(":/icons/16x16/application.png"), tr("&About"), this, SLOT(about()));
    helpMenu->addAction(tr("About &Qt"), qApp, SLOT(aboutQt()));
 
    return bar;
