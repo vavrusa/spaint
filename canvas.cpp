@@ -75,6 +75,7 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
    if(mState == Drawing) {
       qDebug() << "Polygon finished - pts:" << mGlyph->path().elementCount()
                << "~length: " << mGlyph->path().length();
+      emit(pathCreated(mGlyph->path()));
       mGlyph = 0;
       mState = Idle;
    }
@@ -83,6 +84,7 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
    if(mState == Gesture) {
       qDebug() << "Gesture finished - pts:" << mGlyph->path().elementCount()
                << "~length: " << mGlyph->path().length();
+      emit(gestureCreated(mGlyph->path()));
       removeItem(mGlyph);
       delete mGlyph;
       mGlyph = 0;

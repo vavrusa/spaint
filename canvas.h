@@ -39,6 +39,18 @@ class Canvas : public QGraphicsScene
       return QSize(640, 480);
    }
 
+   signals:
+   /** Signalizing new path on canvas.
+     * Signal is emmited only when path is painted non-programatically,
+     * e.g. by mouse/touch interface.
+     * \param path new path
+     */
+   void pathCreated(QPainterPath path);
+   /** Signalizing new gesture on canvas.
+     * \param gesture created gesture
+     */
+   void gestureCreated(QPainterPath gesture);
+
    protected:
    void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
    void mousePressEvent(QGraphicsSceneMouseEvent* e);
