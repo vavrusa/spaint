@@ -29,6 +29,9 @@ set(project_src         main.cpp
                         canvasview.cpp
                         canvascontainment.cpp
                         networkservice.cpp
+                        networkclient.cpp
+                        networkserver.cpp
+                        networkserverthread.cpp
                         mainwindow.cpp
                         )
 
@@ -37,6 +40,9 @@ set(project_headers     canvas.h
                         canvasview.h
                         canvascontainment.h
                         networkservice.h
+                        networkclient.h
+                        networkserver.h
+                        networkserverthread.h
                         mainwindow.h
                         )
 

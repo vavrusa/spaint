@@ -1,21 +1,41 @@
 #ifndef NETWORKSERVICE_H
 #define NETWORKSERVICE_H
 
-#include <QObject>
-#include "canvasmgr.h"
+#include <QDialog>
 
-class NetworkService : public QObject
+#include "canvas.h"
+#include "canvasmgr.h"
+#include "networkserver.h"
+
+class NetworkService : public QDialog
 {
    Q_OBJECT
 
-   public:
-   NetworkService();
+public:
+   NetworkService(QWidget *parent = 0);
+   ~NetworkService();
 
-   bool observe(CanvasMgr* cvmgr);
+   bool observe(CanvasMgr* cm);
 
-   public slots:
+public slots:
    bool start();
    bool stop();
+
+//private slots:
+   bool offerCanvas(Canvas*);
+   bool disofferCanvas(Canvas*);
+
+signals:
+   void serverStarted();
+   void serverStopped();
+
+private:
+/*
+   struct Private;
+   Private* d;
+*/
+   NetworkServer* server;
+
 };
 
 #endif // NETWORKSERVICE_H
