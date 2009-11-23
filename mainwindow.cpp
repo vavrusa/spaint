@@ -68,8 +68,7 @@ MainWindow::~MainWindow()
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Shared Paint"),
-            tr("The <b>Shared Paint</b> project "
-               "is aimed to create simple editor... WTF Vojtechu?"));
+            tr("The <b>Shared Paint</b> project"));
 }
 
 bool MainWindow::observe(CanvasMgr* cm)
