@@ -1,12 +1,16 @@
 <RCC>
-  <qresource prefix="icons">
-      <file>16x16/exit.png</file>
-      <file>16x16/canvas-add.png</file>
-      <file>16x16/canvas-remove.png</file>
-      <file>16x16/canvas-clear.png</file>
-      <file>16x16/save-as.png</file>
-      <file>16x16/configure.png</file>
-      <file>16x16/help-contents.png</file>
-      <file>16x16/application.png</file>
-  </qresource>
+    <qresource prefix="/icons" >
+        <file>16x16/exit.png</file>
+        <file>16x16/canvas-add.png</file>
+        <file>16x16/canvas-remove.png</file>
+        <file>16x16/canvas-clear.png</file>
+        <file>16x16/save-as.png</file>
+        <file>16x16/configure.png</file>
+        <file>16x16/help-contents.png</file>
+        <file>16x16/application.png</file>
+        <file>16x16/user-offline.png</file>
+        <file>16x16/user-online.png</file>
+        <file>16x16/network-wired-activated.png</file>
+        <file>16x16/network-wired.png</file>
+    </qresource>
 </RCC>
