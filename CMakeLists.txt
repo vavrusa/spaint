@@ -19,6 +19,9 @@ endif("${CMAKE_BUILD_TYPE}" STREQUAL "")
 set(CMAKE_COLOR_MAKEFILE ON)
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
+set( QT_USE_QTNETWORK TRUE )
+#set( QT_LIBRARIES QtCore QtGui QtNetwork )
+
 # Source files
 set(project_src         main.cpp
                         canvas.cpp
