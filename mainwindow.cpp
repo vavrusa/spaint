@@ -68,7 +68,7 @@ bool MainWindow::observe(NetworkService* net)
    return true;
 }
 
-void MainWindow::showServerState(NetworkServer::state state, const QString &msg = QString())
+void MainWindow::showServerState(NetworkServer::state state, const QString &msg)
 {
    switch (state) {
       case NetworkServer::errStart:
@@ -86,7 +86,7 @@ void MainWindow::showServerState(NetworkServer::state state, const QString &msg 
          break;
 
       case NetworkServer::stop:
-         // stoped
+         // stopped
          break;
 
       default:
