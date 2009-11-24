@@ -8,12 +8,12 @@ CanvasView::CanvasView(Canvas* canvas, QWidget* parent)
    setFrameStyle(QFrame::NoFrame);
    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+   setBackgroundBrush(Qt::white);
 
    // TODO: Antialiasing is too CPU intensive, investigate
    //setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
    setSceneRect(canvas->sceneRect());
    setCacheMode(CacheBackground);
-   show();
 }
 
 #include "canvasview.moc"

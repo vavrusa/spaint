@@ -72,6 +72,10 @@ void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
 
 void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
+   // Check polygon
+   if(mState != Idle && mGlyph->path().length() == 0)
+      return;
+
    // End of drawing
    if(mState == Drawing) {
       qDebug() << "Polygon finished - pts:" << mGlyph->path().elementCount()
