@@ -47,7 +47,7 @@ class MainWindow : public QMainWindow
    private slots:
    void about();
    void renderCanvas();
-   void showServerState(NetworkServer::state state, const QString& msg);
+   void showServerState(NetworkServer::state state, const QString& msg = QString());
    void promptClientConnection();
 
    private:
