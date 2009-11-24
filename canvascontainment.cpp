@@ -2,6 +2,7 @@
 #include <QGraphicsView>
 #include <QGraphicsSceneWheelEvent>
 #include <QGraphicsItem>
+#include <QPropertyAnimation>
 #include <QDebug>
 #include <QMap>
 #include "canvascontainment.h"
@@ -13,9 +14,10 @@ const static int BorderWidth = 10;
 
 struct CanvasContainment::Private {
 
-   Private() : view(0)
+   Private() : animation(0), view(0)
    {}
 
+   QPropertyAnimation*       animation;     // Current animation
    QGraphicsView*            view;          // Graphics scene
    QList<Canvas*>            list;          // Ordered list
    QList<Canvas*>::iterator  current;       // Focused widget
@@ -139,9 +141,19 @@ void CanvasContainment::focusToCanvas(Canvas* c)
    QGraphicsProxyWidget* proxy = d->map[c];
    if(proxy != 0) {
 
-      // Shift current viewport to target rect
+      // Create animation
+      if(d->animation == 0) {
+         d->animation = new QPropertyAnimation(d->view, "sceneRect");
+      }
+
+      // Plan animation to shift current viewport to target rect
       QRectF targetRect(proxy->sceneBoundingRect());
-      d->view->setSceneRect(targetRect);
+      d->animation->stop();
+      d->animation->setDuration(600);
+      d->animation->setEasingCurve(QEasingCurve::OutBack);
+      d->animation->setStartValue(d->view->sceneRect());
+      d->animation->setEndValue(targetRect);
+      d->animation->start();
    }
 }
 

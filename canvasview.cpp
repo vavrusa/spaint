@@ -8,6 +8,7 @@ CanvasView::CanvasView(Canvas* canvas, QWidget* parent)
    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+   setSceneRect(0, 0, 640, 480);
    show();
 }
 
