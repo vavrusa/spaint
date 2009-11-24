@@ -77,7 +77,6 @@ void CanvasContainment::addCanvas(Canvas* c)
    d->current = d->list.end() - 1;
    d->map.insert(c, proxy);
    d->layout->addItem(proxy);
-   d->layout->setItemSpacing(d->layout->count() - 1, defaultSize.width() * 0.25);
 
    // Update rect
    setSceneRect(sceneRect().adjusted(0, 0, defaultSize.width() * 1.5, 0));
@@ -190,6 +189,7 @@ void CanvasContainment::updateLayout(const QRectF& newRect)
 
    // Update layout
    d->container->setGeometry(newRect);
+   d->layout->setSpacing(Canvas::defaultSizeHint().width() * 0.25);
 
    // Current
    focusToCanvas(*d->current);
