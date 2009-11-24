@@ -1,6 +1,7 @@
 #include <QGraphicsProxyWidget>
 #include <QGraphicsView>
 #include <QGraphicsSceneWheelEvent>
+#include <QGraphicsLinearLayout>
 #include <QGraphicsItem>
 #include <QPropertyAnimation>
 #include <QDebug>
@@ -18,7 +19,9 @@ struct CanvasContainment::Private {
    {}
 
    QPropertyAnimation*       animation;     // Current animation
+   QGraphicsWidget*         container;      // Container for layout
    QGraphicsView*            view;          // Graphics scene
+   QGraphicsLinearLayout*    layout;        // Layout
    QList<Canvas*>            list;          // Ordered list
    QList<Canvas*>::iterator  current;       // Focused widget
    QMap<Canvas*,QGraphicsProxyWidget*> map; // Map Canvas -> Widget
@@ -28,20 +31,29 @@ CanvasContainment::CanvasContainment(QWidget *parent)
    : QGraphicsScene(parent), d(new Private)
 {
    // Create graphics view
+   d->container = new QGraphicsWidget();
    d->view = new QGraphicsView(this, parent);
 
    // Disable scrollbars and set anchor for resizing
    d->view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    d->view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    d->view->setResizeAnchor(QGraphicsView::AnchorViewCenter);
+   d->view->setCacheMode(QGraphicsView::CacheBackground);
    setBackgroundBrush(Qt::gray);
+
+   // Create layout
+   d->layout = new QGraphicsLinearLayout(Qt::Horizontal, d->container);
+   d->container->setLayout(d->layout);
+   addItem(d->container);
 
    // Invalidate current canvas ptr
    d->current = d->list.end();
+   connect(this, SIGNAL(sceneRectChanged(QRectF)), this, SLOT(updateLayout(QRectF)));
 }
 
 CanvasContainment::~CanvasContainment()
 {
+   d->container->deleteLater();
    delete d;
 }
 
@@ -56,18 +68,19 @@ void CanvasContainment::addCanvas(Canvas* c)
    CanvasView* view = new CanvasView(c);
 
    // Create graphics proxy
-   QSize defaultSize = Canvas::defaultSizeHint();
+   QSizeF defaultSize = c->sceneRect().size();
    QGraphicsProxyWidget* proxy = addWidget(view);
+   proxy->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
    // Add canvas to list
    d->list.append(c);
    d->current = d->list.end() - 1;
    d->map.insert(c, proxy);
+   d->layout->addItem(proxy);
+   d->layout->setItemSpacing(d->layout->count() - 1, defaultSize.width() * 0.25);
 
-   // Place proxy in scene
-   proxy->setPos(d->map.size() * defaultSize.width() * 1.5, -defaultSize.height() * 0.5);
-   d->view->setSceneRect(proxy->sceneBoundingRect());
-
+   // Update rect
+   setSceneRect(sceneRect().adjusted(0, 0, defaultSize.width() * 1.5, 0));
    qDebug() << "New canvas: " << (*d->current)->name();
 }
 
@@ -167,6 +180,19 @@ void CanvasContainment::clearCanvas(Canvas* c)
    QList<QGraphicsItem*> list(c->items());
    for(it = list.begin(); it < list.end(); ++it)
       c->removeItem(*it);
+}
+
+void CanvasContainment::updateLayout(const QRectF& newRect)
+{
+   // Layout update
+   if(!newRect.isValid())
+      return;
+
+   // Update layout
+   d->container->setGeometry(newRect);
+
+   // Current
+   focusToCanvas(*d->current);
 }
 
 void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)
