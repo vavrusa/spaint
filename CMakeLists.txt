@@ -38,7 +38,7 @@ set(project_headers     canvas.h
                         )
 
 # Qt4
-set(QT_MIN_VERSION 4.4.0)
+set(QT_MIN_VERSION 4.6.0)
 find_package(Qt4 REQUIRED)
 
 qt4_automoc(${project_src})
