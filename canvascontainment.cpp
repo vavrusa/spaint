@@ -31,7 +31,6 @@ CanvasContainment::CanvasContainment(QWidget *parent)
    : QGraphicsScene(parent), d(new Private)
 {
    // Create graphics view
-   d->container = new QGraphicsWidget();
    d->view = new QGraphicsView(this, parent);
 
    // Disable scrollbars and set anchor for resizing
@@ -39,9 +38,11 @@ CanvasContainment::CanvasContainment(QWidget *parent)
    d->view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    d->view->setResizeAnchor(QGraphicsView::AnchorViewCenter);
    d->view->setCacheMode(QGraphicsView::CacheBackground);
+   d->view->setRenderHint(QPainter::Antialiasing, false);
    setBackgroundBrush(Qt::gray);
 
    // Create layout
+   d->container = new QGraphicsWidget();
    d->layout = new QGraphicsLinearLayout(Qt::Horizontal, d->container);
    d->container->setLayout(d->layout);
    addItem(d->container);
@@ -98,7 +99,6 @@ void CanvasContainment::removeCanvas(Canvas* c)
    d->current--;
    d->list.erase(d->current + 1);
    focusToCanvas(*d->current);
-
    removeItem(proxy);
 
    // Delete widget
@@ -213,7 +213,7 @@ void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)
 
       // Get current rect
       p->save();
-      QRectF currentRect(d->map[*it]->sceneBoundingRect());
+      QRectF currentRect(d->map[*it]->geometry());
       grad.setStart(currentRect.topLeft());
       grad.setFinalStop(grad.start() - QPointF(0, borderWidth));
 
