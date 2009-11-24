@@ -25,6 +25,7 @@
 #include <QMainWindow>
 #include <QMenuBar>
 #include "canvasmgr.h"
+#include "networkservice.h"
 
 class MainWindow : public QMainWindow
 {
@@ -35,6 +36,7 @@ class MainWindow : public QMainWindow
    ~MainWindow();
 
    bool observe(CanvasMgr* cm);
+   bool observe(NetworkService* net);
 
    protected:
    void saveSettings();
