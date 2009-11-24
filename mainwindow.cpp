@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include "mainwindow.h"
 #include "canvascontainment.h"
+#include "networkservice.h"
 
 // Const
 #define DEFAULT_WIDTH 800
@@ -57,9 +58,16 @@ bool MainWindow::observe(CanvasMgr* cm)
    return true;
 }
 
+bool MainWindow::observe(NetworkService* net)
+{
+   connect(net, SIGNAL(serverStarted()), this->d->bar, SLOT(setEnabled(bool)));
+   //connect(net, SIGNAL(serverStopped()), this->bar->helpMenu, SLOT(setDisabled(bool)));
+   return true;
+}
+
 QMenuBar* MainWindow::createMenuBar()
 {
-   QMenuBar* bar = new QMenuBar(this);
+   QMenu* bar = new QMenuBar(this);
 
    QMenu* sessionMenu = bar->addMenu(tr("&File"));
    sessionMenu->addAction(QIcon(":/icons/16x16/canvas-add.png"), tr("C&onnect"))->setEnabled(false);
