@@ -7,7 +7,7 @@
 #include "canvasmgr.h"
 #include "networkserver.h"
 
-class NetworkService : public QDialog
+class NetworkService : public QObject
 {
    Q_OBJECT
 
@@ -18,24 +18,20 @@ public:
    bool observe(CanvasMgr* cm);
 
 public slots:
-   bool start();
-   bool stop();
+   bool startServer();
+   bool stopServer();
+   bool startClient();
 
 //private slots:
    bool offerCanvas(Canvas*);
    bool disofferCanvas(Canvas*);
 
 signals:
-   void serverStarted();
-   void serverStopped();
+   void serverState(NetworkServer::state, const QString& msg = QString());
 
 private:
-/*
    struct Private;
    Private* d;
-*/
-   NetworkServer* server;
-
 };
 
 #endif // NETWORKSERVICE_H
