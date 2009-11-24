@@ -10,7 +10,8 @@
 Canvas::Canvas(const QString& name, CanvasMgr* parent)
       : QGraphicsScene(parent), mState(Idle), mGlyph(0), mName(name)
 {
-   setSceneRect(0, 0, 640, 480);
+   QSize defaultSize(defaultSizeHint());
+   setSceneRect(0, 0, defaultSize.width(), defaultSize.height());
 }
 
 void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)

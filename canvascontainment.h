@@ -30,6 +30,9 @@ class CanvasContainment : public QGraphicsScene
    void drawBackground(QPainter* p, const QRectF& re);
    void wheelEvent(QGraphicsSceneWheelEvent* e);
 
+   private slots:
+   void updateLayout(const QRectF& newRect);
+
    private:
    struct Private;
    Private* d;
