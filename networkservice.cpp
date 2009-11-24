@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2010 Brno University of Technology,                     *
  *   Faculty of Information Technology                                     *
- *   Author(s): Vojtech Vitek <vojtech.vitek AT gmail.com>                 *
+ *   Author(s): Vojtech Vitek (V-Teq) <vojtech.vitek AT gmail.com>         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,25 +19,33 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include <QMessageBox>
 #include <QtNetwork>
+#include <QList>
 
 #include "canvasmgr.h"
 #include "networkservice.h"
+#include "networkserver.h"
+#include "networkclient.h"
 
-/*
-struct NetworkService::Private{
-
-   Private() : tst(0)
-   {}
-
-   int tst;
-};
-*/
-
-NetworkService::NetworkService(QWidget *parent)
-      : QDialog(parent), server(new NetworkServer(this))/*, d(new Private)*/
+class NetworkService::Private
 {
+   public:
+      Private() : server(0)
+      {}
+
+      NetworkServer* server;
+      //QList<NetworkClient*> clients;
+};
+
+NetworkService::NetworkService(QWidget* parent)
+      : d(new Private)
+{
+   d->server = new NetworkServer(parent);
+}
+
+NetworkService::~NetworkService()
+{
+   delete d->server;
 }
 
 bool NetworkService::observe(CanvasMgr* cm)
@@ -47,24 +55,29 @@ bool NetworkService::observe(CanvasMgr* cm)
    return true;
 }
 
-bool NetworkService::start()
+bool NetworkService::startClient()
 {
-   if (!server->listen()) {
-        QMessageBox::critical(this, tr("Shared Paint Server"),
-                              tr("Unable to start the server: %1.")
-                              .arg(server->errorString()));
-        server->close();
-        return false;
-   }
-
-   emit(serverStarted());
    return true;
 }
 
-bool NetworkService::stop()
+bool NetworkService::startServer()
 {
-   /*server->close();*/
-   emit(serverStopped());
+   emit(serverState(NetworkServer::start));
+
+   if (!d->server->listen()) {
+        d->server->close();
+        emit(serverState(NetworkServer::errStart, d->server->errorString()));
+        return false;
+   }
+
+   emit(serverState(NetworkServer::run));
+   return true;
+}
+
+bool NetworkService::stopServer()
+{
+   d->server->close();
+   emit(serverState(NetworkServer::stop));
    return true;
 }
 
@@ -76,11 +89,6 @@ bool NetworkService::offerCanvas(Canvas* canvas)
 bool NetworkService::disofferCanvas(Canvas* canvas)
 {
    return true;
-}
-
-NetworkService::~NetworkService()
-{
-   delete server;
 }
 
 #include "networkservice.moc"

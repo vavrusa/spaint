@@ -23,12 +23,15 @@
 #include <QFileDialog>
 #include <QCloseEvent>
 #include <QApplication>
+#include <QMessageBox>
+#include <QVBoxLayout>
 #include <QSettings>
 #include <QTimer>
 #include <QMessageBox>
 #include "mainwindow.h"
 #include "canvascontainment.h"
 #include "networkservice.h"
+#include "networkserver.h"
 
 // Const
 #define DEFAULT_WIDTH 800
@@ -81,9 +84,54 @@ bool MainWindow::observe(CanvasMgr* cm)
 
 bool MainWindow::observe(NetworkService* net)
 {
-   //connect(net, SIGNAL(serverStarted()),
-   //connect(net, SIGNAL(serverStopped()),
+   connect(net, SIGNAL(serverState(NetworkServer::state, QString)),
+           this, SLOT(showServerState(NetworkServer::state, QString)));
    return true;
+}
+
+void MainWindow::showServerState(NetworkServer::state state, const QString &msg = QString())
+{
+   switch (state) {
+      case NetworkServer::errStart:
+         QMessageBox::critical(this, tr("Shared Paint Server"),
+                               tr("Unable to start the server: %1.")
+                               .arg(msg));
+         break;
+
+      case NetworkServer::start:
+         // starting
+         break;
+
+      case NetworkServer::run:
+         // running
+         break;
+
+      case NetworkServer::stop:
+         // stoped
+         break;
+
+      default:
+         QMessageBox::information(this, tr("Shared Paint Server"),
+                                  tr("NOT IMPLEMENTED: Unknown state"));
+   }
+}
+
+void MainWindow::promptClientConnection()
+{
+   QDialog dlg;
+   QVBoxLayout lt(&dlg);
+   dlg.setWindowTitle(tr("New connection"));
+   dlg.setWindowIcon(QIcon(":/icons/16x16/cavas-add.png"));
+
+   // Create settings
+   //Settings* settings = new Settings(&app(), &dlg);
+   //lt.addWidget(settings);
+
+   // Connect
+//   connect(settings, SIGNAL(accepted()), &dlg, SLOT(accept()));
+//   connect(settings, SIGNAL(rejected()), &dlg, SLOT(reject()));
+
+   dlg.exec();
 }
 
 QMenuBar* MainWindow::createMenuBar()
@@ -91,7 +139,7 @@ QMenuBar* MainWindow::createMenuBar()
    QMenuBar* bar = new QMenuBar(this);
 
    QMenu* sessionMenu = bar->addMenu(tr("&File"));
-   sessionMenu->addAction(QIcon(":/icons/16x16/canvas-add.png"), tr("C&onnect"))->setEnabled(false);
+   sessionMenu->addAction(QIcon(":/icons/16x16/canvas-add.png"), tr("C&onnect"), this, SLOT(promptClientConnection()));
    sessionMenu->addAction(QIcon(":/icons/16x16/save-as.png"), tr("&Save Image"), this, SLOT(renderCanvas()), tr("Ctrl+S"));
    sessionMenu->addSeparator();
    sessionMenu->addAction(QIcon(":/icons/16x16/exit.png"), tr("&Quit"), this, SLOT(close()), tr("Ctrl+Q"));

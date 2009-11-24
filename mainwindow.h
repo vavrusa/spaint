@@ -26,6 +26,7 @@
 #include <QMenuBar>
 #include "canvasmgr.h"
 #include "networkservice.h"
+#include "networkserver.h"
 
 class MainWindow : public QMainWindow
 {
@@ -41,11 +42,13 @@ class MainWindow : public QMainWindow
    protected:
    void saveSettings();
    void loadSettings();
-   void closeEvent(QCloseEvent *event);
+   void closeEvent(QCloseEvent* event);
 
    private slots:
    void about();
    void renderCanvas();
+   void showServerState(NetworkServer::state state, const QString& msg);
+   void promptClientConnection();
 
    private:
    struct Private;
