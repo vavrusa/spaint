@@ -60,14 +60,14 @@ bool MainWindow::observe(CanvasMgr* cm)
 
 bool MainWindow::observe(NetworkService* net)
 {
-   connect(net, SIGNAL(serverStarted()), this->d->bar, SLOT(setEnabled(bool)));
-   //connect(net, SIGNAL(serverStopped()), this->bar->helpMenu, SLOT(setDisabled(bool)));
+   //connect(net, SIGNAL(serverStarted()),
+   //connect(net, SIGNAL(serverStopped()),
    return true;
 }
 
 QMenuBar* MainWindow::createMenuBar()
 {
-   QMenu* bar = new QMenuBar(this);
+   QMenuBar* bar = new QMenuBar(this);
 
    QMenu* sessionMenu = bar->addMenu(tr("&File"));
    sessionMenu->addAction(QIcon(":/icons/16x16/canvas-add.png"), tr("C&onnect"))->setEnabled(false);
