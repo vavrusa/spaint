@@ -44,9 +44,8 @@ int main(int argc, char *argv[])
 
    // Create network service
    NetworkService net;
-   window.observe(&net);
    net.observe(&cm);
-   net.startServer();
+   window.observe(&net);
 
    Gesture::Handler gh;
    gh.observe(&cm);

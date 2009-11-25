@@ -25,8 +25,7 @@
 #include <QMainWindow>
 #include <QMenuBar>
 #include "canvasmgr.h"
-#include "networkservice.h"
-#include "networkserver.h"
+#include "networkwindow.h"
 
 class MainWindow : public QMainWindow
 {
@@ -36,8 +35,8 @@ class MainWindow : public QMainWindow
    MainWindow(QWidget* parent = 0);
    ~MainWindow();
 
-   bool observe(CanvasMgr* cm);
    bool observe(NetworkService* net);
+   bool observe(CanvasMgr* cm);
 
    protected:
    void saveSettings();
@@ -47,8 +46,6 @@ class MainWindow : public QMainWindow
    private slots:
    void about();
    void renderCanvas();
-   void showServerState(NetworkServer::state state, const QString& msg = QString());
-   void promptClientConnection();
 
    private:
    struct Private;

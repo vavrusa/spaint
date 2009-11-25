@@ -1,17 +1,9 @@
 #ifndef NETWORKCLIENT_H
 #define NETWORKCLIENT_H
 
-#include <QDialog>
+#include <QObject>
 
-QT_BEGIN_NAMESPACE
-class QDialogButtonBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QTcpSocket;
-QT_END_NAMESPACE
-
-class NetworkClient : public QDialog
+class NetworkClient : public QObject
 {
    Q_OBJECT
 

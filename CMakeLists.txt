@@ -31,6 +31,7 @@ set(project_src         main.cpp
                         networkclient.cpp
                         networkserver.cpp
                         networkserverthread.cpp
+                        networkwindow.cpp
                         mainwindow.cpp
                         gesturehandler.cpp
                         mousegesturerecognizer.cpp
@@ -43,6 +44,7 @@ set(project_headers     canvas.h
                         networkclient.h
                         networkserver.h
                         networkserverthread.h
+                        networkwindow.h
                         mainwindow.h
                         gesturehandler.h
                         mousegesturerecognizer.h
