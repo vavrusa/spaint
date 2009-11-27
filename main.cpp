@@ -46,11 +46,12 @@ int main(int argc, char *argv[])
    NetworkService net;
    net.observe(&cm);
    window.observe(&net);
+   net.startServer();
 
+   // Create gesture handler
    Gesture::Handler gh;
    gh.observe(&cm);
    gh.start();
-
 
    // Initialize canvases
    cm.init();

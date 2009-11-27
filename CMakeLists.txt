@@ -14,7 +14,7 @@ set(VERSION_STRING ${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION})
 
 # CMake build type: Release|Debug
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
-   set(CMAKE_BUILD_TYPE     Release)
+   set(CMAKE_BUILD_TYPE     Debug)
 endif("${CMAKE_BUILD_TYPE}" STREQUAL "")
 set(CMAKE_COLOR_MAKEFILE ON)
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)

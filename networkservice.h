@@ -33,7 +33,7 @@ class NetworkService : public QObject
    Q_OBJECT
 
 public:
-   NetworkService(QWidget *parent = 0);
+   NetworkService(QObject *parent = 0);
    ~NetworkService();
 
    bool observe(CanvasMgr* cm);
@@ -41,9 +41,10 @@ public:
 public slots:
    bool startServer();
    bool stopServer();
-   bool startClient();
+   bool startClient(QString& host, QString& port);
+   bool stopClients();
 
-//private slots:
+private slots:
    bool offerCanvas(Canvas*);
    bool disofferCanvas(Canvas*);
 
