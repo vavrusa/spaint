@@ -74,6 +74,7 @@ bool MainWindow::observe(NetworkService* net)
 {
    connect(net, SIGNAL(serverState(NetworkServer::state, QString)),
            d->netwin, SLOT(showServerState(NetworkServer::state)));
+   d->netwin->observe(net);
    return true;
 }
 

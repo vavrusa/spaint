@@ -46,6 +46,8 @@ int main(int argc, char *argv[])
    net.observe(&cm);
    window.observe(&net);
 
+   net.startServer();
+
    // Initialize canvases
    cm.init();
 

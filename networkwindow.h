@@ -11,22 +11,42 @@ class NetworkWindow : public QMainWindow
 {
    Q_OBJECT
 
-   public:
+public:
    NetworkWindow(QWidget* parent = 0);
    ~NetworkWindow();
 
    bool observe(NetworkService* net);
 
-   protected:
+protected:
    void saveSettings();
    void loadSettings();
    void closeEvent(QCloseEvent* event);
 
-   private slots:
+private slots:
    void showServerState(NetworkServer::state state, const QString& msg = QString());
-   void promptClientConnection();
 
-   private:
+private:
+   struct Private;
+   Private* d;
+};
+
+class NetworkNewClientConnection : public QWidget
+{
+   Q_OBJECT
+
+public:
+   NetworkNewClientConnection(QWidget* parent = 0);
+   ~NetworkNewClientConnection();
+
+signals:
+   void submitForm(QString& host, QString& port);
+   void cancelForm();
+
+private slots:
+   void okClicked();
+   void cancelClicked();
+
+private:
    struct Private;
    Private* d;
 };

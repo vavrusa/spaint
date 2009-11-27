@@ -8,9 +8,16 @@ class NetworkClient : public QObject
    Q_OBJECT
 
 public:
-   NetworkClient(QWidget *parent = 0);
-   //~NetworkClient();
+   NetworkClient(QObject *parent = 0);
+   ~NetworkClient();
 
+private slots:
+   void read();
+   void error(QAbstractSocket::SocketError);
+
+private:
+   struct Private;
+   Private* d;
 };
 
 #endif // NETWORKCLIENT_H
