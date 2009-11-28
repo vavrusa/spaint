@@ -1,6 +1,6 @@
 #include "gesturehandler.h"
 #include <QDebug>
-#include <Qlist>
+#include <QList>
 
 using namespace Gesture;
 
