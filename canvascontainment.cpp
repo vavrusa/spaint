@@ -225,6 +225,7 @@ void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)
                    QSizeF(currentRect.width(), borderWidth));
 
       // Top
+      p->setPen(Qt::NoPen);
       p->fillRect(bRect, QBrush(grad));
 
       // Bottom
