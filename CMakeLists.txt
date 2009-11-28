@@ -27,6 +27,8 @@ set(project_src         main.cpp
                         canvascontainment.cpp
                         networkservice.cpp
                         mainwindow.cpp
+                        gesturehandler.cpp
+                        mousegesturerecognizer.cpp
                         )
 
 set(project_headers     canvas.h
@@ -35,6 +37,9 @@ set(project_headers     canvas.h
                         canvascontainment.h
                         networkservice.h
                         mainwindow.h
+                        gesturehandler.h
+                        mousegesturerecognizer.h
+                        defines.h
                         )
 
 # Qt4
@@ -58,7 +63,7 @@ add_executable(${PROJECT_NAME}        ${project_src}
                                       ${project_i18n}
                                       )
 target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES}
-                                      )	
+                                      )
 
 # Install targets
 install( TARGETS ${PROJECT_NAME}

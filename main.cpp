@@ -21,13 +21,17 @@
 
 #include <QApplication>
 #include <cstdlib>
+#include <QGestureRecognizer>
+#include <QGesture>
+#include <QGestureEvent>
 #include "canvas.h"
 #include "networkservice.h"
 #include "mainwindow.h"
+#include "gesturehandler.h"
 
 int main(int argc, char *argv[])
 {
-   // Run QApplication   
+   // Run QApplication
    QApplication app(argc, argv);
    app.setOrganizationName("VUT FIT");
    app.setOrganizationDomain("fit.vutbr.cz");
@@ -45,6 +49,11 @@ int main(int argc, char *argv[])
    NetworkService net;
    net.observe(&cm);
    net.start();
+
+   Gesture::GestureHandler gh;
+   gh.observe(&cm);
+   gh.start();
+
 
    // Initialize canvases
    cm.init();
