@@ -39,17 +39,9 @@
 #define MOUSEGESTURERECOGNIZER_H
 
 #include <QList>
+#include <QObject>
 
 namespace Gesture {
-
-/*
- *  Sub-class and implement callback method and register along a gesture description.
- */
-class MouseGestureCallback
-{
-public:
-    virtual void callback() = 0;
-};
 
 /*
  *  The available directions.
@@ -63,33 +55,40 @@ typedef QList<Direction> DirectionList;
 /*
  *  Create lists of directions and connect to a callback.
  */
-struct GestureDefinition
+struct Definition
 {
-    GestureDefinition( const DirectionList &d, MouseGestureCallback *c ) : directions( d ), callbackClass( c ) {}
+    Definition(const DirectionList &d, int c)
+       : directions( d ), code( c ) {}
 
     DirectionList directions;
-    MouseGestureCallback *callbackClass;
+    int code;
 };
 
-class MouseGestureRecognizer
+class MouseGestureRecognizer : public QObject
 {
-public:
-    MouseGestureRecognizer( int minimumMovement = 5, double minimumMatch = 0.9 );
-    ~MouseGestureRecognizer();
+   Q_OBJECT
 
-    void addGestureDefinition( const GestureDefinition &gesture );
-    void clearGestureDefinitions();
+   public:
+   MouseGestureRecognizer(QObject* parent = 0, int minimumMovement = 5, double minimumMatch = 0.9);
+   ~MouseGestureRecognizer();
 
-    void startGesture( int x, int y );
-    void addPoint( int x, int y );
-    void endGesture( int x, int y );
-    void abortGesture();
+   void addGestureDefinition( const Definition &gesture );
+   void clearGestureDefinitions();
 
-private:
-    void recognizeGesture();
+   void startGesture( int x, int y );
+   void addPoint( int x, int y );
+   void endGesture( int x, int y );
+   void abortGesture();
 
-    struct Private;
-    Private *d;
+   signals:
+   void recognized(int code);
+
+   protected:
+   void recognizeGesture();
+
+   private:
+   struct Private;
+   Private *d;
 };
 
 };

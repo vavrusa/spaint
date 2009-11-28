@@ -25,71 +25,75 @@
 
 using namespace Gesture;
 
-
-class GestureHandler::Private
+class Handler::Private
 {
-public:
-    QVector<Canvas*> activeCanvases;
-    QList<GestureCallbackToSignal> callbacks;
-    bool isrunning;
-    Gesture::MouseGestureRecognizer mgr;
-
+   public:
+   QVector<Canvas*> activeCanvases;
+   bool isRunning;
 };
 
-GestureHandler::GestureHandler()
+Handler::Handler(QObject* parent)
+   : MouseGestureRecognizer(parent), d(new Private)
 {
-    d = new Private;
-    d->isrunning = false;
+    d->isRunning = false;
 
-    inicializeGestures();
-
-
+    initializeGestures();
 }
 
-void GestureHandler::inicializeGestures()
+Handler::~Handler()
+{
+   delete d;
+}
+
+void Handler::initializeGestures()
 {
 
     DirectionList dl;
     dl<<Up<<Left;
 
-    d->callbacks.append(GestureCallbackToSignal(this,Brush));
-    d->mgr.addGestureDefinition(Gesture::GestureDefinition(dl,&d->callbacks[d->callbacks.size()-1]));
+    addGestureDefinition(Gesture::Definition(dl, Gesture::Pen));
+    connect(this, SIGNAL(recognized(int)), this, SLOT(debugGesture(int)));
 }
 
-bool GestureHandler::observe(CanvasMgr* cm)
+void Handler::debugGesture(int code)
+{
+   qDebug() << "Gesture recognized: " << code;
+}
+
+bool Handler::observe(CanvasMgr* cm)
 {
     connect(cm, SIGNAL(canvasCreated(Canvas*)), this, SLOT(handleCanvas(Canvas*)));
     connect(cm, SIGNAL(canvasRemoved(Canvas*)), this, SLOT(letCanvasGo(Canvas*)));
     return true;
 }
 
-bool GestureHandler::start()
+bool Handler::start()
 {
-    d->isrunning=true;return true;
+    return d->isRunning = true;
 }
 
-bool GestureHandler::stop()
+bool Handler::stop()
 {
-    d->isrunning=false;return true;
+    return d->isRunning = false;
 }
 
-void GestureHandler::handleCanvas(Canvas *cnvs)
+void Handler::handleCanvas(Canvas *cnvs)
 {
     connect(cnvs, SIGNAL(gestureCreated(QPainterPath)), this, SLOT(handleGesture(QPainterPath)));
     d->activeCanvases.push_back(cnvs);
 }
 
-void GestureHandler::letCanvasGo(Canvas* cnvs)
+void Handler::letCanvasGo(Canvas* cnvs)
 {
     d->activeCanvases.remove(d->activeCanvases.indexOf(cnvs));
     disconnect(cnvs, SIGNAL(gestureCreated(QPainterPath)), this, SLOT(handleGesture(QPainterPath)));
 }
 
-void GestureHandler::handleGesture(QPainterPath gesture)
+void Handler::handleGesture(QPainterPath gesture)
 {
-    if(d->isrunning)
+    if(d->isRunning)
     {
-        qDebug() << "Received gesture :" <<endl;
+        qDebug() << "Received gesture: " <<endl;
 
         QPainterPath::Element elem;
         int x,y;
@@ -103,7 +107,7 @@ void GestureHandler::handleGesture(QPainterPath gesture)
             {
                 //qDebug()<< "move x: " << elem.x <<"y: " <<elem.y <<" ";
 
-                d->mgr.startGesture(x,y);
+                startGesture(x,y);
             }
             if(elem.isLineTo())
             {
@@ -111,10 +115,10 @@ void GestureHandler::handleGesture(QPainterPath gesture)
                 //last item - finish gesture
                 if(i==gesture.elementCount()-1)
                 {
-                    d->mgr.endGesture(x,y);
+                    endGesture(x,y);
                 }
                 else
-                    d->mgr.addPoint(x,y);
+                    addPoint(x,y);
             }
 
 

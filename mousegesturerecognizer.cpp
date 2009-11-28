@@ -50,7 +50,7 @@ struct Pos
 };
 
 typedef std::list<Pos> PosList;
-typedef std::list<GestureDefinition> GestureList;
+typedef std::list<Definition> GestureList;
 
 struct MouseGestureRecognizer::Private
 {
@@ -70,9 +70,9 @@ int calcLength( const PosList &positions );
 
 // Class implementation
 
-MouseGestureRecognizer::MouseGestureRecognizer( int minimumMovement, double minimumMatch )
+MouseGestureRecognizer::MouseGestureRecognizer(QObject* parent, int minimumMovement, double minimumMatch)
+   : QObject(parent), d(new Private)
 {
-    d = new Private;
     d->minimumMovement2 = minimumMovement*minimumMovement;
     d->minimumMatch = minimumMatch;
 }
@@ -82,7 +82,7 @@ MouseGestureRecognizer::~MouseGestureRecognizer()
     delete d;
 }
 
-void MouseGestureRecognizer::addGestureDefinition( const GestureDefinition &gesture )
+void MouseGestureRecognizer::addGestureDefinition( const Definition &gesture )
 {
     d->gestures.push_back( gesture );
     qDebug()<<d->gestures.size();
@@ -189,7 +189,7 @@ void MouseGestureRecognizer::recognizeGesture()
 
                 if( match )
                 {
-                    gi->callbackClass->callback();
+                    emit recognized(gi->code);
                     return;
                 }
             }
@@ -204,7 +204,7 @@ void MouseGestureRecognizer::recognizeGesture()
         {
             if( gi->directions.back() == NoMatch )
             {
-                gi->callbackClass->callback();
+                emit recognized(gi->code);
                 return;
             }
         }
@@ -381,3 +381,5 @@ int calcLength( const PosList &positions )
 
     return res;
 }
+
+#include "mousegesturerecognizer.moc"

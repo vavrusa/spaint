@@ -21,9 +21,6 @@
 
 #include <QApplication>
 #include <cstdlib>
-#include <QGestureRecognizer>
-#include <QGesture>
-#include <QGestureEvent>
 #include "canvas.h"
 #include "networkservice.h"
 #include "mainwindow.h"
@@ -50,7 +47,7 @@ int main(int argc, char *argv[])
    net.observe(&cm);
    net.start();
 
-   Gesture::GestureHandler gh;
+   Gesture::Handler gh;
    gh.observe(&cm);
    gh.start();
 
