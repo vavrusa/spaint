@@ -21,9 +21,8 @@
 
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsPathItem>
+#include <QGraphicsView>
 #include <QPainterPath>
-#include <QPainter>
-#include <QGradient>
 #include <QDebug>
 #include "canvas.h"
 #include "canvasmgr.h"
@@ -33,6 +32,24 @@ Canvas::Canvas(const QString& name, CanvasMgr* parent)
 {
    QSize defaultSize(defaultSizeHint());
    setSceneRect(0, 0, defaultSize.width(), defaultSize.height());
+}
+
+QGraphicsView* Canvas::createView(QWidget* parent)
+{
+   QGraphicsView* view = new QGraphicsView(this, parent);
+
+   // Disable frame and scrollbars
+   view->setFrameStyle(QFrame::NoFrame);
+   view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+   view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+   view->setBackgroundBrush(Qt::white);
+
+   // TODO: Antialiasing is too CPU intensive, investigate
+   //view->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+   view->setSceneRect(sceneRect());
+   view->setCacheMode(QGraphicsView::CacheBackground);
+   connect(this, SIGNAL(sceneRectChanged(QRectF)), view, SLOT(updateSceneRect(QRectF)));
+   return view;
 }
 
 void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)

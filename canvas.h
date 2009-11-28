@@ -46,6 +46,12 @@ class Canvas : public QGraphicsScene
       mName = name;
    }
 
+   /** Create associated canvas view.
+     * \param parent - parent widget for view
+     * \return view associated with canvas
+     */
+   QGraphicsView* createView(QWidget* parent = 0);
+
    /// State tracking
    enum State {
       Idle    = 0x00, // Not interacting

@@ -28,7 +28,6 @@
 #include <QDebug>
 #include <QMap>
 #include "canvascontainment.h"
-#include "canvasview.h"
 #include "canvas.h"
 
 // Static settings
@@ -87,11 +86,11 @@ QGraphicsView* CanvasContainment::view()
 void CanvasContainment::addCanvas(Canvas* c)
 {
    // Create canvas viewport
-   CanvasView* view = new CanvasView(c);
+   QGraphicsView* v = c->createView();
 
    // Create graphics proxy
    QSizeF defaultSize = c->sceneRect().size();
-   QGraphicsProxyWidget* proxy = addWidget(view);
+   QGraphicsProxyWidget* proxy = addWidget(v);
    proxy->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
    // Add canvas to list
@@ -123,8 +122,9 @@ void CanvasContainment::removeCanvas(Canvas* c)
    removeItem(proxy);
 
    // Delete widget
-   CanvasView* view = qobject_cast<CanvasView*>(proxy->widget());
-   view->deleteLater();
+   QGraphicsView* view = qobject_cast<QGraphicsView*>(proxy->widget());
+   if(view != 0)
+      view->deleteLater();
 }
 
 void CanvasContainment::renderCanvas(QIODevice& device, Canvas* c)
@@ -182,8 +182,8 @@ void CanvasContainment::focusToCanvas(Canvas* c)
       // Plan animation to shift current viewport to target rect
       QRectF targetRect(proxy->sceneBoundingRect());
       d->animation->stop();
-      d->animation->setDuration(600);
-      d->animation->setEasingCurve(QEasingCurve::OutBack);
+      d->animation->setDuration(500);
+      d->animation->setEasingCurve(QEasingCurve::OutQuad);
       d->animation->setStartValue(d->view->sceneRect());
       d->animation->setEndValue(targetRect);
       d->animation->start();
