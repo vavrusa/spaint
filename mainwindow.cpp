@@ -46,7 +46,7 @@ struct MainWindow::Private {
    {}
 
    CanvasContainment* containment;
-   NetworkWindow* netwin;
+   NetworkWindow* netWin;
 };
 
 MainWindow::MainWindow(QWidget* parent)
@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget* parent)
    loadSettings();
 
    // Network window
-   d->netwin = new NetworkWindow(this);
+   d->netWin = new NetworkWindow(this);
 
    // Menu
    setMenuBar(createMenuBar());
@@ -73,7 +73,7 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
-   delete d->netwin;
+   delete d->netWin;
    delete d->containment;
    delete d;
 }
@@ -93,9 +93,13 @@ bool MainWindow::observe(CanvasMgr* cm)
 
 bool MainWindow::observe(NetworkService* net)
 {
-   connect(net, SIGNAL(serverState(NetworkServer::state, QString)),
-           d->netwin, SLOT(showServerState(NetworkServer::state)));
-   d->netwin->observe(net);
+   // Observe server state
+   connect(net->server, SIGNAL(serverState(NetworkServer::state,QString)),
+           d->netWin, SLOT(showServerState(NetworkServer::state,QString)));
+
+   // Network window actions
+   d->netWin->observe(net);
+
    return true;
 }
 
@@ -104,7 +108,7 @@ QMenuBar* MainWindow::createMenuBar()
    QMenuBar* bar = new QMenuBar(this);
 
    QMenu* sessionMenu = bar->addMenu(tr("&File"));
-   sessionMenu->addAction(QIcon(":/icons/16x16/canvas-add.png"), tr("N&etwork"), d->netwin, SLOT(show()));
+   sessionMenu->addAction(QIcon(":/icons/16x16/canvas-add.png"), tr("N&etwork"), d->netWin, SLOT(show()));
    sessionMenu->addAction(QIcon(":/icons/16x16/save-as.png"), tr("&Save Image"), this, SLOT(renderCanvas()), tr("Ctrl+S"));
    sessionMenu->addSeparator();
    sessionMenu->addAction(QIcon(":/icons/16x16/exit.png"), tr("&Quit"), this, SLOT(close()), tr("Ctrl+Q"));

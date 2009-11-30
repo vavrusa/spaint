@@ -51,16 +51,18 @@ private:
    Private* d;
 };
 
-class NetworkNewClientConnection : public QWidget
+class NetworknewClient : public QWidget
 {
    Q_OBJECT
 
 public:
-   NetworkNewClientConnection(QWidget* parent = 0);
-   ~NetworkNewClientConnection();
+   NetworknewClient(QWidget* parent = 0);
+   ~NetworknewClient();
+
+   bool observe(NetworkService* net);
 
 signals:
-   void submitForm(QString& host, QString& port);
+   void submitForm(QString host, quint16 port);
    void cancelForm();
 
 private slots:

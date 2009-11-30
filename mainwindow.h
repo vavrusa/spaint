@@ -35,8 +35,8 @@ class MainWindow : public QMainWindow
    MainWindow(QWidget* parent = 0);
    ~MainWindow();
 
-   bool observe(NetworkService* net);
    bool observe(CanvasMgr* cm);
+   bool observe(NetworkService* net);
 
    protected:
    void saveSettings();

@@ -22,11 +22,12 @@
 #ifndef NETWORKSERVICE_H
 #define NETWORKSERVICE_H
 
-#include <QDialog>
+#include <QtNetwork>
 
 #include "canvas.h"
 #include "canvasmgr.h"
 #include "networkserver.h"
+#include "networkclient.h"
 
 class NetworkService : public QObject
 {
@@ -39,17 +40,18 @@ public:
    bool observe(CanvasMgr* cm);
 
 public slots:
-   bool startServer();
+   bool startServer(QString addr = QString("127.0.0.1"), quint16 port = 6666);
    bool stopServer();
-   bool startClient(QString& host, QString& port);
+   bool startClient(QString address, quint16 port);
    bool stopClients();
 
 private slots:
    bool offerCanvas(Canvas*);
    bool disofferCanvas(Canvas*);
 
-signals:
-   void serverState(NetworkServer::state, const QString& msg = QString());
+public:
+   NetworkServer* server;
+   QList<NetworkClient*>* clients;
 
 private:
    struct Private;

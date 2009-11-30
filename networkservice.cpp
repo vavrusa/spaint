@@ -19,7 +19,6 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include <QtNetwork>
 #include <QList>
 
 #include "canvasmgr.h"
@@ -30,69 +29,70 @@
 struct NetworkService::Private
 {
 public:
-   Private() : server(0)
+   Private()
    {}
 
-   NetworkServer* server;
-   QList<NetworkClient*>* clients;
+   QList<Canvas*> offeredCanvases;
 };
 
 NetworkService::NetworkService(QObject* parent)
       : d(new Private)
 {
-   d->server = new NetworkServer(parent);
-   d->clients = new QList<NetworkClient*>;
-   d->clients->clear();
+   server = new NetworkServer(parent);
+   clients = new QList<NetworkClient*>;
+   clients->clear();
 }
 
 NetworkService::~NetworkService()
 {
-   delete d->server;
+   stopServer();
+   stopClients();
+
+   while(!clients->empty()) {
+      delete clients->last();
+      clients->removeLast();
+   }
+   delete clients;
+   delete server;
 }
 
 bool NetworkService::observe(CanvasMgr* cm)
 {
    connect(cm, SIGNAL(canvasCreated(Canvas*)), this, SLOT(offerCanvas(Canvas*)));
    connect(cm, SIGNAL(canvasRemoved(Canvas*)), this, SLOT(disofferCanvas(Canvas*)));
+
    return true;
 }
 
-bool NetworkService::startClient(QString& host, QString& port)
+bool NetworkService::startServer(QString addr, quint16 port)
 {
-   qDebug() << "startClient() #" << d->clients->count();
-   NetworkClient* client = new NetworkClient(this);
-   d->clients->append(client);
+   qDebug() << "NetworkService::startServer()";
+   server->start(addr, port);
 
+   return true;
+}
+
+bool NetworkService::startClient(QString host, quint16 port)
+{
+   qDebug() << "NetworkService::startClient(" << host << ", " << port << ") #" << clients->count();
+   NetworkClient* client = new NetworkClient(this);
+   clients->push_back(client);
+   client->start(host, port);
+
+   return true;
+}
+
+bool NetworkService::stopServer()
+{
+   server->stop();
    return true;
 }
 
 bool NetworkService::stopClients()
 {
    QList<NetworkClient*>::iterator it;
-   for (it = d->clients->begin(); it < d->clients->end(); ++it)
-      d->clients->removeOne(*it);
-}
-
-bool NetworkService::startServer()
-{
-   emit(serverState(NetworkServer::start));
-
-   if (!d->server->listen(QHostAddress(QString("127.0.0.1")), 6666)) {
-        d->server->close();
-        emit(serverState(NetworkServer::errStart, d->server->errorString()));
-        return false;
-   }
-
-   qDebug() << "Server listening..";
-
-   emit(serverState(NetworkServer::run));
-   return true;
-}
-
-bool NetworkService::stopServer()
-{
-   d->server->close();
-   emit(serverState(NetworkServer::stop));
+   for (it = clients->begin(); it < clients->end(); ++it)
+      (*it)->stop();
    return true;
 }
 

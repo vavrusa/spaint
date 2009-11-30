@@ -29,6 +29,30 @@ NetworkServer::NetworkServer(QObject* parent)
 {
 }
 
+bool NetworkServer::start(QString& addr, quint16 port)
+{
+   emit(serverState(NetworkServer::START));
+
+   if (!this->listen(QHostAddress(addr), port)) {
+        this->close();
+        qDebug() << "Server error";
+        emit(serverState(NetworkServer::ERR_START, this->errorString()));
+        return false;
+   }
+
+   qDebug() << "Server listening..";
+
+   emit(serverState(NetworkServer::RUN));
+   return true;
+}
+
+bool NetworkServer::stop()
+{
+   this->close();
+   emit(serverState(NetworkServer::STOP));
+   return true;
+}
+
 void NetworkServer::incomingConnection(int sock)
 {
    qDebug() << "server::incomingConnection()";

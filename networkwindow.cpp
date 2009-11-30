@@ -46,7 +46,7 @@ public:
    Private()
    {}
 
-   NetworkNewClientConnection* newClientConnection;
+   NetworknewClient* newClient;
 };
 
 NetworkWindow::NetworkWindow(QWidget* parent)
@@ -57,8 +57,8 @@ NetworkWindow::NetworkWindow(QWidget* parent)
    setWindowIcon(QIcon(":/icons/spaint.png"));
    resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
-   d->newClientConnection = new NetworkNewClientConnection(this);
-   setCentralWidget(d->newClientConnection);
+   d->newClient = new NetworknewClient(this);
+   setCentralWidget(d->newClient);
 
    // Load settings
    loadSettings();
@@ -66,18 +66,22 @@ NetworkWindow::NetworkWindow(QWidget* parent)
 
 NetworkWindow::~NetworkWindow()
 {
+   delete d->newClient;
    delete d;
 }
 
 bool NetworkWindow::observe(NetworkService* net)
 {
-   connect(net, SIGNAL(serverState(NetworkServer::state, QString)),
-           this, SLOT(showServerState(NetworkServer::state, QString)));
+   connect(d->newClient, SIGNAL(submitForm(QString,quint16)),
+           net, SLOT(startClient(QString,quint16)));
 
-   connect(d->newClientConnection, SIGNAL(submitForm(QString&, QString&)),
-           net, SLOT(startClient(QString&, QString&)));
-   connect(d->newClientConnection, SIGNAL(cancelForm()),
-           this, SLOT(close()));
+   // TODO: switch to new client view
+   connect(d->newClient, SIGNAL(submitForm(QString,quint16)),
+           this, SLOT(hide()));
+
+   // TODO: switch to default view
+   connect(d->newClient, SIGNAL(cancelForm()),
+           this, SLOT(hide()));
 
    return true;
 }
@@ -85,21 +89,21 @@ bool NetworkWindow::observe(NetworkService* net)
 void NetworkWindow::showServerState(NetworkServer::state state, const QString &msg)
 {
    switch (state) {
-      case NetworkServer::errStart:
+      case NetworkServer::ERR_START:
          QMessageBox::critical(this, tr("Shared Paint Server"),
                                tr("Unable to start the server: %1.")
                                .arg(msg));
          break;
 
-      case NetworkServer::start:
+      case NetworkServer::START:
          // starting
          break;
 
-      case NetworkServer::run:
+      case NetworkServer::RUN:
          // running
          break;
 
-      case NetworkServer::stop:
+      case NetworkServer::STOP:
          // stopped
          break;
 
@@ -151,7 +155,7 @@ void NetworkWindow::loadSettings()
    }
 }
 
-struct NetworkNewClientConnection::Private : public QWidget
+struct NetworknewClient::Private : public QWidget
 {
 public:
    Private()
@@ -162,7 +166,7 @@ public:
    QLabel* hostLabel;
    QLineEdit* hostEdit;
 
-   QString port;
+   quint16 port;
    QLabel* portLabel;
    QLineEdit* portEdit;
 
@@ -172,22 +176,22 @@ public:
    QGridLayout* layout;
 };
 
-NetworkNewClientConnection::NetworkNewClientConnection(QWidget* parent)
+NetworknewClient::NetworknewClient(QWidget* parent)
       : QWidget(parent), d(new Private)
 {
-   d->hostLabel = new QLabel(QString(tr("IP address:")));
-   d->hostEdit = new QLineEdit("");
+   d->hostLabel = new QLabel(QString(tr("IP address:")), this);
+   d->hostEdit = new QLineEdit("", this);
    d->hostLabel->setBuddy(d->hostEdit);
    d->hostLabel->setFocus();
 
-   d->portLabel = new QLabel(QString(tr("Port:")));
-   d->portEdit = new QLineEdit("");
+   d->portLabel = new QLabel(QString(tr("Port:")), this);
+   d->portEdit = new QLineEdit("", this);
    d->portLabel->setBuddy(d->portEdit);
 
-   d->ok = new QPushButton(tr("Ok"));
-   d->cancel = new QPushButton(tr("Cancel"));
+   d->ok = new QPushButton(tr("Ok"), this);
+   d->cancel = new QPushButton(tr("Cancel"), this);
 
-   d->layout = new QGridLayout;
+   d->layout = new QGridLayout(this);
    d->layout->addWidget(d->hostLabel, 0, 0);
    d->layout->addWidget(d->hostEdit, 0, 1);
    d->layout->addWidget(d->portLabel, 1, 0);
@@ -201,22 +205,19 @@ NetworkNewClientConnection::NetworkNewClientConnection(QWidget* parent)
    this->setLayout(d->layout);
 }
 
-NetworkNewClientConnection::~NetworkNewClientConnection()
+NetworknewClient::~NetworknewClient()
 {
    delete d;
 }
 
-void NetworkNewClientConnection::okClicked()
+void NetworknewClient::okClicked()
 {
-   qDebug() << "okClicked()";
-   d->host = d->hostEdit->text();
-   d->port = d->portEdit->text();
-   emit submitForm(d->host, d->port);
+   // VALIDATE FORM
+   emit submitForm(d->hostEdit->text(), d->portEdit->text().toInt());
 }
 
-void NetworkNewClientConnection::cancelClicked()
+void NetworknewClient::cancelClicked()
 {
-   qDebug() << "cancelClicked()";
    emit cancelForm();
 }
 

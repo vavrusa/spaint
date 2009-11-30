@@ -44,8 +44,8 @@ int main(int argc, char *argv[])
 
    // Create network service
    NetworkService net;
-   net.observe(&cm);
    window.observe(&net);
+   net.observe(&cm);
    net.startServer();
 
    // Create gesture handler

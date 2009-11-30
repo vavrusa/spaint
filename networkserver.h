@@ -30,15 +30,20 @@ class NetworkServer : public QTcpServer
 
 public:
    enum state {
-      start,
-      run,
-      stop,
-      errStart,
-      errRun,
-      errStop
+      START,
+      RUN,
+      STOP,
+      ERR_START,
+      ERR_RUN,
+      ERR_STOP
    };
 
    NetworkServer(QObject* parent);
+   bool start(QString& address, quint16 port);
+   bool stop();
+
+signals:
+   void serverState(NetworkServer::state, const QString& msg = QString());
 
 protected:
    void incomingConnection(int sock);
