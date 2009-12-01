@@ -25,7 +25,7 @@ public slots:
    bool stop();
 
 private slots:
-   void read();
+   void receiveData();
    void error(QAbstractSocket::SocketError);
 
 private:

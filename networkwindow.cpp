@@ -34,7 +34,6 @@
 #include <QtNetwork>
 #include "networkwindow.h"
 #include "networkservice.h"
-#include "networkserver.h"
 
 // Const
 #define DEFAULT_WIDTH 400
@@ -46,7 +45,7 @@ public:
    Private()
    {}
 
-   NetworknewClient* newClient;
+   NetworkNewClient* newClient;
 };
 
 NetworkWindow::NetworkWindow(QWidget* parent)
@@ -57,7 +56,7 @@ NetworkWindow::NetworkWindow(QWidget* parent)
    setWindowIcon(QIcon(":/icons/spaint.png"));
    resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
-   d->newClient = new NetworknewClient(this);
+   d->newClient = new NetworkNewClient(this);
    setCentralWidget(d->newClient);
 
    // Load settings
@@ -155,7 +154,7 @@ void NetworkWindow::loadSettings()
    }
 }
 
-struct NetworknewClient::Private : public QWidget
+struct NetworkNewClient::Private : public QWidget
 {
 public:
    Private()
@@ -176,16 +175,16 @@ public:
    QGridLayout* layout;
 };
 
-NetworknewClient::NetworknewClient(QWidget* parent)
+NetworkNewClient::NetworkNewClient(QWidget* parent)
       : QWidget(parent), d(new Private)
 {
    d->hostLabel = new QLabel(QString(tr("IP address:")), this);
-   d->hostEdit = new QLineEdit("", this);
+   d->hostEdit = new QLineEdit("127.0.0.1", this);
    d->hostLabel->setBuddy(d->hostEdit);
    d->hostLabel->setFocus();
 
    d->portLabel = new QLabel(QString(tr("Port:")), this);
-   d->portEdit = new QLineEdit("", this);
+   d->portEdit = new QLineEdit("6666", this);
    d->portLabel->setBuddy(d->portEdit);
 
    d->ok = new QPushButton(tr("Ok"), this);
@@ -205,18 +204,18 @@ NetworknewClient::NetworknewClient(QWidget* parent)
    this->setLayout(d->layout);
 }
 
-NetworknewClient::~NetworknewClient()
+NetworkNewClient::~NetworkNewClient()
 {
    delete d;
 }
 
-void NetworknewClient::okClicked()
+void NetworkNewClient::okClicked()
 {
    // VALIDATE FORM
    emit submitForm(d->hostEdit->text(), d->portEdit->text().toInt());
 }
 
-void NetworknewClient::cancelClicked()
+void NetworkNewClient::cancelClicked()
 {
    emit cancelForm();
 }

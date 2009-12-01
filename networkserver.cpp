@@ -19,28 +19,52 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
+#include <QMap>
 #include <QtNetwork>
 
 #include "networkserver.h"
 #include "networkserverthread.h"
 
+struct NetworkServer::Private
+{
+public:
+   Private()
+   {}
+
+   QMap<int, NetworkServerThread*> threads;
+   QList<Canvas*> offeredCanvases;
+};
+
 NetworkServer::NetworkServer(QObject* parent)
-      : QTcpServer(parent)
+      : QTcpServer(parent), d(new Private)
 {
 }
 
-bool NetworkServer::start(QString& addr, quint16 port)
+NetworkServer::~NetworkServer()
+{
+   delete d;
+}
+
+bool NetworkServer::observe(CanvasMgr* cm)
+{
+   connect(cm, SIGNAL(canvasCreated(Canvas*)), this, SLOT(offerCanvas(Canvas*)));
+   connect(cm, SIGNAL(canvasRemoved(Canvas*)), this, SLOT(disofferCanvas(Canvas*)));
+
+   return true;
+}
+
+bool NetworkServer::start(quint16 port)
 {
    emit(serverState(NetworkServer::START));
 
-   if (!this->listen(QHostAddress(addr), port)) {
+   if (!this->listen(QHostAddress::Any, port)) {
         this->close();
         qDebug() << "Server error";
         emit(serverState(NetworkServer::ERR_START, this->errorString()));
         return false;
    }
 
-   qDebug() << "Server listening..";
+   qDebug() << "Server listening on port " << port << "...";
 
    emit(serverState(NetworkServer::RUN));
    return true;
@@ -49,16 +73,55 @@ bool NetworkServer::start(QString& addr, quint16 port)
 bool NetworkServer::stop()
 {
    this->close();
+
+   QMap<int, NetworkServerThread*>::iterator it;
+   for (it = d->threads.begin(); it != d->threads.end(); ++it) {
+      it.value()->terminate();
+      delete it.value();
+      d->threads.erase(it);
+   }
+
    emit(serverState(NetworkServer::STOP));
    return true;
 }
 
 void NetworkServer::incomingConnection(int sock)
 {
-   qDebug() << "server::incomingConnection()";
+   qDebug() << "server::incomingConnection(" << sock << ")";
+
+   if (d->threads.contains(sock)) {
+      qDebug() << "Server::error: Socket already in use.";
+      return;
+   }
+
    NetworkServerThread *thread = new NetworkServerThread(this, sock);
+   d->threads[sock] = thread;
    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+
+   thread->sendData(QString("Some ASCII data.."));
    thread->start();
 }
+
+bool NetworkServer::offerCanvas(Canvas* canvas)
+{
+   qDebug() << "NetworkServer::offerCanvas()";
+
+   d->offeredCanvases.push_back(canvas);
+
+   //foreach clients offerCanvas
+   return true;
+}
+
+bool NetworkServer::disofferCanvas(Canvas* canvas)
+{
+   qDebug() << "NetworkServer::disofferCanvas()";
+
+   //delete canvas in list
+
+   //foreach clients dissofferCanvas();
+
+   return true;
+}
+
 
 #include "networkserver.moc"

@@ -29,6 +29,9 @@
 #include "networkserver.h"
 #include "networkclient.h"
 
+const QString default_addr("127.0.0.1");
+const quint16 default_port(6666);
+
 class NetworkService : public QObject
 {
    Q_OBJECT
@@ -40,14 +43,10 @@ public:
    bool observe(CanvasMgr* cm);
 
 public slots:
-   bool startServer(QString addr = QString("127.0.0.1"), quint16 port = 6666);
+   bool startServer(quint16 port = default_port);
    bool stopServer();
-   bool startClient(QString address, quint16 port);
+   bool startClient(QString addr = default_addr, quint16 port = default_port);
    bool stopClients();
-
-private slots:
-   bool offerCanvas(Canvas*);
-   bool disofferCanvas(Canvas*);
 
 public:
    NetworkServer* server;

@@ -51,13 +51,13 @@ private:
    Private* d;
 };
 
-class NetworknewClient : public QWidget
+class NetworkNewClient : public QWidget
 {
    Q_OBJECT
 
 public:
-   NetworknewClient(QWidget* parent = 0);
-   ~NetworknewClient();
+   NetworkNewClient(QWidget* parent = 0);
+   ~NetworkNewClient();
 
    bool observe(NetworkService* net);
 

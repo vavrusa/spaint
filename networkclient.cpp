@@ -19,7 +19,7 @@ NetworkClient::NetworkClient(QObject *parent)
       : QObject(parent), d(new Private)
 {
    d->tcpSocket = new QTcpSocket(this);
-   connect(d->tcpSocket, SIGNAL(readyRead()), this, SLOT(read()));
+   connect(d->tcpSocket, SIGNAL(readyRead()), this, SLOT(receiveData()));
    connect(d->tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
            this, SLOT(error(QAbstractSocket::SocketError)));
 }
@@ -32,19 +32,23 @@ NetworkClient::~NetworkClient()
 
 bool NetworkClient::start(QString& addr, quint16 port)
 {
-   qDebug() << "Client::start(" << addr << ", " << port << ")";
+   qDebug() << "Client::start(" << addr << "," << port << ")";
    d->tcpSocket->abort();
    d->tcpSocket->connectToHost(addr, port);
+   //emit
+   return true;
 }
 
 bool NetworkClient::stop()
 {
    d->tcpSocket->abort();
+   //emit
+   return true;
 }
 
-void NetworkClient::read()
+void NetworkClient::receiveData()
 {
-   qDebug() << "Client::read()";
+   qDebug() << "Client::receiveData()";
 
    QDataStream in(d->tcpSocket);
    in.setVersion(QDataStream::Qt_4_0);
@@ -66,9 +70,9 @@ void NetworkClient::read()
 
 }
 
-void NetworkClient::error(QAbstractSocket::SocketError)
+void NetworkClient::error(QAbstractSocket::SocketError err)
 {
-   qDebug() << "Client::error()";
+   qDebug() << "Client::error()" << err;
 }
 
 #include "networkclient.moc"

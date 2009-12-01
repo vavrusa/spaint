@@ -19,38 +19,81 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include <QMessageBox>
-#include <QtNetwork>
+#include <QThread>
+#include <QTcpSocket>
 
 #include "networkservice.h"
 #include "networkserverthread.h"
 
 NetworkServerThread::NetworkServerThread(QObject* parent, int sock)
-      : QThread(parent), sock(sock)
+      : QThread(parent), socketDescriptor(sock)
 {
 }
 
 void NetworkServerThread::run()
 {
    qDebug() << "serverThread::run()";
-   QTcpSocket tcpSocket;
 
-   if (!tcpSocket.setSocketDescriptor(sock)) {
-     emit error(tcpSocket.error());
-     return;
+   tcpSocket = new QTcpSocket;
+
+   if (!tcpSocket->setSocketDescriptor(socketDescriptor)) {
+      qDebug() << "tcpSocket error in thread";
+      //emit serverState(NetworkServer::ERR_RUN, tcpSocket->errorString());
    }
 
-   QByteArray block;
-   QDataStream out(&block, QIODevice::WriteOnly);
+   tcpSocket->write(blockData);
+   blockData.clear();
+
+   connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(getData()));
+   connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(terminate()));
+
+   exec();
+
+   tcpSocket->disconnectFromHost();
+
+   qDebug() << "serverThread::run() exit()";
+}
+
+void NetworkServerThread::sendData(QString data)
+{
+   qDebug() << "serverThread::setData() " << data;
+   QDataStream out(&blockData, QIODevice::WriteOnly);
    out.setVersion(QDataStream::Qt_4_0);
    out << (quint16)0;
-   out << QString("Some text..");
+   out << data;
    out.device()->seek(0);
-   out << (quint16)(block.size() - sizeof(quint16));
+   out << (quint16)(blockData.size() - sizeof(quint16));
+}
 
-   tcpSocket.write(block);
-   tcpSocket.disconnectFromHost();
-   tcpSocket.waitForDisconnected();
+void NetworkServerThread::sendData(int data)
+{
+
+}
+
+void NetworkServerThread::sendData(QPainterPath path)
+{
+
+}
+
+void NetworkServerThread::sendData(Canvas* canvas)
+{
+   qDebug() << "serverThread::setData() " << data;
+   QDataStream out(&blockData, QIODevice::WriteOnly);
+   out.setVersion(QDataStream::Qt_4_0);
+   out << (quint16)0;
+   out << data;
+   out.device()->seek(0);
+   out << (quint16)(blockData.size() - sizeof(quint16));
+}
+
+void NetworkServerThread::receiveData()
+{
+   qDebug() << "serverThread::receiveData()";
+}
+
+void NetworkServerThread::terminate()
+{
+   qDebug() << "serverThread::terminate() client_disconnected()";
 }
 
 #include "networkserverthread.moc"

@@ -25,21 +25,29 @@
 #include <QThread>
 #include <QTcpSocket>
 
+#include "canvas.h"
+
 class NetworkServerThread : public QThread
 {
    Q_OBJECT
 
 public:
    NetworkServerThread(QObject* parent, int sock);
-   //~NetworkServerThread();
+
    void run();
 
-signals:
-   void error(QTcpSocket::SocketError sockErr);
+public slots:
+   void sendData(QString data);
+   void sendData(int data);
+   void sendData(Canvas* canvas);
+   //void sendData(QPainterPath path);
+   void receiveData();
+   void terminate();
 
 private:
-   int sock;
-
+   QByteArray blockData;
+   QTcpSocket* tcpSocket;
+   int socketDescriptor;
 };
 
 #endif // NETWORKSERVERTHREAD_H

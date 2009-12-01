@@ -24,6 +24,9 @@
 
 #include <QTcpServer>
 
+#include "canvasmgr.h"
+#include "networkserverthread.h"
+
 class NetworkServer : public QTcpServer
 {
    Q_OBJECT
@@ -39,14 +42,26 @@ public:
    };
 
    NetworkServer(QObject* parent);
-   bool start(QString& address, quint16 port);
+   ~NetworkServer();
+
+   bool observe(CanvasMgr* cm);
+   bool start(quint16 port);
    bool stop();
+   bool sendData(Canvas canvas);
 
 signals:
    void serverState(NetworkServer::state, const QString& msg = QString());
 
+private slots:
+   bool offerCanvas(Canvas* canvas);
+   bool disofferCanvas(Canvas* canvas);
+
 protected:
    void incomingConnection(int sock);
+
+private:
+   struct Private;
+   Private* d;
 };
 
 #endif // NETWORKSERVER_H

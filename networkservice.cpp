@@ -58,16 +58,14 @@ NetworkService::~NetworkService()
 
 bool NetworkService::observe(CanvasMgr* cm)
 {
-   connect(cm, SIGNAL(canvasCreated(Canvas*)), this, SLOT(offerCanvas(Canvas*)));
-   connect(cm, SIGNAL(canvasRemoved(Canvas*)), this, SLOT(disofferCanvas(Canvas*)));
-
+   server->observe(cm);
    return true;
 }
 
-bool NetworkService::startServer(QString addr, quint16 port)
+bool NetworkService::startServer(quint16 port)
 {
    qDebug() << "NetworkService::startServer()";
-   server->start(addr, port);
+   server->start(port);
 
    return true;
 }
@@ -93,18 +91,6 @@ bool NetworkService::stopClients()
    QList<NetworkClient*>::iterator it;
    for (it = clients->begin(); it < clients->end(); ++it)
       (*it)->stop();
-   return true;
-}
-
-bool NetworkService::offerCanvas(Canvas* canvas)
-{
-   qDebug() << "network::offerCanvas()";
-   return true;
-}
-
-bool NetworkService::disofferCanvas(Canvas* canvas)
-{
-   qDebug() << "network::disofferCanvas()";
    return true;
 }
 
