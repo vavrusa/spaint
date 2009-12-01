@@ -91,13 +91,13 @@ void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
    // Left mouse starts drawing
-   if(e->button() == Qt::LeftButton) {
+   if(mState == Idle && e->button() == Qt::LeftButton) {
       mGlyph = addPath(QPainterPath(), QPen(Qt::black));
       mState = Drawing;
    }
 
    // Right mouse starts gesture
-   if(e->button() == Qt::RightButton) {
+   if(mState == Idle && e->button() == Qt::RightButton) {
       QPen pen;
       pen.setColor(QColor(215, 0, 25, 64)); // Transparent red
       pen.setWidth(8);
@@ -115,7 +115,7 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
       return;
 
    // End of drawing
-   if(mState == Drawing) {
+   if(mState == Drawing && e->button() == Qt::LeftButton) {
       qDebug() << "Polygon finished - pts:" << mGlyph->path().elementCount()
                << "~length: " << mGlyph->path().length();
       emit(pathCreated(mGlyph->path()));
@@ -124,7 +124,7 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
    }
 
    // End of gesture
-   if(mState == Gesture) {
+   if(mState == Gesture && e->button() == Qt::RightButton) {
       qDebug() << "Gesture finished - pts:" << mGlyph->path().elementCount()
                << "~length: " << mGlyph->path().length();
       emit(gestureCreated(mGlyph->path()));
