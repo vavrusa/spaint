@@ -56,6 +56,9 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR}
                      ${QT_INCLUDES}
                      )
 
+# Subdirectories
+add_subdirectory(doc)
+
 # Targets
 add_executable(${PROJECT_NAME}        ${project_src}
                                       ${project_i18n}
@@ -90,4 +93,3 @@ CONFIGURE_FILE(
 
 ADD_CUSTOM_TARGET(uninstall
           "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
-
