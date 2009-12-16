@@ -8,6 +8,11 @@
       <file>16x16/configure.png</file>
       <file>16x16/help-contents.png</file>
       <file>16x16/application.png</file>
+      <file>32x32/brush-color.png</file>
+      <file>32x32/canvas-clear.png</file>
+      <file>32x32/draw-eraser.png</file>
+      <file>32x32/draw-pen.png</file>
+      <file>32x32/pen-color.png</file>
       <file>48x48/color-picker.png</file>
       <file>48x48/draw-brush.png</file>
       <file>48x48/draw-eraser.png</file>
