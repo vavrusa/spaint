@@ -44,7 +44,7 @@ protected:
    void closeEvent(QCloseEvent* event);
 
 private slots:
-   void showServerState(NetworkServer::state state, const QString& msg = QString());
+   void showServerState(NetworkServer::State state, const QString& msg = QString());
 
 private:
    struct Private;

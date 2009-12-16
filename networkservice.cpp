@@ -21,6 +21,7 @@
 
 #include <QList>
 
+#include "canvas.h"
 #include "canvasmgr.h"
 #include "networkservice.h"
 #include "networkserver.h"

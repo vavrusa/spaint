@@ -30,7 +30,7 @@ set(project_src         main.cpp
                         networkservice.cpp
                         networkclient.cpp
                         networkserver.cpp
-                        networkserverthread.cpp
+                        networkworker.cpp
                         networkwindow.cpp
                         mainwindow.cpp
                         gesturehandler.cpp
@@ -48,7 +48,7 @@ set(project_headers     canvas.h
                         networkservice.h
                         networkclient.h
                         networkserver.h
-                        networkserverthread.h
+                        networkworker.h
                         networkwindow.h
                         mainwindow.h
                         gesturehandler.h

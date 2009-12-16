@@ -37,6 +37,13 @@ class NetworkService : public QObject
    Q_OBJECT
 
 public:
+
+   enum DataType {
+      CANVAS,
+      PATH,
+      STRING
+   };
+
    NetworkService(QObject *parent = 0);
    ~NetworkService();
 

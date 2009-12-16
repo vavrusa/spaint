@@ -19,11 +19,12 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include <QMap>
 #include <QtNetwork>
+#include <QThreadPool>
+#include <QList>
 
 #include "networkserver.h"
-#include "networkserverthread.h"
+#include "networkworker.h"
 
 struct NetworkServer::Private
 {
@@ -31,13 +32,14 @@ public:
    Private()
    {}
 
-   QMap<int, NetworkServerThread*> threads;
-   QList<Canvas*> offeredCanvases;
+   QList<QTcpSocket*> clients;
+   QList<Canvas*> canvases;
 };
 
 NetworkServer::NetworkServer(QObject* parent)
       : QTcpServer(parent), d(new Private)
 {
+   //QThreadPool::globalInstance()->setMaxThreadCount(5);
 }
 
 NetworkServer::~NetworkServer()
@@ -74,12 +76,8 @@ bool NetworkServer::stop()
 {
    this->close();
 
-   QMap<int, NetworkServerThread*>::iterator it;
-   for (it = d->threads.begin(); it != d->threads.end(); ++it) {
-      it.value()->terminate();
-      delete it.value();
-      d->threads.erase(it);
-   }
+   // foreach threads -> wait||terminate()
+   // foreach sockets -> disconnect()
 
    emit(serverState(NetworkServer::STOP));
    return true;
@@ -89,26 +87,47 @@ void NetworkServer::incomingConnection(int sock)
 {
    qDebug() << "server::incomingConnection(" << sock << ")";
 
-   if (d->threads.contains(sock)) {
-      qDebug() << "Server::error: Socket already in use.";
-      return;
+   QTcpSocket* tcpSocket = new QTcpSocket(this);
+
+   if (!tcpSocket->setSocketDescriptor(sock)) {
+      qDebug() << "tcpSocket error in thread";
+      //emit serverState(NetworkServer::ERR_RUN, tcpSocket->errorString());
    }
 
-   NetworkServerThread *thread = new NetworkServerThread(this, sock);
-   d->threads[sock] = thread;
-   connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+   d->clients << tcpSocket;
 
-   thread->sendData(QString("Some ASCII data.."));
-   thread->start();
+   connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(cleanConnections()));
+   connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(receiveData()));
+
+   foreach (Canvas* canvas, d->canvases)
+      offerCanvasToClient(tcpSocket, canvas);
+}
+
+void NetworkServer::cleanConnections()
+{
+   for (QList<QTcpSocket*>::iterator it = d->clients.begin(); it != d->clients.end(); ++it)
+      if ((*it)->state() == QAbstractSocket::UnconnectedState)
+         d->clients.erase(it);
+}
+
+bool NetworkServer::offerCanvasToClient(QTcpSocket* client, Canvas* canvas)
+{
+   qDebug() << "NetworkServer::offerCanvasToClient()";
+
+    NetworkWorker* worker = new NetworkWorker(client, NetworkService::STRING, canvas);// static_cast<void*>(&canvas));
+    QThreadPool::globalInstance()->start(worker);
+
 }
 
 bool NetworkServer::offerCanvas(Canvas* canvas)
 {
    qDebug() << "NetworkServer::offerCanvas()";
 
-   d->offeredCanvases.push_back(canvas);
+   d->canvases << canvas;
 
-   //foreach clients offerCanvas
+   foreach (QTcpSocket* client, d->clients)
+      offerCanvasToClient(client, canvas);
+
    return true;
 }
 
@@ -123,5 +142,6 @@ bool NetworkServer::disofferCanvas(Canvas* canvas)
    return true;
 }
 
+//void receiveData()
 
 #include "networkserver.moc"

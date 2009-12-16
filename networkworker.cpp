@@ -19,81 +19,34 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include <QThread>
+#include <QRunnable>
 #include <QTcpSocket>
 
 #include "networkservice.h"
-#include "networkserverthread.h"
+#include "networkworker.h"
 
-NetworkServerThread::NetworkServerThread(QObject* parent, int sock)
-      : QThread(parent), socketDescriptor(sock)
+NetworkWorker::NetworkWorker(QTcpSocket* _tcpSocket, NetworkService::DataType _dataType, void* _data)
+      : tcpSocket(_tcpSocket), dataType(_dataType), dataBlock()
 {
-}
-
-void NetworkServerThread::run()
-{
-   qDebug() << "serverThread::run()";
-
-   tcpSocket = new QTcpSocket;
-
-   if (!tcpSocket->setSocketDescriptor(socketDescriptor)) {
-      qDebug() << "tcpSocket error in thread";
-      //emit serverState(NetworkServer::ERR_RUN, tcpSocket->errorString());
+   QDataStream out(&dataBlock, QIODevice::WriteOnly);
+   out.setVersion(QDataStream::Qt_4_0);
+   out << (quint16)0;
+   
+   switch(dataType) {
+   case NetworkService::STRING:
+      out << QString("Ahoj :)");
    }
 
-   tcpSocket->write(blockData);
-   blockData.clear();
-
-   connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(getData()));
-   connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(terminate()));
-
-   exec();
-
-   tcpSocket->disconnectFromHost();
-
-   qDebug() << "serverThread::run() exit()";
-}
-
-void NetworkServerThread::sendData(QString data)
-{
-   qDebug() << "serverThread::setData() " << data;
-   QDataStream out(&blockData, QIODevice::WriteOnly);
-   out.setVersion(QDataStream::Qt_4_0);
-   out << (quint16)0;
-   out << data;
    out.device()->seek(0);
-   out << (quint16)(blockData.size() - sizeof(quint16));
+   out << (quint16)(dataBlock.size() - sizeof(quint16));
+
 }
 
-void NetworkServerThread::sendData(int data)
+void NetworkWorker::run()
 {
+   qDebug() << "NetworkWorker::run()";
 
+   tcpSocket->write(dataBlock);
 }
 
-void NetworkServerThread::sendData(QPainterPath path)
-{
-
-}
-
-void NetworkServerThread::sendData(Canvas* canvas)
-{
-   qDebug() << "serverThread::setData() " << data;
-   QDataStream out(&blockData, QIODevice::WriteOnly);
-   out.setVersion(QDataStream::Qt_4_0);
-   out << (quint16)0;
-   out << data;
-   out.device()->seek(0);
-   out << (quint16)(blockData.size() - sizeof(quint16));
-}
-
-void NetworkServerThread::receiveData()
-{
-   qDebug() << "serverThread::receiveData()";
-}
-
-void NetworkServerThread::terminate()
-{
-   qDebug() << "serverThread::terminate() client_disconnected()";
-}
-
-#include "networkserverthread.moc"
+#include "networkworker.moc"

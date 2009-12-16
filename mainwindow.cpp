@@ -105,11 +105,7 @@ bool MainWindow::observe(CanvasMgr* cm)
 
 bool MainWindow::observe(NetworkService* net)
 {
-   // Observe server state
-   connect(net->server, SIGNAL(serverState(NetworkServer::state,QString)),
-           d->netWin, SLOT(showServerState(NetworkServer::state,QString)));
-
-   // Network window actions
+   // Network window to observe network actions
    d->netWin->observe(net);
 
    return true;

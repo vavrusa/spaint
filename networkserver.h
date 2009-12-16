@@ -24,15 +24,14 @@
 
 #include <QTcpServer>
 
-#include "canvasmgr.h"
-#include "networkserverthread.h"
+#include "canvas.h"
 
 class NetworkServer : public QTcpServer
 {
    Q_OBJECT
 
 public:
-   enum state {
+   enum State {
       START,
       RUN,
       STOP,
@@ -47,19 +46,22 @@ public:
    bool observe(CanvasMgr* cm);
    bool start(quint16 port);
    bool stop();
-   bool sendData(Canvas canvas);
 
 signals:
-   void serverState(NetworkServer::state, const QString& msg = QString());
+   void serverState(NetworkServer::State, const QString& msg = QString());
 
 private slots:
    bool offerCanvas(Canvas* canvas);
    bool disofferCanvas(Canvas* canvas);
+   void cleanConnections();
 
 protected:
    void incomingConnection(int sock);
 
 private:
+   bool offerCanvasToClient(QTcpSocket* client, Canvas* canvas);
+   bool offerAllCanvasesToClient(QTcpSocket* client);
+
    struct Private;
    Private* d;
 };

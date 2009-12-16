@@ -19,35 +19,26 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#ifndef NETWORKSERVERTHREAD_H
-#define NETWORKSERVERTHREAD_H
+#ifndef NETWORKWORKER_H
+#define NETWORKWORKER_H
 
-#include <QThread>
+#include <QRunnable>
 #include <QTcpSocket>
 
-#include "canvas.h"
+#include "networkservice.h"
 
-class NetworkServerThread : public QThread
+class NetworkWorker : public QRunnable
 {
-   Q_OBJECT
 
 public:
-   NetworkServerThread(QObject* parent, int sock);
+   NetworkWorker(QTcpSocket*, NetworkService::DataType, void*);
 
    void run();
 
-public slots:
-   void sendData(QString data);
-   void sendData(int data);
-   void sendData(Canvas* canvas);
-   //void sendData(QPainterPath path);
-   void receiveData();
-   void terminate();
-
 private:
-   QByteArray blockData;
-   QTcpSocket* tcpSocket;
-   int socketDescriptor;
+   QTcpSocket*              tcpSocket;
+   NetworkService::DataType dataType;
+   QByteArray               dataBlock;
 };
 
-#endif // NETWORKSERVERTHREAD_H
+#endif // NETWORKWORKER_H

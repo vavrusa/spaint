@@ -71,6 +71,11 @@ NetworkWindow::~NetworkWindow()
 
 bool NetworkWindow::observe(NetworkService* net)
 {
+   // Observe server state
+   connect(net->server, SIGNAL(serverState(NetworkServer::State,QString)),
+           this, SLOT(showServerState(NetworkServer::State,QString)));
+
+   // Submit new client form
    connect(d->newClient, SIGNAL(submitForm(QString,quint16)),
            net, SLOT(startClient(QString,quint16)));
 
@@ -85,7 +90,7 @@ bool NetworkWindow::observe(NetworkService* net)
    return true;
 }
 
-void NetworkWindow::showServerState(NetworkServer::state state, const QString &msg)
+void NetworkWindow::showServerState(NetworkServer::State state, const QString &msg)
 {
    switch (state) {
       case NetworkServer::ERR_START:

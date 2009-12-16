@@ -35,14 +35,18 @@ bool NetworkClient::start(QString& addr, quint16 port)
    qDebug() << "Client::start(" << addr << "," << port << ")";
    d->tcpSocket->abort();
    d->tcpSocket->connectToHost(addr, port);
-   //emit
+
+   //emit client connecting
+
    return true;
 }
 
 bool NetworkClient::stop()
 {
    d->tcpSocket->abort();
-   //emit
+
+   //emit client stopping
+
    return true;
 }
 
