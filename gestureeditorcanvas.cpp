@@ -126,8 +126,8 @@ void GestureEditorCanvas::paintEvent(QPaintEvent* )
             maxX++;
     }
 
-    curX = 150 - (maxX + minX) * (d->step/2);
-    curY = 150 - (maxY + minY) * (d->step/2);
+    curX = width()/2 - (maxX + minX) * (d->step/2);
+    curY = height()/2 - (maxY + minY) * (d->step/2);
 
 
     //drawing arrows
