@@ -32,6 +32,7 @@ class Handler::Private
    public:
     QMap<gestureType,DirectionList> gestureMap;
     QMap<gestureType,DirectionList> defaultGestureMap;
+    QMap<gestureType,typeData> gestureTypeData;
     QVector<Canvas*> activeCanvases;
     bool isRunning;
 };
@@ -52,6 +53,15 @@ Handler::~Handler()
 
 void Handler::initializeGestures()
 {
+
+    //inicializing text and icon for all of the gesture types, which can be set
+    d->gestureTypeData[Pen]      = typeData(tr("&Pen"),QIcon(":/icons/32x32/draw-pen.png"));
+    d->gestureTypeData[Brush]    = typeData(tr("&Brush"),QIcon(":/icons/32x32/draw-pen.png"));
+    d->gestureTypeData[Eraser]   = typeData(tr("&Eraser"),QIcon(":/icons/32x32/draw-eraser.png"));
+    d->gestureTypeData[Clear]    = typeData(tr("&Clear"),QIcon(":/icons/32x32/canvas-clear.png"));
+    d->gestureTypeData[FColor]   = typeData(tr("&FColor"),QIcon(":/icons/32x32/brush-color.png"));
+    d->gestureTypeData[BColor]   = typeData(tr("&BColor"),QIcon(":/icons/32x32/brush-color.png"));
+
     //saving default gestures
     DirectionList dl;
     dl<<Up<<Left;
@@ -186,6 +196,16 @@ QString Handler::dlToStr(DirectionList dl)
     }
     return str;
 
+}
+
+typeData& Handler::getTypeData(gestureType type)
+{
+   return d->gestureTypeData[type];
+}
+
+unsigned Handler::getTypeCount()
+{
+   return d->gestureTypeData.count();
 }
 
 bool Handler::start()

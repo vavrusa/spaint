@@ -26,6 +26,8 @@
 #include <QPainterPath>
 #include <QPair>
 #include <QList>
+#include <QString>
+#include <QIcon>
 #include "canvas.h"
 #include "canvasmgr.h"
 #include "mousegesturerecognizer.h"
@@ -34,10 +36,15 @@ namespace Gesture
 {
 
 typedef enum Type {
-   Pen = 0,
-   Brush = 1,
+   Pen      = 0,
+   Brush    = 1,
+   Eraser   = 2,
+   Clear    = 3,
+   FColor   = 4,
+   BColor   = 5,
 }gestureType;
 
+typedef QPair<QString, QIcon> typeData;
 
 class Handler : public MouseGestureRecognizer
 {
@@ -54,6 +61,8 @@ class Handler : public MouseGestureRecognizer
    //converting string <-> DirectionList
    DirectionList strToDl (QString str);
    QString dlToStr (DirectionList dl);
+   typeData& getTypeData(gestureType type);                      //returns label and icon for type
+   unsigned getTypeCount();                                 //returns count of defined types
 
    public slots:
    bool start();              //start/stop handling gestures

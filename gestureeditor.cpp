@@ -61,12 +61,12 @@ void GestureEditor::defineLayout()
 
    // Create list and combo
    d->listWidget = new QListWidget(this);
-   QComboBox* combo = new QComboBox(this);
 
    // Button box
    QDialogButtonBox* box = new QDialogButtonBox(this);
    QPushButton* clear = box->addButton(tr("&Clear"), QDialogButtonBox::DestructiveRole);
    QPushButton* reset = box->addButton(QDialogButtonBox::Reset);
+   QPushButton* save = box->addButton(QDialogButtonBox::Apply);
    box->addButton(QDialogButtonBox::Ok);
    box->addButton(QDialogButtonBox::Cancel);
 
@@ -78,7 +78,6 @@ void GestureEditor::defineLayout()
 
    // Create buttons layout
    QHBoxLayout* ctLayout = new QHBoxLayout();
-   ctLayout->addWidget(combo, Qt::AlignRight);
    ctLayout->addWidget(box);
 
    // Create main layout
@@ -86,19 +85,23 @@ void GestureEditor::defineLayout()
    main->addLayout(layout);
    main->addLayout(ctLayout);
 
-   // Populate boxes
-   combo->addItem("Pen", QVariant(Pen));
-   combo->addItem("Brush", QVariant(Brush));
-   d->listWidget->addItem(new QListWidgetItem(tr("Pen"), d->listWidget, Pen));
-   d->listWidget->addItem(new QListWidgetItem(tr("Brush"),d->listWidget, Brush));
+
+   for(int i = 0; i < d->handler->getTypeCount() ; i++)
+   {
+      typeData item = d->handler->getTypeData(static_cast<gestureType>(i));
+      d->listWidget->addItem(new QListWidgetItem(item.second, item.first, d->listWidget, i));
+   }
+
    d->listWidget->setCurrentRow(0);
 
 
    // Connect widgets
    connect(d->handler,SIGNAL(somethingChanged()), this, SLOT(update()));
    connect(d->listWidget, SIGNAL(currentRowChanged(int)), this, SLOT(currentGestureChanged()));
+   connect(save,SIGNAL(clicked()),this,SLOT(editCurrentGesture()));
    connect(clear,SIGNAL(clicked()),this,SLOT(eraseCurrentGestures()));
    connect(reset,SIGNAL(clicked()),this,SLOT(resetCurrentGesture()));
+   connect(box, SIGNAL(accepted()), this, SLOT(editCurrentGesture()));
    connect(box, SIGNAL(accepted()), this, SLOT(hide()));
    connect(box, SIGNAL(rejected()), this, SLOT(hide()));
 
@@ -127,5 +130,4 @@ void GestureEditor::resetCurrentGesture()
     d->handler->resetGesture(d->activeType);
     currentGestureChanged();
 }
-
 #include "gestureeditor.moc"

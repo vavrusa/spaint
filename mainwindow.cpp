@@ -60,6 +60,7 @@ MainWindow::MainWindow(QWidget* parent)
    //construct gesture editor
    d->ge = new Gesture::GestureEditor(&d->gh);
    d->ge->hide();
+   d->ge->setParent(this,Qt::Window);
 
    // Load settings
    loadSettings();
