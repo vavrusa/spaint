@@ -1,7 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 Brno University of Technology,                     *
- *   Faculty of Information Technology                                     *
- *   Author(s): Marek Vavrusa    <xvavru00 AT stud.fit.vutbr.cz>           *
+ *   Copyright (C) 2009 Marek Vavrusa <marek@vavrusa.com>                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,36 +17,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include <QApplication>
-#include <cstdlib>
-#include "canvas.h"
-#include "networkservice.h"
-#include "mainwindow.h"
+#include "colorsicon.h"
 
-int main(int argc, char *argv[])
+ColorsIcon::ColorsIcon(QGraphicsItem *parent)
+   : GraphicsIcon(QPixmap(48 * 2, 48), parent)
 {
-   // Run QApplication
-   QApplication app(argc, argv);
-   app.setOrganizationName("VUT FIT");
-   app.setOrganizationDomain("fit.vutbr.cz");
-   app.setApplicationName("SharedPaint");
-
-   // Create canvas manager
-   CanvasMgr cm;
-
-   // Create application window
-   MainWindow window;
-   window.observe(&cm);
-   window.show();
-
-   // Create network service
-   NetworkService net;
-   net.observe(&cm);
-   net.start();
-
-   // Initialize canvases
-   cm.init();
-
-   // Run event-loop
-   return app.exec();
 }
+
+#include "colorsicon.moc"

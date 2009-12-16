@@ -30,6 +30,7 @@ set(project_src         main.cpp
                         mousegesturerecognizer.cpp
                         overlay.cpp
                         graphicsicon.cpp
+                        colorsicon.cpp
                         )
 
 set(project_headers     canvas.h
@@ -42,6 +43,7 @@ set(project_headers     canvas.h
                         defines.h
                         overlay.h
                         graphicsicon.h
+                        colorsicon.h
                         )
 
 # Qt4

@@ -27,6 +27,7 @@
 #include <QTimer>
 #include <QMessageBox>
 #include "mainwindow.h"
+#include "gesturehandler.h"
 #include "canvascontainment.h"
 
 // Const
@@ -38,6 +39,7 @@ struct MainWindow::Private {
    Private() : containment(0)
    {}
 
+   Gesture::Handler gh;
    CanvasContainment* containment;
 };
 
@@ -74,8 +76,13 @@ void MainWindow::about()
 
 bool MainWindow::observe(CanvasMgr* cm)
 {
+   // Observe canvases
    connect(cm,   SIGNAL(canvasCreated(Canvas*)), d->containment, SLOT(addCanvas(Canvas*)));
    connect(cm,   SIGNAL(canvasRemoved(Canvas*)), d->containment, SLOT(removeCanvas(Canvas*)));
+
+   // Observe gestures
+   d->gh.observe(cm);
+   d->gh.start();
    return true;
 }
 
