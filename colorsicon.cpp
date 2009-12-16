@@ -17,11 +17,85 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
+#include <QGraphicsSceneMouseEvent>
+#include <QColorDialog>
+#include <QLayout>
+#include <QDialogButtonBox>
+#include <QPainter>
 #include "colorsicon.h"
 
 ColorsIcon::ColorsIcon(QGraphicsItem *parent)
-   : GraphicsIcon(QPixmap(48 * 2, 48), parent)
+   : GraphicsIcon(QPixmap(), parent), mPen(Qt::black), mBrush(255,255,255,0)
 {
+   resize(48, 48);
+}
+
+void ColorsIcon::paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidget* w)
+{
+   // Draw background
+   GraphicsIcon::paint(p, opt, w);
+
+   // Divide rect in two halves
+   QRectF re(boundingRect());
+   re.setSize(QSizeF(48, 48));
+   re.moveTop(re.top() + 0.5 * (boundingRect().height() - re.height()));
+   re.moveLeft(re.left() + 0.5 * (boundingRect().width() - re.width()));
+   re.setWidth(re.width() * 0.5);
+
+   // Foreground
+   p->fillRect(re, mPen);
+
+   // Backgorund
+   re.moveLeft(re.left() + re.width());
+   p->fillRect(re, mBrush);
+
+   // Draw border
+   re.moveLeft(re.left() - re.width());
+   re.setWidth(re.width() * 2.0);
+   p->setPen(Qt::black);
+   p->setBrush(Qt::NoBrush);
+   p->drawRect(re);
+}
+
+void ColorsIcon::mousePressEvent(QGraphicsSceneMouseEvent* e)
+{
+   // Get first cell
+   float divider = boundingRect().width() * 0.5;
+
+   // Match mouse
+   if(e->pos().x() < divider) {
+      pickColor(QPalette::Foreground);
+   }
+   else {
+      pickColor(QPalette::Background);
+   }
+}
+
+void ColorsIcon::pickColor(QPalette::ColorRole role)
+{
+   // TODO: QColorDialog is bugged. Corrupts alpha when no adjustment occurs.
+   QColorDialog dlg;
+   dlg.setCurrentColor(role == QPalette::Foreground ? mPen : mBrush);
+   dlg.setOption(QColorDialog::DontUseNativeDialog);
+   dlg.setOption(QColorDialog::ShowAlphaChannel);
+
+   // Execute dialog
+   if(dlg.exec() == QDialog::Accepted) {
+
+      // Emit color change
+      emit colorPicked(role, dlg.currentColor());
+   }
+}
+
+void ColorsIcon::setColor(QPalette::ColorRole role, const QColor& color) {
+
+   if(role == QPalette::Background)
+      mBrush = color;
+   else
+      mPen = color;
+
+   // Update
+   update();
 }
 
 #include "colorsicon.moc"

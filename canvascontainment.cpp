@@ -73,6 +73,8 @@ CanvasContainment::CanvasContainment(QWidget *parent)
 
    // Create overlay
    d->overlay = new Overlay(); // As top-level
+   connect(d->overlay, SIGNAL(colorChanged(QPalette::ColorRole,QColor)),
+           this,       SLOT(changeColor(QPalette::ColorRole,QColor)));
    addItem(d->overlay);
    d->overlay->setOpacity(0.0);
 
@@ -220,6 +222,10 @@ void CanvasContainment::focusToCanvas(Canvas* c)
       d->overlay->resize(targetRect.width(), d->overlay->boundingRect().height());
       d->overlay->setPos(targetRect.bottomLeft());
 
+      // Update colors
+      d->overlay->changeColor(QPalette::Foreground, c->color(QPalette::Foreground));
+      d->overlay->changeColor(QPalette::Background, c->color(QPalette::Background));
+
       // Run group
       d->anim->start();
    }
@@ -249,6 +255,14 @@ void CanvasContainment::updateLayout(const QRectF& newRect)
 
    // Current
    focusToCanvas(*d->current);
+}
+
+void CanvasContainment::changeColor(QPalette::ColorRole role, const QColor& color)
+{
+   if(*d->current == 0)
+      return;
+
+   (*d->current)->setColor(role, color);
 }
 
 void CanvasContainment::drawBackground(QPainter* p, const QRectF& re)

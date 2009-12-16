@@ -32,6 +32,10 @@ Canvas::Canvas(const QString& name, CanvasMgr* parent)
 {
    QSize defaultSize(defaultSizeHint());
    setSceneRect(0, 0, defaultSize.width(), defaultSize.height());
+
+   // Set default colors
+   mPen = Qt::black;
+   mBrush = QColor(255, 255, 255, 0);
 }
 
 QGraphicsView* Canvas::createView(QWidget* parent)
@@ -92,7 +96,8 @@ void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
    // Left mouse starts drawing
    if(mState == Idle && e->button() == Qt::LeftButton) {
-      mGlyph = addPath(QPainterPath(), QPen(Qt::black));
+      mGlyph = addPath(QPainterPath(), mPen.isValid() ? QPen(mPen) : QPen(Qt::black),
+                                       mBrush.isValid() ? QBrush(mBrush) : QBrush());
       mState = Drawing;
    }
 

@@ -23,6 +23,7 @@
 #define CANVAS_H
 
 #include <QGraphicsScene>
+#include <QPalette>
 class CanvasMgr;
 class QPainter;
 class QGraphicsSceneMouseEvent;
@@ -44,6 +45,22 @@ class Canvas : public QGraphicsScene
      */
    void setName(const QString& name) {
       mName = name;
+   }
+
+   /** Return color. */
+   const QColor& color(QPalette::ColorRole role = QPalette::Foreground) {
+      if(role == QPalette::Background)
+         return mBrush;
+      else
+         return mPen;
+   }
+
+   /** Set color. */
+   void setColor(QPalette::ColorRole role, const QColor& color) {
+      if(role == QPalette::Background)
+         mBrush = color;
+      else
+         mPen = color;
    }
 
    /** Create associated canvas view.
@@ -92,6 +109,7 @@ class Canvas : public QGraphicsScene
    int mState;
    QGraphicsPathItem* mGlyph;
    QString mName;
+   QColor mPen, mBrush;
 
 };
 

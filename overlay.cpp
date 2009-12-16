@@ -21,6 +21,7 @@
 #include <QPainter>
 #include "overlay.h"
 #include "graphicsicon.h"
+#include "colorsicon.h"
 
 /** Private data. */
 class Overlay::Private
@@ -54,6 +55,14 @@ Overlay::Overlay(QGraphicsWidget *parent) :
       d->layout->addItem(icon);
       connect(icon, SIGNAL(selected(GraphicsIcon*)), this, SLOT(selectIcon(GraphicsIcon*)));
    }
+
+   // Append colors icon
+   ColorsIcon* colors = new ColorsIcon(this);
+   d->layout->addItem(colors);
+   connect(colors, SIGNAL(colorPicked(QPalette::ColorRole,QColor)),
+           this,   SLOT(changeColor(QPalette::ColorRole,QColor)));
+   connect(this,   SIGNAL(colorChanged(QPalette::ColorRole,QColor)),
+           colors, SLOT(setColor(QPalette::ColorRole,QColor)));
 }
 
 Overlay::~Overlay()
@@ -67,10 +76,9 @@ void Overlay::selectIcon(GraphicsIcon* icon)
       i->setActivated(i == icon);
 }
 
-void Overlay::paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidget* w)
+void Overlay::changeColor(QPalette::ColorRole role, const QColor& color)
 {
-   // Paint background
-   QGraphicsWidget::paint(p, opt, w);
+   emit colorChanged(role, color);
 }
 
 #include "overlay.moc"

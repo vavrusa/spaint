@@ -53,6 +53,7 @@ class CanvasContainment : public QGraphicsScene
 
    private slots:
    void updateLayout(const QRectF& newRect);
+   void changeColor(QPalette::ColorRole role, const QColor& color);
 
    private:
    struct Private;

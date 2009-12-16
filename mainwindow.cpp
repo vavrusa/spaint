@@ -35,6 +35,7 @@
 #include "mainwindow.h"
 #include "networkwindow.h"
 #include "gesturehandler.h"
+#include "gestureeditor.h"
 #include "canvascontainment.h"
 
 // Const
@@ -47,6 +48,7 @@ struct MainWindow::Private {
    {}
 
    Gesture::Handler gh;
+   Gesture::GestureEditor* ge;
    CanvasContainment* containment;
    NetworkWindow* netWin;
 };
@@ -63,6 +65,8 @@ MainWindow::MainWindow(QWidget* parent)
    d->containment = new CanvasContainment(this);
    setCentralWidget(d->containment->view());
 
+   //construct gesture editor
+   d->ge = new Gesture::GestureEditor(&d->gh);
    // Load settings
    loadSettings();
 
@@ -77,6 +81,7 @@ MainWindow::~MainWindow()
 {
    delete d->netWin;
    delete d->containment;
+   delete d->ge;
    delete d;
 }
 
@@ -123,6 +128,7 @@ QMenuBar* MainWindow::createMenuBar()
    QMenu* editMenu = bar->addMenu(tr("&Edit"));
    editMenu->addAction(QIcon(":/icons/16x16/canvas-clear.png"), tr("&Clear"), d->containment, SLOT(clearCanvas()));
    editMenu->addSeparator();
+   editMenu->addAction(QIcon(":/icons/16x16/configure.png"), tr("&Gestures"),d->ge, SLOT(show()));
    editMenu->addAction(QIcon(":/icons/16x16/configure.png"), tr("&Options"))->setEnabled(false);
 
    QMenu* helpMenu = bar->addMenu(tr("&Help"));
