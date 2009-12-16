@@ -38,6 +38,9 @@ class ColorsIcon : public GraphicsIcon
    /** Set color. */
    void setColor(QPalette::ColorRole role, const QColor& color);
 
+   /** Color picker. */
+   void pickColor(QPalette::ColorRole role);
+
    signals:
 
    /** Color changed. */
@@ -47,9 +50,6 @@ class ColorsIcon : public GraphicsIcon
 
    /** Mouse press. */
    void mousePressEvent(QGraphicsSceneMouseEvent* e);
-
-   /** Color picker. */
-   void pickColor(QPalette::ColorRole role);
 
    private:
    QColor mPen, mBrush;

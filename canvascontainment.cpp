@@ -32,6 +32,7 @@
 #include "canvascontainment.h"
 #include "canvas.h"
 #include "overlay.h"
+#include "gesturehandler.h"
 
 // Static settings
 const static int BorderWidth = 10;
@@ -153,6 +154,21 @@ void CanvasContainment::renderCanvas(QIODevice& device, Canvas* c)
    QPixmap pixmap(widget->size());
    widget->render(&pixmap);
    pixmap.save(&device, "PNG");
+}
+
+void CanvasContainment::gesture(int code)
+{
+   switch(code)
+   {
+   case Gesture::Pen:   d->overlay->setTool(Canvas::Pen); break;
+   case Gesture::Eraser: d->overlay->setTool(Canvas::Eraser); break;
+   case Gesture::Clear: clearCanvas(); break;
+   case Gesture::FColor: d->overlay->pickColor(QPalette::Foreground); break;
+   case Gesture::BColor: d->overlay->pickColor(QPalette::Background); break;
+   default:
+      qWarning("CanvasContainment: Unhandled gesture %d", code);
+      break;
+   }
 }
 
 void CanvasContainment::wheelEvent(QGraphicsSceneWheelEvent* e)

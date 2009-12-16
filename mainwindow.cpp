@@ -58,9 +58,9 @@ MainWindow::MainWindow(QWidget* parent)
    setCentralWidget(d->containment->view());
 
    //construct gesture editor
-   d->ge = new Gesture::GestureEditor(&d->gh);
+   d->ge = new Gesture::GestureEditor(&d->gh, this);
+   d->ge->setModal(true);
    d->ge->hide();
-   d->ge->setParent(this,Qt::Window);
 
    // Load settings
    loadSettings();
@@ -89,6 +89,9 @@ bool MainWindow::observe(CanvasMgr* cm)
    connect(cm,   SIGNAL(canvasRemoved(Canvas*)), d->containment, SLOT(removeCanvas(Canvas*)));
 
    // Observe gestures
+   connect(&d->gh, SIGNAL(recognized(int)), d->containment, SLOT(gesture(int)));
+
+   // Start gesture recognizer
    d->gh.observe(cm);
    d->gh.start();
    return true;

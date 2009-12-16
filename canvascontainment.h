@@ -42,6 +42,7 @@ class CanvasContainment : public QGraphicsScene
    signals:
 
    public slots:
+   void gesture(int code);
    void addCanvas(Canvas* c);
    void removeCanvas(Canvas* c = 0);
    void focusToCanvas(Canvas* c);

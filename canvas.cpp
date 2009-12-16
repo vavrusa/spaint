@@ -75,7 +75,7 @@ void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 
    // Measure distance from last point
    // TODO: sample in time intervals
-   int difference = (mState == Drawing) ? 10 : 60;
+   int difference = (mState == Drawing) ? 5 : 50;
    static QPointF lastPos = pt;
    if((pt - lastPos).toPoint().manhattanLength() > difference) {
 
@@ -104,7 +104,7 @@ void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
       else
          mBrush.setStyle(Qt::NoBrush);
 
-      mGlyph = addPath(QPainterPath(), mPen, mBrush);
+      mGlyph = addPath(QPainterPath(e->scenePos()), mPen, mBrush);
       mState = Drawing;
    }
 
@@ -113,7 +113,7 @@ void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
       QPen pen;
       pen.setColor(QColor(215, 0, 25, 64)); // Transparent red
       pen.setWidth(8);
-      mGlyph = addPath(QPainterPath(), pen);
+      mGlyph = addPath(QPainterPath(e->scenePos()), pen);
       mState = Gesture;
    }
 

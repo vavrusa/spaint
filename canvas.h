@@ -88,7 +88,12 @@ class Canvas : public QGraphicsScene
 
    /// Tool
    enum Tool {
-      Pen     = 0x00  // Pen tool
+      NoTool = 0,// Invalid tool
+      Pen,       // Pen tool
+      Eraser,    // Eraser
+      Brush,     // Brush
+      Picker,    // Color picker
+      Mover      // Mover
    };
 
    /** Return default canvas size.

@@ -20,6 +20,7 @@
 #ifndef OVERLAY_HPP
 #define OVERLAY_HPP
 #include <QGraphicsWidget>
+#include "canvas.h"
 class GraphicsIcon;
 
 class Overlay : public QGraphicsWidget
@@ -32,6 +33,12 @@ class Overlay : public QGraphicsWidget
    Overlay(QGraphicsWidget* parent = 0);
    ~Overlay();
 
+   /** Return tool. */
+   Canvas::Tool tool();
+
+   /** Set tool. */
+   void setTool(Canvas::Tool tool);
+
    signals:
 
    /** Color changed. */
@@ -41,6 +48,9 @@ class Overlay : public QGraphicsWidget
    void thicknessChanged(int);
 
    public slots:
+
+   /** Pick color. */
+   void pickColor(QPalette::ColorRole role);
 
    /** Change color. */
    void changeColor(QPalette::ColorRole role, const QColor& color);

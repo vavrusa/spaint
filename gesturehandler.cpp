@@ -30,10 +30,9 @@ using namespace Gesture;
 class Handler::Private
 {
    public:
-    QMap<gestureType,DirectionList> gestureMap;
-    QMap<gestureType,DirectionList> defaultGestureMap;
-    QMap<gestureType,typeData> gestureTypeData;
-    QVector<Canvas*> activeCanvases;
+    QMap<Type,DirectionList> gestureMap;
+    QMap<Type,DirectionList> defaultGestureMap;
+    QMap<Type,Info> gestureTypeData;
     bool isRunning;
 };
 
@@ -55,38 +54,38 @@ void Handler::initializeGestures()
 {
 
     //inicializing text and icon for all of the gesture types, which can be set
-    d->gestureTypeData[Pen]      = typeData(tr("&Pen"),QIcon(":/icons/32x32/draw-pen.png"));
-    d->gestureTypeData[Brush]    = typeData(tr("&Brush"),QIcon(":/icons/32x32/draw-pen.png"));
-    d->gestureTypeData[Eraser]   = typeData(tr("&Eraser"),QIcon(":/icons/32x32/draw-eraser.png"));
-    d->gestureTypeData[Clear]    = typeData(tr("&Clear"),QIcon(":/icons/32x32/canvas-clear.png"));
-    d->gestureTypeData[FColor]   = typeData(tr("&FColor"),QIcon(":/icons/32x32/brush-color.png"));
-    d->gestureTypeData[BColor]   = typeData(tr("&BColor"),QIcon(":/icons/32x32/brush-color.png"));
+    d->gestureTypeData[Pen]      = Info(tr("Select pen"),QIcon(":/icons/32x32/draw-pen.png"));
+    d->gestureTypeData[Eraser]   = Info(tr("Select eraser"),QIcon(":/icons/32x32/draw-eraser.png"));
+    d->gestureTypeData[Clear]    = Info(tr("Clear canvas"),QIcon(":/icons/32x32/canvas-clear.png"));
+    d->gestureTypeData[FColor]   = Info(tr("Pen color"),QIcon(":/icons/32x32/pen-color.png"));
+    d->gestureTypeData[BColor]   = Info(tr("Background color"),QIcon(":/icons/32x32/brush-color.png"));
 
     //saving default gestures
-    DirectionList dl;
-    dl<<Up<<Left;
-    d->defaultGestureMap[Pen] = dl;
-
-    dl.clear();
-    dl<<Left<<Down;
-    d->defaultGestureMap[Brush] = dl;
+    d->defaultGestureMap[Pen] = DirectionList() << Up << Left;
+    d->defaultGestureMap[Eraser] = DirectionList() << Down << Left;
+    d->defaultGestureMap[Clear] = DirectionList() << Down;
+    d->defaultGestureMap[FColor] = DirectionList() << Up << Right << Down << Left;
+    d->defaultGestureMap[BColor] = DirectionList() << Down << Right << Up << Left;
 
     //setting up gesture paths from settings/default values
     QSettings set;
+
     //pen gesture
+    d->gestureMap = d->defaultGestureMap;
     if(set.contains("Gestures/Pen"))
         d->gestureMap[Pen] = strToDl(set.value("Gestures/Pen").toString());
-    else
-        d->gestureMap[Pen] = d->defaultGestureMap[Pen];
+    if(set.contains("Gestures/Eraser"))
+        d->gestureMap[Eraser] = strToDl(set.value("Gestures/Eraser").toString());
+    if(set.contains("Gestures/Clear"))
+        d->gestureMap[Clear] = strToDl(set.value("Gestures/Clear").toString());
+    if(set.contains("Gestures/FColor"))
+        d->gestureMap[FColor] = strToDl(set.value("Gestures/FColor").toString());
+    if(set.contains("Gestures/BColor"))
+        d->gestureMap[BColor] = strToDl(set.value("Gestures/BColor").toString());
 
-    //brush gesture
-    if(set.contains("Gestures/Brush"))
-        d->gestureMap[Brush] = strToDl(set.value("Gestures/Brush").toString());
-    else
-        d->gestureMap[Brush] = d->defaultGestureMap[Brush];
 
     //setting up gestures in recognizer
-    QMapIterator<gestureType,DirectionList> i(d->gestureMap);
+    QMapIterator<Type,DirectionList> i(d->gestureMap);
     while (i.hasNext())
     {
         i.next();
@@ -94,24 +93,17 @@ void Handler::initializeGestures()
     }
 
     emit somethingChanged();
-
-    connect(this, SIGNAL(recognized(int)), this, SLOT(debugGesture(int)));
 }
 
 void Handler::uninitializeGestures()
 {
     QSettings set;
-    //save changed gestures
-    if(d->defaultGestureMap[Pen] != d->gestureMap[Pen])
-        set.setValue("Gestures/Pen", dlToStr(d->gestureMap[Pen]));
-
-    if(d->defaultGestureMap[Brush] != d->gestureMap[Brush])
-        set.setValue("Gestures/Brush", dlToStr(d->gestureMap[Brush]));
-}
-
-void Handler::debugGesture(int code)
-{
-   qDebug() << "Gesture recognized: " << code;
+    set.setValue("Gestures/Pen",    dlToStr(d->gestureMap[Pen]));
+    set.setValue("Gestures/Eraser", dlToStr(d->gestureMap[Eraser]));
+    set.setValue("Gestures/Clear",  dlToStr(d->gestureMap[Clear]));
+    set.setValue("Gestures/FColor", dlToStr(d->gestureMap[FColor]));
+    set.setValue("Gestures/BColor", dlToStr(d->gestureMap[BColor]));
+    set.sync();
 }
 
 bool Handler::observe(CanvasMgr* cm)
@@ -121,19 +113,19 @@ bool Handler::observe(CanvasMgr* cm)
     return true;
 }
 
-DirectionList Handler::getGesture(gestureType type)
+DirectionList Handler::getGesture(Type type)
 {
     return d->gestureMap[type];
 }
 
-void Handler::setGesture(gestureType type, DirectionList dl)
+void Handler::setGesture(Type type, DirectionList dl)
 {
     clearGestureDefinitions();
 
     d->gestureMap[type] = dl;
 
     //redelcaring of gestures
-    QMapIterator<gestureType,DirectionList> i(d->gestureMap);
+    QMapIterator<Type,DirectionList> i(d->gestureMap);
     while (i.hasNext())
     {
         i.next();
@@ -143,7 +135,7 @@ void Handler::setGesture(gestureType type, DirectionList dl)
     emit somethingChanged();
 }
 
-void Handler::resetGesture(gestureType type)
+void Handler::resetGesture(Type type)
 {
     d->gestureMap[type] = d->defaultGestureMap[type];
     emit somethingChanged();
@@ -198,14 +190,9 @@ QString Handler::dlToStr(DirectionList dl)
 
 }
 
-typeData& Handler::getTypeData(gestureType type)
+const QMap<Type,Info>& Handler::getTypes()
 {
-   return d->gestureTypeData[type];
-}
-
-unsigned Handler::getTypeCount()
-{
-   return d->gestureTypeData.count();
+   return d->gestureTypeData;
 }
 
 bool Handler::start()
@@ -221,12 +208,10 @@ bool Handler::stop()
 void Handler::handleCanvas(Canvas *cnvs)
 {
     connect(cnvs, SIGNAL(gestureCreated(QPainterPath)), this, SLOT(handleGesture(QPainterPath)));
-    d->activeCanvases.push_back(cnvs);
 }
 
 void Handler::letCanvasGo(Canvas* cnvs)
 {
-    d->activeCanvases.remove(d->activeCanvases.indexOf(cnvs));
     disconnect(cnvs, SIGNAL(gestureCreated(QPainterPath)), this, SLOT(handleGesture(QPainterPath)));
 }
 

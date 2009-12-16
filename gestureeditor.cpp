@@ -21,16 +21,16 @@ class GestureEditor::Private
    public:
     GestureEditorCanvas* canvas;
     Handler*        handler;
-    gestureType     activeType;
+    Type     activeType;
     QStringList     gestureTypeList;
     QListWidget*    listWidget;
 
 };
 
-GestureEditor::GestureEditor(Handler*parent)
-    : QDialog(0), d(new Private)
+GestureEditor::GestureEditor(Handler* h, QWidget* parent)
+    : QDialog(parent), d(new Private)
 {
-    d->handler = parent;
+    d->handler = h;
 
     //setting up widget layout
     setWindowIcon(QIcon(":/icons/16x16/configure.png"));
@@ -61,6 +61,19 @@ void GestureEditor::defineLayout()
 
    // Create list and combo
    d->listWidget = new QListWidget(this);
+   d->listWidget->setIconSize(QSize(32,32));
+   const QMap<Type,Info>& map = d->handler->getTypes();
+   QMap<Type,Info>::const_iterator it = map.constBegin();
+   while(it != map.constEnd())
+   {
+      d->listWidget->addItem(new QListWidgetItem(it.value().second,
+                                                 it.value().first,
+                                                 d->listWidget,
+                                                 it.key()));
+      ++it;
+   }
+
+   d->listWidget->setCurrentRow(0);
 
    // Button box
    QDialogButtonBox* box = new QDialogButtonBox(this);
@@ -85,16 +98,6 @@ void GestureEditor::defineLayout()
    main->addLayout(layout);
    main->addLayout(ctLayout);
 
-
-   for(int i = 0; i < d->handler->getTypeCount() ; i++)
-   {
-      typeData item = d->handler->getTypeData(static_cast<gestureType>(i));
-      d->listWidget->addItem(new QListWidgetItem(item.second, item.first, d->listWidget, i));
-   }
-
-   d->listWidget->setCurrentRow(0);
-
-
    // Connect widgets
    connect(d->handler,SIGNAL(somethingChanged()), this, SLOT(update()));
    connect(d->listWidget, SIGNAL(currentRowChanged(int)), this, SLOT(currentGestureChanged()));
@@ -115,8 +118,8 @@ void GestureEditor::eraseCurrentGestures()
 
 void GestureEditor::currentGestureChanged()
 {
-    d->canvas->setDirections(d->handler->getGesture(static_cast<gestureType>(d->listWidget->currentItem()->type())));
-    d->activeType =static_cast<gestureType>(d->listWidget->currentItem()->type());
+    d->canvas->setDirections(d->handler->getGesture(static_cast<Type>(d->listWidget->currentItem()->type())));
+    d->activeType =static_cast<Type>(d->listWidget->currentItem()->type());
     editCurrentGesture();
 }
 

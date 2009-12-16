@@ -13,7 +13,7 @@ class GestureEditor : public QDialog
    Q_OBJECT
 
    public:
-   GestureEditor(Handler* parent);
+   GestureEditor(Handler* h, QWidget* parent = 0);
    ~GestureEditor();
 
    public slots:
