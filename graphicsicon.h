@@ -1,7 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 Brno University of Technology,                     *
- *   Faculty of Information Technology                                     *
- *   Author(s): Marek Vavrusa    <xvavru00 AT stud.fit.vutbr.cz>           *
+ *   Copyright (C) 2009 Marek Vavrusa <marek@vavrusa.com>                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,37 +17,44 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include <QApplication>
-#include <cstdlib>
-#include "canvas.h"
-#include "networkservice.h"
-#include "mainwindow.h"
+#ifndef GRAPHICSICON_HPP
+#define GRAPHICSICON_HPP
+#include <QGraphicsWidget>
+#include <QPixmap>
 
-int main(int argc, char *argv[])
+class GraphicsIcon : public QGraphicsWidget
 {
-   // Run QApplication
-   QApplication app(argc, argv);
-   app.setOrganizationName("VUT FIT");
-   app.setOrganizationDomain("fit.vutbr.cz");
-   app.setApplicationName("SharedPaint");
+   Q_OBJECT
 
-   // Create canvas manager
-   CanvasMgr cm;
+   public:
 
-   // Create application window
-   MainWindow window;
-   window.observe(&cm);
-   window.show();
+   /** Initializes graphics icon with pixmap. */
+   GraphicsIcon(const QPixmap& pixmap, QGraphicsItem* parent = 0);
+   ~GraphicsIcon();
 
-   // Create network service
-   NetworkService net;
-   window.observe(&net);
-   net.observe(&cm);
-   net.startServer();
+   /** Paint event. */
+   void paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidget* w = 0);
 
-   // Initialize canvases
-   cm.init();
+   /** Activate. */
+   void setActivated(bool value);
 
-   // Run event-loop
-   return app.exec();
-}
+   signals:
+
+   /** Emit activated signal. */
+   void selected(GraphicsIcon* icon);
+
+   protected:
+
+   /** Hover events. */
+   void mousePressEvent(QGraphicsSceneMouseEvent* e);
+   void hoverEnterEvent(QGraphicsSceneHoverEvent* e);
+   void hoverLeaveEvent(QGraphicsSceneHoverEvent* e);
+   void hoverMoveEvent(QGraphicsSceneHoverEvent* e);
+   void timerEvent(QTimerEvent* e);
+
+   private:
+   struct Private;
+   Private* d;
+};
+
+#endif

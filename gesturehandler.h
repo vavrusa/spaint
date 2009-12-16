@@ -24,6 +24,8 @@
 
 #include <QObject>
 #include <QPainterPath>
+#include <QPair>
+#include <QList>
 #include "canvas.h"
 #include "canvasmgr.h"
 #include "mousegesturerecognizer.h"
@@ -31,10 +33,11 @@
 namespace Gesture
 {
 
-enum Type {
-   Pen,
-   Brush,
-};
+typedef enum Type {
+   Pen = 0,
+   Brush = 1,
+}gestureType;
+
 
 class Handler : public MouseGestureRecognizer
 {
@@ -44,6 +47,13 @@ class Handler : public MouseGestureRecognizer
    Handler(QObject* parent = 0);
    ~Handler();
    bool observe(CanvasMgr* cm);
+   DirectionList getGesture(gestureType type);              //gets direction list of gesture
+   void setGesture(gestureType type, DirectionList dl);     //changes directions of gesture
+   void resetGesture(gestureType type);                      //set gestures directions to default
+
+   //converting string <-> DirectionList
+   DirectionList strToDl (QString str);
+   QString dlToStr (DirectionList dl);
 
    public slots:
    bool start();              //start/stop handling gestures
@@ -53,10 +63,14 @@ class Handler : public MouseGestureRecognizer
    void letCanvasGo(Canvas* cnvs);             //disconnecting from destroyed canvas
 
    protected:
-   void initializeGestures(void);
+   void initializeGestures(void);               //sets all gestures either from settings or from default values
+   void uninitializeGestures(void);             //saves all changed gestures to settings
 
    protected slots:
    void debugGesture(int code);
+
+   signals:
+   void somethingChanged();
 
 
    private:

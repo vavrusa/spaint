@@ -35,6 +35,9 @@ set(project_src         main.cpp
                         mainwindow.cpp
                         gesturehandler.cpp
                         mousegesturerecognizer.cpp
+                        overlay.cpp
+                        graphicsicon.cpp
+                        colorsicon.cpp
                         )
 
 set(project_headers     canvas.h
@@ -49,6 +52,9 @@ set(project_headers     canvas.h
                         gesturehandler.h
                         mousegesturerecognizer.h
                         defines.h
+                        overlay.h
+                        graphicsicon.h
+                        colorsicon.h
                         )
 
 # Qt4
@@ -66,6 +72,9 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR}
                      ${CMAKE_CURRENT_SOURCE_DIR}
                      ${QT_INCLUDES}
                      )
+
+# Subdirectories
+add_subdirectory(doc)
 
 # Targets
 add_executable(${PROJECT_NAME}        ${project_src}
@@ -101,4 +110,3 @@ CONFIGURE_FILE(
 
 ADD_CUSTOM_TARGET(uninstall
           "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
-

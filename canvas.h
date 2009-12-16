@@ -59,6 +59,11 @@ class Canvas : public QGraphicsScene
       Gesture = 0x02  // Drawing mouse gesture
    };
 
+   /// Tool
+   enum Tool {
+      Pen     = 0x00  // Pen tool
+   };
+
    /** Return default canvas size.
        \return canvas size
      */
