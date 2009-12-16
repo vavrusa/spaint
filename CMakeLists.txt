@@ -31,6 +31,8 @@ set(project_src         main.cpp
                         overlay.cpp
                         graphicsicon.cpp
                         colorsicon.cpp
+                        gestureeditor.cpp
+                        gestureeditorcanvas.cpp
                         )
 
 set(project_headers     canvas.h
@@ -44,6 +46,8 @@ set(project_headers     canvas.h
                         overlay.h
                         graphicsicon.h
                         colorsicon.h
+                        gestureeditor.h
+                        gestureeditorcanvas.h
                         )
 
 # Qt4

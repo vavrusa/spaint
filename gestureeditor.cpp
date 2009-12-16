@@ -62,12 +62,6 @@ void GestureEditor::defineLayout()
     d->left->addWidget(d->clear);
     d->left->addWidget(d->reset);
 
-    d->right->addWidget(d->combo);
-    d->right->addWidget(d->ok);
-    d->right->addWidget(d->clear);
-    d->right->addWidget(d->reset);
-    d->right->addStretch();
-
     d->canvas->setFixedSize(270,270);
 
     d->combo->addItem("Pen",QVariant(Pen));
@@ -75,8 +69,8 @@ void GestureEditor::defineLayout()
 
     d->list->setFixedSize(70,180);
 
-    QListWidgetItem pen(tr("Pen"),d->list);
-    QListWidgetItem brush(tr("Brush"),d->list);
+    QListWidgetItem * pen = new QListWidgetItem(tr("Pen"),d->list);
+    QListWidgetItem * brush= new QListWidgetItem(tr("Brush"),d->list);
 
     //d->list->addItem(&pen);
     //d->list->addItem(&brush);
