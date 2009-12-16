@@ -29,6 +29,7 @@ class Overlay::Private
    Private() {
    }
 
+   QList<GraphicsIcon*> icons;
    QGraphicsLinearLayout* layout;
 };
 
@@ -40,15 +41,30 @@ Overlay::Overlay(QGraphicsWidget *parent) :
    // Create layout
    d->layout = new QGraphicsLinearLayout(Qt::Horizontal, this);
    setLayout(d->layout);
-   d->layout->addItem(new GraphicsIcon(QPixmap(":icons/48x48/draw-brush.png"), this));
-   d->layout->addItem(new GraphicsIcon(QPixmap(":icons/48x48/fill-color.png"), this));
-   d->layout->addItem(new GraphicsIcon(QPixmap(":icons/48x48/draw-eraser.png"), this));
-   d->layout->addItem(new GraphicsIcon(QPixmap(":icons/48x48/color-picker.png"), this));
+
+   // Create buttons
+   d->icons.clear();
+   d->icons.append(new GraphicsIcon(QPixmap(":icons/48x48/draw-brush.png"), this));
+   d->icons.append(new GraphicsIcon(QPixmap(":icons/48x48/fill-color.png"), this));
+   d->icons.append(new GraphicsIcon(QPixmap(":icons/48x48/draw-eraser.png"), this));
+   d->icons.append(new GraphicsIcon(QPixmap(":icons/48x48/color-picker.png"), this));
+
+   // Append buttons to layout
+   foreach(GraphicsIcon* icon, d->icons) {
+      d->layout->addItem(icon);
+      connect(icon, SIGNAL(selected(GraphicsIcon*)), this, SLOT(selectIcon(GraphicsIcon*)));
+   }
 }
 
 Overlay::~Overlay()
 {
    delete d;
+}
+
+void Overlay::selectIcon(GraphicsIcon* icon)
+{
+   foreach(GraphicsIcon* i, d->icons)
+      i->setActivated(i == icon);
 }
 
 void Overlay::paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidget* w)

@@ -30,10 +30,12 @@ class GraphicsIcon::Private
    Private() {
       timer = -1;
       dist = 0.0;
+      isActivated = false;
    }
 
    int timer;
    float dist;
+   bool isActivated;
    QPixmap pixmap;
 };
 
@@ -43,6 +45,7 @@ GraphicsIcon::GraphicsIcon(const QPixmap& pixmap, QGraphicsItem* parent)
    d->pixmap = pixmap;
    resize(pixmap.size());
    setAcceptHoverEvents(true);
+   setAcceptedMouseButtons(Qt::LeftButton);
    setPreferredSize(pixmap.size());
 }
 
@@ -55,9 +58,14 @@ void GraphicsIcon::paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidg
 {
    // Draw background
    QRectF re(boundingRect());
-   if(d->dist > 0.0) {
-      float radius = (re.height() * 0.75) * d->dist;
+   if(d->dist > 0.0 || d->isActivated) {
       QColor color(255, 255, 255, 192);
+      float radius = (re.height() * 0.75) * d->dist;
+      if(d->isActivated) {
+         radius = (re.height() * 0.75) * 1.0;
+         color = QColor(168, 255, 255, 224);
+      }
+
       QRadialGradient grad(re.center(), radius);
       grad.setColorAt(0.0, color);
       color.setAlpha(0);
@@ -91,6 +99,18 @@ void GraphicsIcon::timerEvent(QTimerEvent* e)
    update();
 }
 
+void GraphicsIcon::setActivated(bool value) {
+   d->isActivated = value;
+   setAcceptHoverEvents(!value); // Activated does not accept hover
+   update();
+}
+
+void GraphicsIcon::mousePressEvent(QGraphicsSceneMouseEvent* e)
+{
+   if(e->button() == Qt::LeftButton)
+      emit selected(this);
+}
+
 void GraphicsIcon::hoverMoveEvent(QGraphicsSceneHoverEvent* e)
 {
    QRectF re(boundingRect());
@@ -100,7 +120,6 @@ void GraphicsIcon::hoverMoveEvent(QGraphicsSceneHoverEvent* e)
 
 void GraphicsIcon::hoverEnterEvent(QGraphicsSceneHoverEvent* e)
 {
-   qDebug("enter");
    if(d->timer != -1) {
       killTimer(d->timer);
    }
@@ -108,7 +127,6 @@ void GraphicsIcon::hoverEnterEvent(QGraphicsSceneHoverEvent* e)
 
 void GraphicsIcon::hoverLeaveEvent(QGraphicsSceneHoverEvent* e)
 {
-   qDebug("leave");
    d->timer = startTimer(40);
 }
 

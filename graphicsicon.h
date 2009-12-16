@@ -35,9 +35,18 @@ class GraphicsIcon : public QGraphicsWidget
    /** Paint event. */
    void paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidget* w = 0);
 
+   /** Activate. */
+   void setActivated(bool value);
+
+   signals:
+
+   /** Emit activated signal. */
+   void selected(GraphicsIcon* icon);
+
    protected:
 
    /** Hover events. */
+   void mousePressEvent(QGraphicsSceneMouseEvent* e);
    void hoverEnterEvent(QGraphicsSceneHoverEvent* e);
    void hoverLeaveEvent(QGraphicsSceneHoverEvent* e);
    void hoverMoveEvent(QGraphicsSceneHoverEvent* e);

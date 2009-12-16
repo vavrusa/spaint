@@ -20,6 +20,7 @@
 #ifndef OVERLAY_HPP
 #define OVERLAY_HPP
 #include <QGraphicsWidget>
+class GraphicsIcon;
 
 class Overlay : public QGraphicsWidget
 {
@@ -33,6 +34,11 @@ class Overlay : public QGraphicsWidget
 
    /** Paint event. */
    void paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidget* w = 0);
+
+   protected slots:
+
+   /** Select icon. */
+   void selectIcon(GraphicsIcon* icon);
 
    private:
    struct Private;
