@@ -32,10 +32,15 @@ class Overlay : public QGraphicsWidget
    Overlay(QGraphicsWidget* parent = 0);
    ~Overlay();
 
-   /** Paint event. */
-   void paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidget* w = 0);
+   signals:
 
-   protected slots:
+   /** Color changed. */
+   void colorChanged(QPalette::ColorRole, QColor);
+
+   public slots:
+
+   /** Change color. */
+   void changeColor(QPalette::ColorRole role, const QColor& color);
 
    /** Select icon. */
    void selectIcon(GraphicsIcon* icon);

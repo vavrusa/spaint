@@ -59,10 +59,10 @@ void GraphicsIcon::paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidg
    // Draw background
    QRectF re(boundingRect());
    if(d->dist > 0.0 || d->isActivated) {
+
       QColor color(255, 255, 255, 192);
       float radius = (re.height() * 0.75) * d->dist;
       if(d->isActivated) {
-         radius = (re.height() * 0.75) * 1.0;
          color = QColor(168, 255, 255, 224);
       }
 
@@ -71,6 +71,7 @@ void GraphicsIcon::paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidg
       color.setAlpha(0);
       grad.setColorAt(1.0, color);
       p->save();
+      p->setClipRect(boundingRect());
       p->setPen(Qt::NoPen);
       p->setBrush(QBrush(grad));
       p->drawEllipse(re.center(), radius, radius);
@@ -78,10 +79,12 @@ void GraphicsIcon::paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidg
    }
 
    // Draw icon
-   QPointF center(re.center());
-   center.setX(center.x() - d->pixmap.width() * 0.5);
-   center.setY(center.y() - d->pixmap.height() * 0.5);
-   p->drawPixmap(center, d->pixmap);
+   if(!d->pixmap.isNull()) {
+      QPointF center(re.center());
+      center.setX(center.x() - d->pixmap.width() * 0.5);
+      center.setY(center.y() - d->pixmap.height() * 0.5);
+      p->drawPixmap(center, d->pixmap);
+   }
 }
 
 void GraphicsIcon::timerEvent(QTimerEvent* e)
@@ -102,7 +105,20 @@ void GraphicsIcon::timerEvent(QTimerEvent* e)
 void GraphicsIcon::setActivated(bool value) {
    d->isActivated = value;
    setAcceptHoverEvents(!value); // Activated does not accept hover
-   update();
+
+   // Cancel animations
+   if(d->timer != -1) {
+      killTimer(d->timer);
+   }
+
+   // Activate
+   if(value) {
+      d->dist = 1.0;
+   }
+   // Fade out
+   else {
+      d->timer = startTimer(40);
+   }
 }
 
 void GraphicsIcon::mousePressEvent(QGraphicsSceneMouseEvent* e)

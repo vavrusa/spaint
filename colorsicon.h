@@ -24,11 +24,35 @@
 class ColorsIcon : public GraphicsIcon
 {
    Q_OBJECT
+
    public:
 
    /** Explicit constructor. */
    explicit ColorsIcon(QGraphicsItem *parent = 0);
 
+   /** Paint event. */
+   void paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidget* w = 0);
+
+   public slots:
+
+   /** Set color. */
+   void setColor(QPalette::ColorRole role, const QColor& color);
+
+   signals:
+
+   /** Color changed. */
+   void colorPicked(QPalette::ColorRole, QColor);
+
+   protected:
+
+   /** Mouse press. */
+   void mousePressEvent(QGraphicsSceneMouseEvent* e);
+
+   /** Color picker. */
+   void pickColor(QPalette::ColorRole role);
+
+   private:
+   QColor mPen, mBrush;
 };
 
 #endif
