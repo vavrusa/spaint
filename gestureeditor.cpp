@@ -1,13 +1,18 @@
+#include <QMouseEvent>
+#include <QGraphicsPathItem>
+#include <QDialogButtonBox>
+#include <QPainterPath>
+#include <QBoxLayout>
+#include <QPushButton>
+#include <QListWidget>
+#include <QComboBox>
+#include <QIcon>
+#include <QMap>
+
 #include "gestureeditor.h"
 #include "mousegesturerecognizer.h"
 #include "gesturehandler.h"
 #include "gestureeditorcanvas.h"
-#include <QMouseEvent>
-#include <QGraphicsPathItem>
-#include <QPainterPath>
-#include <QHBoxLayout>
-#include <QtGui>
-#include <QMap>
 
 using namespace Gesture;
 
@@ -15,86 +20,89 @@ class GestureEditor::Private
 {
    public:
     GestureEditorCanvas* canvas;
-    QListWidget*     list;
-    QComboBox*      combo;
-    QPushButton*    ok;
-    QPushButton*    clear;
-    QPushButton*    reset;
-
-    QHBoxLayout*    main;
-    QVBoxLayout*    right;
-    QVBoxLayout*    left;
-
     Handler*        handler;
     gestureType     activeType;
     QStringList     gestureTypeList;
+    QListWidget*    listWidget;
 
 };
 
+GestureEditor::GestureEditor(Handler*parent)
+    : QDialog(0), d(new Private)
+{
+    d->handler = parent;
 
+    //setting up widget layout
+    setWindowIcon(QIcon(":/icons/16x16/configure.png"));
+    setWindowTitle(tr("Gesture Editor"));
+    defineLayout();
+
+    //inicialization
+    d->activeType = Pen;
+}
+
+GestureEditor::~GestureEditor()
+{
+  delete d;
+}
 
 void GestureEditor::show()
 {
     currentGestureChanged();
-    QWidget::show();
+    QDialog::show();
 }
 
 void GestureEditor::defineLayout()
 {
-    this->setFixedSize(400,300);
 
-    d->canvas = new GestureEditorCanvas(this);
-    d->list = new QListWidget;
-    d->combo = new QComboBox;
-    d->ok = new QPushButton("Save");
-    d->clear = new QPushButton("Clear");
-    d->reset = new QPushButton("Default");
+   // Create canvas
+   d->canvas = new GestureEditorCanvas(this);
+   d->canvas->setFixedSize(270,270);
 
-    d->main = new QHBoxLayout;
-    d->right = new QVBoxLayout;
-    d->left = new QVBoxLayout;
+   // Create list and combo
+   d->listWidget = new QListWidget(this);
+   QComboBox* combo = new QComboBox(this);
 
-    d->main->addLayout(d->left);
-    d->main->addWidget(d->canvas);
+   // Button box
+   QDialogButtonBox* box = new QDialogButtonBox(this);
+   QPushButton* clear = box->addButton(tr("&Clear"), QDialogButtonBox::DestructiveRole);
+   QPushButton* reset = box->addButton(QDialogButtonBox::Reset);
+   box->addButton(QDialogButtonBox::Ok);
+   box->addButton(QDialogButtonBox::Cancel);
 
-    d->left->addWidget(d->list);
-    d->left->addWidget(d->ok);
-    d->left->addWidget(d->clear);
-    d->left->addWidget(d->reset);
 
-    d->canvas->setFixedSize(270,270);
+   // Create canvas layout
+   QHBoxLayout* layout = new QHBoxLayout();
+   layout->addWidget(d->listWidget);
+   layout->addWidget(d->canvas);
 
-    d->combo->addItem("Pen",QVariant(Pen));
-    d->combo->addItem("Brush",QVariant(Brush));
+   // Create buttons layout
+   QHBoxLayout* ctLayout = new QHBoxLayout();
+   ctLayout->addWidget(combo, Qt::AlignRight);
+   ctLayout->addWidget(box);
 
-    d->list->setFixedSize(70,180);
-    d->list->setSelectionMode(QAbstractItemView::SingleSelection);
-    QListWidgetItem * pen = new QListWidgetItem(QIcon(":/icons/16x16/canvas-add.png"),tr("Pen"),d->list, Pen);
-    QListWidgetItem * brush= new QListWidgetItem(QIcon(":/icons/16x16/canvas-add.png"),tr("Brush"),d->list, Brush);
+   // Create main layout
+   QVBoxLayout* main = new QVBoxLayout(this);
+   main->addLayout(layout);
+   main->addLayout(ctLayout);
 
-    d->list->setCurrentRow(0);
+   // Populate boxes
+   combo->addItem("Pen", QVariant(Pen));
+   combo->addItem("Brush", QVariant(Brush));
+   d->listWidget->addItem(new QListWidgetItem(tr("Pen"), d->listWidget, Pen));
+   d->listWidget->addItem(new QListWidgetItem(tr("Brush"),d->listWidget, Brush));
+   d->listWidget->setCurrentRow(0);
 
-    //d->list->addItem(&pen);
-    //d->list->addItem(&brush);
 
-    this->setLayout(d->main);
-    //! EDIT
-    setWindowIcon(QIcon(":/icons/16x16/canvas-add.png"));
-    setWindowTitle(tr("Gesture Editor"));
+   // Connect widgets
+   connect(d->handler,SIGNAL(somethingChanged()), this, SLOT(update()));
+   connect(d->listWidget, SIGNAL(currentRowChanged(int)), this, SLOT(currentGestureChanged()));
+   connect(clear,SIGNAL(clicked()),this,SLOT(eraseCurrentGestures()));
+   connect(reset,SIGNAL(clicked()),this,SLOT(resetCurrentGesture()));
+   connect(box, SIGNAL(accepted()), this, SLOT(hide()));
+   connect(box, SIGNAL(rejected()), this, SLOT(hide()));
 
 }
-
-void GestureEditor::makeConnections()
-{
-    connect(d->handler,SIGNAL(somethingChanged()), this, SLOT(update()));
-    connect(d->list, SIGNAL(currentRowChanged(int)), this, SLOT(currentGestureChanged()));
-    connect(d->clear,SIGNAL(clicked()),this,SLOT(eraseCurrentGestures()));
-    connect(d->ok,SIGNAL(clicked()),this,SLOT(editCurrentGesture()));
-    connect(d->reset,SIGNAL(clicked()),this,SLOT(resetCurrentGesture()));
-}
-
-
-
 
 void GestureEditor::eraseCurrentGestures()
 {
@@ -104,8 +112,9 @@ void GestureEditor::eraseCurrentGestures()
 
 void GestureEditor::currentGestureChanged()
 {
-    d->canvas->setDirections(d->handler->getGesture(static_cast<gestureType>(d->list->currentItem()->type())));
-    d->activeType =static_cast<gestureType>(d->list->currentItem()->type());
+    d->canvas->setDirections(d->handler->getGesture(static_cast<gestureType>(d->listWidget->currentItem()->type())));
+    d->activeType =static_cast<gestureType>(d->listWidget->currentItem()->type());
+    editCurrentGesture();
 }
 
 void GestureEditor::editCurrentGesture()
@@ -117,26 +126,6 @@ void GestureEditor::resetCurrentGesture()
 {
     d->handler->resetGesture(d->activeType);
     currentGestureChanged();
-}
-
-GestureEditor::GestureEditor(Handler*parent)
-    : d(new Private)
-{
-    d->handler = parent;
-
-    //setting up widget layout
-    defineLayout();
-
-    //inicialization
-    d->activeType = Pen;
-
-
-    makeConnections();
-}
-
-GestureEditor::~GestureEditor()
-{
-  delete d;
 }
 
 #include "gestureeditor.moc"

@@ -59,6 +59,8 @@ MainWindow::MainWindow(QWidget* parent)
 
    //construct gesture editor
    d->ge = new Gesture::GestureEditor(&d->gh);
+   d->ge->hide();
+
    // Load settings
    loadSettings();
 
@@ -67,8 +69,8 @@ MainWindow::MainWindow(QWidget* parent)
 }
 
 MainWindow::~MainWindow()
-{\
-   delete d->ge;
+{
+   d->ge->deleteLater(); // Never delete QObject with delete
    delete d;
 }
 
