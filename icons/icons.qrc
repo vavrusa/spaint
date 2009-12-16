@@ -8,5 +8,9 @@
       <file>16x16/configure.png</file>
       <file>16x16/help-contents.png</file>
       <file>16x16/application.png</file>
+      <file>48x48/color-picker.png</file>
+      <file>48x48/draw-brush.png</file>
+      <file>48x48/draw-eraser.png</file>
+      <file>48x48/fill-color.png</file>
   </qresource>
 </RCC>
