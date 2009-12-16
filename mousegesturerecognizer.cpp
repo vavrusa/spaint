@@ -85,7 +85,6 @@ MouseGestureRecognizer::~MouseGestureRecognizer()
 void MouseGestureRecognizer::addGestureDefinition( const Definition &gesture )
 {
     d->gestures.push_back( gesture );
-    qDebug()<<d->gestures.size();
 }
 
 void MouseGestureRecognizer::clearGestureDefinitions()
@@ -113,6 +112,34 @@ void MouseGestureRecognizer::endGesture( int x, int y )
 void MouseGestureRecognizer::abortGesture()
 {
     d->positions.clear();
+}
+
+DirectionList MouseGestureRecognizer::createDirectionsFromPath(QPainterPath path, unsigned length)
+{
+    d->positions.clear();
+    for(int i = 0; i < path.elementCount(); i++)
+        d->positions.push_back( Pos(static_cast<int>(path.elementAt(i).x),static_cast<int>(path.elementAt(i).y)));
+
+    PosList directions = simplify(limitDirections(d->positions));
+
+    //removing of extra parts of path till we reach number set by parametr length
+    while(d->positions.size()>length)
+        directions = simplify(removeShortest( directions ));
+
+    //setting directions for returning directionlist
+    DirectionList retDirs;
+    for(PosList::iterator i = directions.begin(); i != directions.end(); i++)
+    {
+        if(i->x>0)
+            retDirs<<Right;
+        else if(i->x<0)
+            retDirs<<Left;
+        else if(i->y>0)
+            retDirs<<Up;
+        else if(i->y<0)
+            retDirs<<Down;
+    }
+    return retDirs;
 }
 
 void MouseGestureRecognizer::addPoint( int x, int y )

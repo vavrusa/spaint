@@ -40,6 +40,7 @@
 
 #include <QList>
 #include <QObject>
+#include <QPainterPath>
 
 namespace Gesture {
 
@@ -79,6 +80,8 @@ class MouseGestureRecognizer : public QObject
    void addPoint( int x, int y );
    void endGesture( int x, int y );
    void abortGesture();
+
+   DirectionList createDirectionsFromPath(QPainterPath path, unsigned length);
 
    signals:
    void recognized(int code);

@@ -20,16 +20,20 @@
  ***************************************************************************/
 
 #include "gesturehandler.h"
+#include <QString>
 #include <QDebug>
 #include <QList>
+#include <QSettings>
 
 using namespace Gesture;
 
 class Handler::Private
 {
    public:
-   QVector<Canvas*> activeCanvases;
-   bool isRunning;
+    QMap<gestureType,DirectionList> gestureMap;
+    QMap<gestureType,DirectionList> defaultGestureMap;
+    QVector<Canvas*> activeCanvases;
+    bool isRunning;
 };
 
 Handler::Handler(QObject* parent)
@@ -42,17 +46,57 @@ Handler::Handler(QObject* parent)
 
 Handler::~Handler()
 {
-   delete d;
+    uninitializeGestures();
+    delete d;
 }
 
 void Handler::initializeGestures()
 {
-
+    //saving default gestures
     DirectionList dl;
     dl<<Up<<Left;
+    d->defaultGestureMap[Pen] = dl;
 
-    addGestureDefinition(Gesture::Definition(dl, Gesture::Pen));
+    dl.clear();
+    dl<<Left<<Down;
+    d->defaultGestureMap[Brush] = dl;
+
+    //setting up gesture paths from settings/default values
+    QSettings set;
+    //pen gesture
+    if(set.contains("Gestures/Pen"))
+        d->gestureMap[Pen] = strToDl(set.value("Gestures/Pen").toString());
+    else
+        d->gestureMap[Pen] = d->defaultGestureMap[Pen];
+
+    //brush gesture
+    if(set.contains("Gestures/Brush"))
+        d->gestureMap[Brush] = strToDl(set.value("Gestures/Brush").toString());
+    else
+        d->gestureMap[Brush] = d->defaultGestureMap[Brush];
+
+    //setting up gestures in recognizer
+    QMapIterator<gestureType,DirectionList> i(d->gestureMap);
+    while (i.hasNext())
+    {
+        i.next();
+        addGestureDefinition(Definition(i.value(),i.key()));
+    }
+
+    emit somethingChanged();
+
     connect(this, SIGNAL(recognized(int)), this, SLOT(debugGesture(int)));
+}
+
+void Handler::uninitializeGestures()
+{
+    QSettings set;
+    //save changed gestures
+    if(d->defaultGestureMap[Pen] != d->gestureMap[Pen])
+        set.setValue("Gestures/Pen", dlToStr(d->gestureMap[Pen]));
+
+    if(d->defaultGestureMap[Brush] != d->gestureMap[Brush])
+        set.setValue("Gestures/Brush", dlToStr(d->gestureMap[Brush]));
 }
 
 void Handler::debugGesture(int code)
@@ -65,6 +109,83 @@ bool Handler::observe(CanvasMgr* cm)
     connect(cm, SIGNAL(canvasCreated(Canvas*)), this, SLOT(handleCanvas(Canvas*)));
     connect(cm, SIGNAL(canvasRemoved(Canvas*)), this, SLOT(letCanvasGo(Canvas*)));
     return true;
+}
+
+DirectionList Handler::getGesture(gestureType type)
+{
+    return d->gestureMap[type];
+}
+
+void Handler::setGesture(gestureType type, DirectionList dl)
+{
+    clearGestureDefinitions();
+
+    d->gestureMap[type] = dl;
+
+    //redelcaring of gestures
+    QMapIterator<gestureType,DirectionList> i(d->gestureMap);
+    while (i.hasNext())
+    {
+        i.next();
+        addGestureDefinition(Definition(i.value(),i.key()));
+    }
+
+    emit somethingChanged();
+}
+
+void Handler::resetGesture(gestureType type)
+{
+    d->gestureMap[type] = d->defaultGestureMap[type];
+    emit somethingChanged();
+}
+
+DirectionList Handler::strToDl(QString str)
+{
+    DirectionList dl;
+    for(int i = 0; i < str.size(); i++)
+    {
+        switch(str.toLatin1()[i])
+        {
+        case 'U':
+            dl<<Up;
+            break;
+        case 'D':
+            dl<<Down;
+            break;
+        case 'L':
+            dl<<Left;
+            break;
+        case 'R':
+            dl<<Right;
+            break;
+        }
+    }
+    return dl;
+}
+
+QString Handler::dlToStr(DirectionList dl)
+{
+    QString str;
+    for(int i = 0; i < dl.size(); i++)
+    {
+        switch(dl.at(i))
+        {
+        case Up:
+            str.append('U');
+            break;
+        case Down:
+            str.append('D');
+            break;
+        case Left:
+            str.append('L');
+            break;
+        case Right:
+            str.append('R');
+            break;
+        }
+    }
+    return str;
+
 }
 
 bool Handler::start()
@@ -120,9 +241,6 @@ void Handler::handleGesture(QPainterPath gesture)
                 else
                     addPoint(x,y);
             }
-
-
-
         }
     }
 }

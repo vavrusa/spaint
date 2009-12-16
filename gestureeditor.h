@@ -16,24 +16,14 @@ public:
     GestureEditor(Handler* parent);
     ~GestureEditor();
 
-    //Checks, if defined line is ok for building gesture
-    bool isBlock(QPoint a, QPoint b);
-
-    enum State{ Idle, Drawing};
-
 public slots:
     void show();
-
-protected:
-    void paintEvent(QPaintEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
 
 private slots:
     void eraseCurrentGestures();        //erase current drawing of gesture
     void currentGestureChanged();       //drawing has changed
     void editCurrentGesture();          //save current gesture to handler
+    void resetCurrentGesture();         //set current gesture to default value
 
 private:
     class Private;

@@ -25,6 +25,7 @@
 #include "networkservice.h"
 #include "mainwindow.h"
 #include "gesturehandler.h"
+#include "gestureeditor.h"
 
 int main(int argc, char *argv[])
 {
@@ -40,7 +41,7 @@ int main(int argc, char *argv[])
    // Create application window
    MainWindow window;
    window.observe(&cm);
-   window.show();
+   //window.show();
 
    // Create network service
    NetworkService net;
@@ -54,6 +55,9 @@ int main(int argc, char *argv[])
 
    // Initialize canvases
    cm.init();
+
+   Gesture::GestureEditor ge(&gh);
+   ge.show();
 
    // Run event-loop
    return app.exec();
