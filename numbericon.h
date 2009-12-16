@@ -17,43 +17,54 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#ifndef OVERLAY_HPP
-#define OVERLAY_HPP
-#include <QGraphicsWidget>
-class GraphicsIcon;
+#ifndef NUMBERICON_HPP
+#define NUMBERICON_HPP
+#include "graphicsicon.h"
 
-class Overlay : public QGraphicsWidget
+class NumberIcon : public GraphicsIcon
 {
    Q_OBJECT
 
    public:
 
-   /** Initialize overlay. */
-   Overlay(QGraphicsWidget* parent = 0);
-   ~Overlay();
+   /** Explicit constructor. */
+   explicit NumberIcon(QGraphicsItem *parent = 0);
+
+   /** Paint event. */
+   void paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidget* w = 0);
+
+   public slots:
+
+   /** Set number. */
+   void setNumber(int num) {
+      mNum = num;
+      update();
+   }
+
+   /** Set color. */
+   void setColor(QPalette::ColorRole role, const QColor& color) {
+      if(role == QPalette::Foreground) {
+         mColor = color;
+         update();
+      }
+   }
 
    signals:
 
    /** Color changed. */
-   void colorChanged(QPalette::ColorRole, QColor);
+   void numberShifted(int num);
 
-   /** Thickness changed. */
-   void thicknessChanged(int);
+   protected:
 
-   public slots:
-
-   /** Change color. */
-   void changeColor(QPalette::ColorRole role, const QColor& color);
-
-   /** Change thickness. */
-   void changeThickness(int num);
-
-   /** Select icon. */
-   void selectIcon(GraphicsIcon* icon);
+   /** Mouse press. */
+   void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
+   void mousePressEvent(QGraphicsSceneMouseEvent* e);
+   void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
 
    private:
-   struct Private;
-   Private* d;
+   int mDiff;
+   int mNum;
+   QColor mColor;
 };
 
-#endif
+#endif // NUMBERICON_HPP

@@ -23,6 +23,7 @@
 #define CANVASCONTAINMENT_H
 
 #include <QGraphicsScene>
+#include <QPalette>
 class QGraphicsSceneWheelEvent;
 class QGraphicsView;
 class QPainter;
@@ -54,6 +55,7 @@ class CanvasContainment : public QGraphicsScene
    private slots:
    void updateLayout(const QRectF& newRect);
    void changeColor(QPalette::ColorRole role, const QColor& color);
+   void changeThickness(int num);
 
    private:
    struct Private;
@@ -61,4 +63,4 @@ class CanvasContainment : public QGraphicsScene
 
 };
 
-#endif // CANVASCONTAINMENT_H
+#endif

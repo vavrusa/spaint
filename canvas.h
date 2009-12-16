@@ -48,19 +48,29 @@ class Canvas : public QGraphicsScene
    }
 
    /** Return color. */
-   const QColor& color(QPalette::ColorRole role = QPalette::Foreground) {
+   QColor color(QPalette::ColorRole role = QPalette::Foreground) {
       if(role == QPalette::Background)
-         return mBrush;
-      else
-         return mPen;
+         return mBrush.color();
+
+      return mPen.color();
    }
 
    /** Set color. */
    void setColor(QPalette::ColorRole role, const QColor& color) {
       if(role == QPalette::Background)
-         mBrush = color;
+         mBrush.setColor(color);
       else
-         mPen = color;
+         mPen.setColor(color);
+   }
+
+   /** Return thickness. */
+   int thickness() {
+      return mPen.width();
+   }
+
+   /** Set thickness. */
+   void setThickness(int width) {
+      mPen.setWidth(width);
    }
 
    /** Create associated canvas view.
@@ -109,7 +119,8 @@ class Canvas : public QGraphicsScene
    int mState;
    QGraphicsPathItem* mGlyph;
    QString mName;
-   QColor mPen, mBrush;
+   QPen mPen;
+   QBrush mBrush;
 
 };
 

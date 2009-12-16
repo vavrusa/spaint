@@ -22,6 +22,7 @@
 #include "overlay.h"
 #include "graphicsicon.h"
 #include "colorsicon.h"
+#include "numbericon.h"
 
 /** Private data. */
 class Overlay::Private
@@ -56,6 +57,14 @@ Overlay::Overlay(QGraphicsWidget *parent) :
       connect(icon, SIGNAL(selected(GraphicsIcon*)), this, SLOT(selectIcon(GraphicsIcon*)));
    }
 
+   // Append number icon
+   NumberIcon* thickness = new NumberIcon(this);
+   d->layout->addItem(thickness);
+   connect(thickness, SIGNAL(numberShifted(int)),
+           this,      SLOT(changeThickness(int)));
+   connect(this,      SIGNAL(thicknessChanged(int)),
+           thickness, SLOT(setNumber(int)));
+
    // Append colors icon
    ColorsIcon* colors = new ColorsIcon(this);
    d->layout->addItem(colors);
@@ -63,6 +72,10 @@ Overlay::Overlay(QGraphicsWidget *parent) :
            this,   SLOT(changeColor(QPalette::ColorRole,QColor)));
    connect(this,   SIGNAL(colorChanged(QPalette::ColorRole,QColor)),
            colors, SLOT(setColor(QPalette::ColorRole,QColor)));
+
+   // Connect thickness to color
+   connect(this,      SIGNAL(colorChanged(QPalette::ColorRole,QColor)),
+           thickness, SLOT(setColor(QPalette::ColorRole,QColor)));
 }
 
 Overlay::~Overlay()
@@ -79,6 +92,11 @@ void Overlay::selectIcon(GraphicsIcon* icon)
 void Overlay::changeColor(QPalette::ColorRole role, const QColor& color)
 {
    emit colorChanged(role, color);
+}
+
+void Overlay::changeThickness(int num)
+{
+   emit thicknessChanged(num);
 }
 
 #include "overlay.moc"
