@@ -68,21 +68,26 @@ void GestureEditor::defineLayout()
     d->combo->addItem("Brush",QVariant(Brush));
 
     d->list->setFixedSize(70,180);
+    d->list->setSelectionMode(QAbstractItemView::SingleSelection);
+    QListWidgetItem * pen = new QListWidgetItem(QIcon(":/icons/16x16/canvas-add.png"),tr("Pen"),d->list, Pen);
+    QListWidgetItem * brush= new QListWidgetItem(QIcon(":/icons/16x16/canvas-add.png"),tr("Brush"),d->list, Brush);
 
-    QListWidgetItem * pen = new QListWidgetItem(tr("Pen"),d->list);
-    QListWidgetItem * brush= new QListWidgetItem(tr("Brush"),d->list);
+    d->list->setCurrentRow(0);
 
     //d->list->addItem(&pen);
     //d->list->addItem(&brush);
 
     this->setLayout(d->main);
+    //! EDIT
+    setWindowIcon(QIcon(":/icons/16x16/canvas-add.png"));
+    setWindowTitle(tr("Gesture Editor"));
 
 }
 
 void GestureEditor::makeConnections()
 {
     connect(d->handler,SIGNAL(somethingChanged()), this, SLOT(update()));
-    connect(d->combo,SIGNAL(currentIndexChanged(int)),this, SLOT(currentGestureChanged()));
+    connect(d->list, SIGNAL(currentRowChanged(int)), this, SLOT(currentGestureChanged()));
     connect(d->clear,SIGNAL(clicked()),this,SLOT(eraseCurrentGestures()));
     connect(d->ok,SIGNAL(clicked()),this,SLOT(editCurrentGesture()));
     connect(d->reset,SIGNAL(clicked()),this,SLOT(resetCurrentGesture()));
@@ -99,8 +104,8 @@ void GestureEditor::eraseCurrentGestures()
 
 void GestureEditor::currentGestureChanged()
 {
-    d->canvas->setDirections(d->handler->getGesture(static_cast<gestureType>(d->combo->itemData(d->combo->currentIndex()).toUInt())));
-    d->activeType =static_cast<gestureType>(d->combo->itemData(d->combo->currentIndex()).toUInt());
+    d->canvas->setDirections(d->handler->getGesture(static_cast<gestureType>(d->list->currentItem()->type())));
+    d->activeType =static_cast<gestureType>(d->list->currentItem()->type());
 }
 
 void GestureEditor::editCurrentGesture()
