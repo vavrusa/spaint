@@ -25,21 +25,25 @@
 #include <QGraphicsLinearLayout>
 #include <QGraphicsItem>
 #include <QPropertyAnimation>
+#include <QParallelAnimationGroup>
+#include <QSequentialAnimationGroup>
 #include <QDebug>
 #include <QMap>
 #include "canvascontainment.h"
 #include "canvas.h"
+#include "overlay.h"
 
 // Static settings
 const static int BorderWidth = 10;
 
 struct CanvasContainment::Private {
 
-   Private() : animation(0), view(0)
-   {}
+   Private() : anim(0), view(0) {
+   }
 
-   QPropertyAnimation*       animation;     // Current animation
+   QParallelAnimationGroup*  anim;          // Current animations
    QGraphicsWidget*         container;      // Container for layout
+   Overlay*                overlay;         // Canvas overlay controls
    QGraphicsView*            view;          // Graphics scene
    QGraphicsLinearLayout*    layout;        // Layout
    QList<Canvas*>            list;          // Ordered list
@@ -66,6 +70,11 @@ CanvasContainment::CanvasContainment(QWidget *parent)
    d->layout = new QGraphicsLinearLayout(Qt::Horizontal, d->container);
    d->container->setLayout(d->layout);
    addItem(d->container);
+
+   // Create overlay
+   d->overlay = new Overlay(); // As top-level
+   addItem(d->overlay);
+   d->overlay->setOpacity(0.0);
 
    // Invalidate current canvas ptr
    d->current = d->list.end();
@@ -175,18 +184,44 @@ void CanvasContainment::focusToCanvas(Canvas* c)
    if(proxy != 0) {
 
       // Create animation
-      if(d->animation == 0) {
-         d->animation = new QPropertyAnimation(d->view, "sceneRect");
+      if(d->anim == 0) {
+
+         // Add view animation
+         d->anim = new QParallelAnimationGroup(this);
+
+         QPropertyAnimation* anim = new QPropertyAnimation(d->view, "sceneRect");
+         anim->setDuration(500);
+         anim->setEasingCurve(QEasingCurve::OutQuad);
+         d->anim->insertAnimation(0, anim);
+
+         // Add overlay animation
+         anim = new QPropertyAnimation(d->overlay, "opacity");
+         anim->setStartValue(0.0);
+         anim->setEndValue(1.0);
+         anim->setDuration(500);
+         anim->setEasingCurve(QEasingCurve::InQuad);
+         d->anim->addAnimation(anim);
       }
 
+      // Skip on empty list
+      if(d->anim->animationCount() < 2)
+         return;
+
+      // Update animations
+      d->anim->stop();
+
       // Plan animation to shift current viewport to target rect
+      QPropertyAnimation* anim = qobject_cast<QPropertyAnimation*>(d->anim->animationAt(0));
       QRectF targetRect(proxy->sceneBoundingRect());
-      d->animation->stop();
-      d->animation->setDuration(500);
-      d->animation->setEasingCurve(QEasingCurve::OutQuad);
-      d->animation->setStartValue(d->view->sceneRect());
-      d->animation->setEndValue(targetRect);
-      d->animation->start();
+      anim->setStartValue(anim->targetObject()->property(anim->propertyName()));
+      anim->setEndValue(targetRect);
+
+      // Update overlay
+      d->overlay->resize(targetRect.width(), d->overlay->boundingRect().height());
+      d->overlay->setPos(targetRect.bottomLeft());
+
+      // Run group
+      d->anim->start();
    }
 }
 
