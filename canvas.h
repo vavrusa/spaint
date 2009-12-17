@@ -67,6 +67,9 @@ class Canvas : public QGraphicsScene
       mName = name;
    }
 
+   /** Return items. */
+   QList<QGraphicsPathItem*> pathItems() const;
+
    /** Return color. */
    QColor color(QPalette::ColorRole role = QPalette::Foreground) {
       if(role == QPalette::Background)

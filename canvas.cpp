@@ -66,6 +66,19 @@ QGraphicsView* Canvas::createView(QWidget* parent)
    return view;
 }
 
+QList<QGraphicsPathItem*> Canvas::pathItems() const
+{
+   QList<QGraphicsPathItem*> list;
+   QList<QGraphicsItem*> src(QGraphicsScene::items());
+   foreach(QGraphicsItem* i, src) {
+      QGraphicsPathItem* n = dynamic_cast<QGraphicsPathItem*>(i);
+      if(n != 0)
+         list.append(n);
+   }
+
+   return list;
+}
+
 void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
    // Don't process events when not painting
