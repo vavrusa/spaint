@@ -56,14 +56,16 @@ private slots:
    bool offerCanvas(Canvas* canvas);
    bool disofferCanvas(Canvas* canvas);
    bool sendCreatedPath(Canvas* canvas, QPainterPath path);
+   void readData();
    void cleanConnections();
+   void tst(QAbstractSocket::SocketState);
 
 protected:
    void incomingConnection(int sock);
 
 private:
-   bool offerCanvasToClient(int client, Canvas* canvas);
-   bool offerAllCanvasesToClient(int client);
+   bool offerCanvasToClient(QTcpSocket* tcpSocket, Canvas* canvas);
+   bool offerAllCanvasesToClient(QTcpSocket* tcpSocket);
 
    struct Private;
    Private* d;

@@ -80,9 +80,6 @@ void NetworkClient::receiveData()
    in >> dataType;
 
    switch(dataType) {
-   case NetworkService::STRING:
-      qDebug() << "NetworkClient::receiveData() String";
-      break;
    case NetworkService::CANVAS:
    {
       qDebug() << "NetworkClient::receiveData() Canvas";

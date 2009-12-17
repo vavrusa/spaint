@@ -42,7 +42,7 @@ public:
    enum DataType {
       CANVAS,
       CANVASPATH,
-      STRING
+      UNKNOWN
    };
 
    struct CANVAS_stub {

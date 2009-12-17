@@ -33,10 +33,10 @@ public:
    Private()
    {}
 
-   QList<int> clients;
+   QList<QTcpSocket*> clients;
+   QMap<QTcpSocket*,QMutex*> clientLock;
    QList<Canvas*> canvases;
-   QMultiMap<Canvas*, int> canvasClient;
-   // TODO: Client doesn't have to be subscribed to canvas actions (offer state only)
+   QMultiMap<Canvas*,QTcpSocket*> canvasClients;
 };
 
 NetworkServer::NetworkServer(QObject* parent)
@@ -86,35 +86,60 @@ bool NetworkServer::stop()
    return true;
 }
 
-void NetworkServer::incomingConnection(int sock)
+void NetworkServer::incomingConnection(int socketDescriptor)
 {
-   qDebug() << "server::incomingConnection(" << sock << ")";
+   qDebug() << "server::incomingConnection(" << socketDescriptor << ")";
+
+   QTcpSocket* tcpSocket = new QTcpSocket();
+
+   if (!tcpSocket->setSocketDescriptor(socketDescriptor)) {
+      qDebug() << "NetworkServer::incomingConnection() tcpSocket error";
+   }
+
+   d->clients << tcpSocket;
+   //QMutex* lock = new QMutex();
+   //d->clientLock.insert(tcpSocket, lock);
+
+   connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(cleanConnections()));
+   connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readData()));
+   connect(tcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
+           this, SLOT(tst(QAbstractSocket::SocketState)));
 
    foreach (Canvas* canvas, d->canvases)
-      offerCanvasToClient(sock, canvas);
+      offerCanvasToClient(tcpSocket, canvas);
+}
+
+void NetworkServer::tst(QAbstractSocket::SocketState state)
+{
+   qDebug() << "Client QTcpSocket changed state." << state;
+}
+
+void NetworkServer::readData()
+{
+   qDebug() << "NetworkServer::readData()";
+
 }
 
 void NetworkServer::cleanConnections()
 {
-   /*
-   for (QList<int>::iterator it = d->clients.begin(); it != d->clients.end(); ++it)
+   for (QList<QTcpSocket*>::iterator it = d->clients.begin(); it != d->clients.end(); ++it)
       if ((*it)->state() == QAbstractSocket::UnconnectedState)
          d->clients.erase(it);
-    */
+   //TODO: delete other stuff as mutexes etc.
 }
 
-bool NetworkServer::offerCanvasToClient(int sock, Canvas* canvas)
+bool NetworkServer::offerCanvasToClient(QTcpSocket* tcpSocket, Canvas* canvas)
 {
    qDebug() << "NetworkServer::offerCanvasToClient()";
 
    NetworkService::CANVAS_stub* stub = new NetworkService::CANVAS_stub;
    stub->canvas = canvas;
 
-   NetworkWorker* worker = new NetworkWorker(sock, NetworkService::CANVAS, stub);
+   NetworkWorker* worker = new NetworkWorker(tcpSocket, NetworkService::CANVAS, stub);
    QThreadPool::globalInstance()->start(worker);
 
    // FIXME: Pernament subscribing - wait for "SUBSCRIBE" instead
-   d->canvasClient.insert(canvas, sock);
+   d->canvasClients.insert(canvas, tcpSocket);
 }
 
 bool NetworkServer::offerCanvas(Canvas* canvas)
@@ -128,7 +153,7 @@ bool NetworkServer::offerCanvas(Canvas* canvas)
    connect(canvas, SIGNAL(pathCreated(Canvas*,QPainterPath)),
            this, SLOT(sendCreatedPath(Canvas*,QPainterPath)));
 
-   foreach (int client, d->clients)
+   foreach (QTcpSocket* client, d->clients)
       offerCanvasToClient(client, canvas);
 
    return true;
@@ -147,8 +172,8 @@ bool NetworkServer::disofferCanvas(Canvas* canvas)
 
 bool NetworkServer::sendCreatedPath(Canvas* canvas, QPainterPath path)
 {
-   QMultiMap<Canvas*, int>::iterator it = d->canvasClient.find(canvas);
-   while (it != d->canvasClient.end() && it.key() == canvas) {
+   QMultiMap<Canvas*, QTcpSocket*>::iterator it = d->canvasClients.find(canvas);
+   while (it != d->canvasClients.end() && it.key() == canvas) {
       qDebug() << "NetworkServer::sendCreatedPath(" << canvas << ", client=" << it.value() << ")";
 
       NetworkService::CANVASPATH_stub* stub = new NetworkService::CANVASPATH_stub;

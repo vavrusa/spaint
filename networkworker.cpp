@@ -25,6 +25,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsItem>
 #include <QPainterPath>
+#include <QMutex>
 
 #include "networkservice.h"
 #include "networkworker.h"
@@ -32,38 +33,35 @@
 struct NetworkWorker::Private
 {
 public:
-   Private(int _socketDescriptor, NetworkService::DataType _dataType, void* _data)
-      : socketDescriptor(_socketDescriptor), tcpSocket(0), dataType(_dataType), data(_data)
+   Private(QTcpSocket* _tcpSocket, NetworkService::DataType _dataType, void* _data)
+      : tcpSocket(_tcpSocket), dataType(_dataType), data(_data)
    {
    }
 
-   int socketDescriptor;
+   QThread* parentThread;
    QTcpSocket* tcpSocket;
    NetworkService::DataType dataType;
    void* data;
+   QMutex mutex;
 };
 
-NetworkWorker::NetworkWorker(int _socketDescriptor, NetworkService::DataType _dataType, void* _data)
-      : QRunnable(), d(new Private(_socketDescriptor, _dataType, _data))
+NetworkWorker::NetworkWorker(QTcpSocket* _tcpSocket, NetworkService::DataType _dataType, void* _data)
+      : QObject(), QRunnable(), d(new Private(_tcpSocket, _dataType, _data))
 {
+   d->parentThread = thread();
+//   d->mutex.lock();
 }
 
 NetworkWorker::~NetworkWorker()
 {
+//   d->mutex.unlock();
    delete d;
 }
 
 void NetworkWorker::run()
 {
+   this->moveToThread(thread());
    qDebug() << "NetworkWorker::run()";
-
-   qDebug() << "d->socketDescriptor=" << d->socketDescriptor;
-   d->tcpSocket = new QTcpSocket();
-
-   if (!d->tcpSocket->setSocketDescriptor(d->socketDescriptor)) {
-      qDebug() << "NetworkWorker::run() d->tcpSocket error in thread";
-      return;
-   }
 
    QByteArray dataBlock;
    QDataStream out(&dataBlock, QIODevice::WriteOnly);
@@ -103,7 +101,7 @@ void NetworkWorker::run()
    d->tcpSocket->write(dataBlock);
    d->tcpSocket->waitForBytesWritten();
 
-   delete d->tcpSocket;
+   this->moveToThread(d->parentThread);
 }
 
 #include "networkworker.moc"
