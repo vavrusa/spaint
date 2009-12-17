@@ -82,7 +82,7 @@ void CanvasMgr::importPath(const QString& name, QPainterPath path)
    qDebug() << "CanvasMgr::importPath(" << name << ", path)";
    foreach (Canvas* canvas, d->imported) {
       if (canvas->name() == name) {
-         canvas->importPath(path);
+         canvas->addPath(path);
          qDebug() << "CanvasMgr::importPath() .. found Canvas";
          break;
       }

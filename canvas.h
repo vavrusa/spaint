@@ -132,16 +132,11 @@ class Canvas : public QGraphicsScene
      * e.g. by mouse/touch interface.
      * \param path new path
      */
-   void pathCreated(Canvas* canvas, QPainterPath path);
+   void pathCreated(Canvas* canvas, QGraphicsPathItem* item);
    /** Signalizing new gesture on canvas.
      * \param gesture created gesture
      */
    void gestureCreated(QPainterPath gesture);
-
-   public slots:
-   /** Create imported path
-     */
-   void importPath(QPainterPath path);
 
    protected:
    void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
