@@ -81,8 +81,9 @@ void NetworkClient::receiveData()
 
    switch(dataType) {
    case NetworkService::CANVAS:
+   case NetworkService::CANVASPATH:
    {
-      qDebug() << "NetworkClient::receiveData() Canvas";
+      qDebug() << "NetworkClient::receiveData() Canvas(Path)";
 
       // Canvas name
       QString name;
@@ -93,7 +94,9 @@ void NetworkClient::receiveData()
       stream << ":"  << d->tcpSocket->peerPort() << ")";
       qDebug() << name;
 
-      emit createCanvas(name, true);
+      // Create new canvas for the first time
+      if (dataType == NetworkService::CANVAS)
+         emit createCanvas(name, false);
 
       // Canvas Paths
       while (d->tcpSocket->bytesAvailable() > 0) {
@@ -103,27 +106,6 @@ void NetworkClient::receiveData()
          emit createCanvasPath(name, path);
       }
 
-      break;
-   }
-   case NetworkService::CANVASPATH:
-   {
-      qDebug() << "NetworkClient::receiveData() Canvas Path";
-
-      // Canvas name
-      QString name;
-      QTextStream stream(&name);
-      in >> name;
-      stream << " (" << d->tcpSocket->peerName();
-      stream << ", " << d->tcpSocket->peerAddress().toString();
-      stream << ":"  << d->tcpSocket->peerPort() << ")";
-      qDebug() << name;
-
-      // Canvas Path
-      while (d->tcpSocket->bytesAvailable() > 0) {
-         QPainterPath path;
-         in >> path;
-         emit createCanvasPath(name, path);
-      }
       break;
    }
    default:

@@ -42,6 +42,8 @@ public:
    enum DataType {
       CANVAS,
       CANVASPATH,
+      REMOVECANVAS,
+      REMOVECANVASPATH,
       UNKNOWN
    };
 

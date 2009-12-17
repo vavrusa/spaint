@@ -25,12 +25,13 @@
 #include <QGraphicsScene>
 #include <QGraphicsItem>
 #include <QPainterPath>
+#include <QGraphicsPathItem>
 #include <QMutex>
 
 #include "networkservice.h"
 #include "networkworker.h"
 
-struct NetworkWorker::Private
+class NetworkWorker::Private : public QObject
 {
 public:
    Private(QTcpSocket* _tcpSocket, NetworkService::DataType _dataType, void* _data)
@@ -49,18 +50,19 @@ NetworkWorker::NetworkWorker(QTcpSocket* _tcpSocket, NetworkService::DataType _d
       : QObject(), QRunnable(), d(new Private(_tcpSocket, _dataType, _data))
 {
    d->parentThread = thread();
-//   d->mutex.lock();
+ //  d->mutex.lock();
 }
 
 NetworkWorker::~NetworkWorker()
 {
-//   d->mutex.unlock();
+ //  d->mutex.unlock();
    delete d;
 }
 
 void NetworkWorker::run()
 {
-   this->moveToThread(thread());
+   moveToThread(thread());
+
    qDebug() << "NetworkWorker::run()";
 
    QByteArray dataBlock;
@@ -76,18 +78,19 @@ void NetworkWorker::run()
       qDebug() << "NetworkWorker::run() sending Canvas";
       NetworkService::CANVAS_stub* stub = static_cast<NetworkService::CANVAS_stub*>(d->data);
       out << stub->canvas->name();
-      foreach(QGraphicsItem* item, stub->canvas->items())
-         out << item->shape();
+      foreach(QGraphicsPathItem* item, stub->canvas->pathItems()) {
+         out << item->path();
+         out << item->pen();
+         out << item->brush();
+      }
       break;
    }
    case NetworkService::CANVASPATH:
    {
       qDebug() << "NetworkWorker::run() sending Canvas Path";
       NetworkService::CANVASPATH_stub* stub = static_cast<NetworkService::CANVASPATH_stub*>(d->data);
-      //out << static_cast<quint32>(canvas->name().length());
       out << stub->canvas->name();
-      //out << static_cast<quint32>(path->length());
-      out << stub->path;
+      out << *stub->path;
       break;
    }
    default:
@@ -101,7 +104,7 @@ void NetworkWorker::run()
    d->tcpSocket->write(dataBlock);
    d->tcpSocket->waitForBytesWritten();
 
-   this->moveToThread(d->parentThread);
+   moveToThread(d->parentThread);
 }
 
 #include "networkworker.moc"
