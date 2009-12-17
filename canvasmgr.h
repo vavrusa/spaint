@@ -37,7 +37,7 @@ class CanvasMgr : public QObject
    public slots:
    void init();
    Canvas* create(const QString& name = QString(), bool locally = true);
-   void importPath(const QString& name, QPainterPath path);
+   void importPath(const QString& name, QPainterPath path,QPen,QBrush);
    bool remove(Canvas* canvas, bool locally = true);
 
    signals:

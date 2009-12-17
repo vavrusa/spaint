@@ -53,7 +53,7 @@ public:
 
    struct CANVASPATH_stub {
       Canvas* canvas;
-      QPainterPath* path;
+      QGraphicsPathItem* item;
    };
 
    NetworkService(QObject *parent = 0);

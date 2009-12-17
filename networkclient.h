@@ -3,6 +3,8 @@
 
 #include <QString>
 #include <QPainterPath>
+#include <QPen>
+#include <QBrush>
 
 #include "canvasmgr.h"
 #include "canvas.h"
@@ -30,7 +32,7 @@ public:
 
 signals:
    void createCanvas(QString name, bool imported = true);
-   void createCanvasPath(QString name, QPainterPath path);
+   void createCanvasPath(QString name, QPainterPath path, QPen pen, QBrush brush);
 
 private slots:
    void receiveData();

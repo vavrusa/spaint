@@ -154,8 +154,8 @@ bool NetworkServer::offerCanvas(Canvas* canvas, bool locally)
 
    // TODO: Subscribing to canvas data (offer), don't do it pernamently
 
-   connect(canvas, SIGNAL(pathCreated(Canvas*,QPainterPath)),
-           this, SLOT(sendCreatedPath(Canvas*,QPainterPath)));
+   connect(canvas, SIGNAL(pathCreated(Canvas*,QGraphicsPathItem*)),
+           this, SLOT(sendCreatedPath(Canvas*,QGraphicsPathItem*)));
 
    foreach (QTcpSocket* client, d->clients)
       offerCanvasToClient(client, canvas);
@@ -174,7 +174,7 @@ bool NetworkServer::disofferCanvas(Canvas* canvas)
    return true;
 }
 
-bool NetworkServer::sendCreatedPath(Canvas* canvas, QPainterPath path)
+bool NetworkServer::sendCreatedPath(Canvas* canvas, QGraphicsPathItem* path)
 {
    QMultiMap<Canvas*, QTcpSocket*>::iterator it = d->canvasClients.find(canvas);
    while (it != d->canvasClients.end() && it.key() == canvas) {
@@ -182,7 +182,7 @@ bool NetworkServer::sendCreatedPath(Canvas* canvas, QPainterPath path)
 
       NetworkService::CANVASPATH_stub* stub = new NetworkService::CANVASPATH_stub;
       stub->canvas = canvas;
-      stub->path = &path;
+      stub->item = path;
       //stub->path = new QPainterPath(path);
 
       NetworkWorker* worker = new NetworkWorker(it.value(), NetworkService::CANVASPATH, stub);

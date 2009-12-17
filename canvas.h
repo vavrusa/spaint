@@ -126,6 +126,12 @@ class Canvas : public QGraphicsScene
       return QSize(640, 480);
    }
 
+   public slots:
+   void importPath(QPainterPath path, QPen pen, QBrush brush) {
+      addPath(path, pen, brush);
+      update();
+   }
+
    signals:
    /** Signalizing new path on canvas.
      * Signal is emmited only when path is painted non-programatically,

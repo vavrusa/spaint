@@ -87,12 +87,12 @@ bool CanvasMgr::remove(Canvas* canvas, bool locally)
    return true;
 }
 
-void CanvasMgr::importPath(const QString& name, QPainterPath path)
+void CanvasMgr::importPath(const QString& name, QPainterPath path, QPen pen, QBrush brush)
 {
    qDebug() << "CanvasMgr::importPath(" << name << ", path)";
    foreach (Canvas* canvas, d->imported) {
       if (canvas->name() == name) {
-         canvas->addPath(path);
+         canvas->importPath(path, pen, brush);
          qDebug() << "CanvasMgr::importPath() .. found Canvas";
          break;
       }

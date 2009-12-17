@@ -1,4 +1,7 @@
 #include <QtNetwork>
+#include <QPainterPath>
+#include <QBrush>
+#include <QPen>
 
 #include "networkservice.h"
 #include "networkclient.h"
@@ -27,8 +30,8 @@ bool NetworkClient::observe(CanvasMgr* cm)
 {
    connect(this, SIGNAL(createCanvas(QString,bool)),
            cm, SLOT(create(QString,bool)));
-   connect(this, SIGNAL(createCanvasPath(QString,QPainterPath)),
-           cm, SLOT(importPath(QString,QPainterPath)));
+   connect(this, SIGNAL(createCanvasPath(QString,QPainterPath,QPen,QBrush)),
+           cm, SLOT(importPath(QString,QPainterPath,QPen,QBrush)));
 
    return true;
 }
@@ -103,7 +106,12 @@ void NetworkClient::receiveData()
          qDebug() << "Received another canvas path..";
          QPainterPath path;
          in >> path;
-         emit createCanvasPath(name, path);
+         QPen pen;
+         in >> pen;
+         QBrush brush;
+         in >> brush;
+
+         emit createCanvasPath(name, path, pen, brush);
       }
 
       break;

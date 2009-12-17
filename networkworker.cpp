@@ -90,7 +90,9 @@ void NetworkWorker::run()
       qDebug() << "NetworkWorker::run() sending Canvas Path";
       NetworkService::CANVASPATH_stub* stub = static_cast<NetworkService::CANVASPATH_stub*>(d->data);
       out << stub->canvas->name();
-      out << *stub->path;
+      out << stub->item->path();
+      out << stub->item->pen();
+      out << stub->item->brush();
       break;
    }
    default:
