@@ -202,7 +202,13 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 void Canvas::importPath(QPainterPath path)
 {
    qDebug() << "Canvas::createImportedPath()";
-   //mGlyph = addPath(QPainterPath(), pen);
+
+   // Brush style
+   if(mBrush.color().alpha() > 0)
+      mBrush.setStyle(Qt::SolidPattern);
+   else
+      mBrush.setStyle(Qt::NoBrush);
+   addPath(path, mPen, mBrush);
 }
 
 #include "canvas.moc"
