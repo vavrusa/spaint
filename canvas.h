@@ -27,7 +27,7 @@
 class CanvasMgr;
 class QPainter;
 class QGraphicsSceneMouseEvent;
-class QGraphicsBlurEffect;
+class QGraphicsColorizeEffect;
 
 class Canvas : public QGraphicsScene
 {
@@ -148,7 +148,7 @@ class Canvas : public QGraphicsScene
    QBrush mBrush;
    Tool mTool;
    QGraphicsItem* mHovered;
-   QGraphicsBlurEffect* mEffect;
+   QGraphicsColorizeEffect* mEffect;
 };
 
 #endif // CANVAS_H
