@@ -61,8 +61,8 @@ void Handler::initializeGestures()
     d->gestureTypeData[BColor]   = Info(tr("Background color"),QIcon(":/icons/32x32/brush-color.png"));
 
     //saving default gestures
-    d->defaultGestureMap[Pen] = DirectionList() << Up << Left;
-    d->defaultGestureMap[Eraser] = DirectionList() << Down << Left;
+    d->defaultGestureMap[Pen] = DirectionList() << Up << Right;
+    d->defaultGestureMap[Eraser] = DirectionList() << Up << Left;
     d->defaultGestureMap[Clear] = DirectionList() << Down;
     d->defaultGestureMap[FColor] = DirectionList() << Up << Right << Down << Left;
     d->defaultGestureMap[BColor] = DirectionList() << Down << Right << Up << Left;
