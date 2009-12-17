@@ -39,9 +39,11 @@ enum Type {
    Pen,
    Brush,
    Eraser,
-   Clear,
+   Transform,
    FColor,
    BColor,
+   Clear,
+   Save
 };
 
 typedef QPair<QString, QIcon> Info;

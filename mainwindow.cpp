@@ -90,6 +90,7 @@ bool MainWindow::observe(CanvasMgr* cm)
 
    // Observe gestures
    connect(&d->gh, SIGNAL(recognized(int)), d->containment, SLOT(gesture(int)));
+   connect(&d->gh, SIGNAL(recognized(int)), this, SLOT(gesture(int)));
 
    // Start gesture recognizer
    d->gh.observe(cm);
@@ -183,6 +184,12 @@ void MainWindow::loadSettings()
       // Defaults
       resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
    }
+}
+
+void MainWindow::gesture(int code)
+{
+   if(code == Gesture::Save)
+      renderCanvas();
 }
 
 #include "mainwindow.moc"

@@ -51,7 +51,7 @@ Overlay::Overlay(QGraphicsWidget *parent) :
    d->icons.clear();
    d->icons.insert(Canvas::Pen,    new GraphicsIcon(QPixmap(":icons/48x48/draw-pen.png"), this));
    d->icons.insert(Canvas::Eraser, new GraphicsIcon(QPixmap(":icons/48x48/draw-eraser.png"), this));
-   d->icons.insert(Canvas::Brush,  new GraphicsIcon(QPixmap(":icons/48x48/fill-color.png"), this));
+   d->icons.insert(Canvas::Transform, new GraphicsIcon(QPixmap(":icons/48x48/transform.png"), this));
    d->icons.insert(Canvas::Picker, new GraphicsIcon(QPixmap(":icons/48x48/color-picker.png"), this));
 
    // Append buttons to layout

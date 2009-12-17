@@ -71,9 +71,11 @@ void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
    // Don't process events when not painting
    if(mState == Idle || mGlyph == 0) {
 
+      // Hover
+      mHovered = itemAt(e->scenePos());
+
       // Eraser
       if(mTool == Eraser) {
-         mHovered = itemAt(e->scenePos());
          if(mHovered != 0) {
             mEffect->setEnabled(true);
             mHovered->setGraphicsEffect(mEffect);
@@ -81,6 +83,11 @@ void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
          else
             mEffect->setEnabled(false);
          return;
+      }
+
+      // Transform
+      if(mTool == Transform) {
+         QGraphicsScene::mouseMoveEvent(e);
       }
 
       return;
@@ -111,9 +118,6 @@ void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
       mGlyph->setPath(path);
       lastPos = pt;
    }
-
-   // Default action
-   QGraphicsScene::mouseMoveEvent(e);
 }
 
 void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
@@ -126,6 +130,8 @@ void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
       return;
    }
 
+   QGraphicsScene::mousePressEvent(e);
+
    // Left mouse starts drawing
    if(mState == Idle && e->button() == Qt::LeftButton) {
 
@@ -137,7 +143,7 @@ void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
 
       // Pen
       if(mTool == Pen) {
-         mGlyph = addPath(QPainterPath(e->scenePos()), mPen, mBrush);
+         mGlyph = addPath(QPainterPath(), mPen, mBrush);
          mState = Drawing;
       }
    }
@@ -147,24 +153,26 @@ void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
       QPen pen;
       pen.setColor(QColor(215, 0, 25, 64)); // Transparent red
       pen.setWidth(8);
-      mGlyph = addPath(QPainterPath(e->scenePos()), pen);
+      mGlyph = addPath(QPainterPath(), pen);
       mState = Gesture;
    }
-
-   QGraphicsScene::mousePressEvent(e);
 }
 
 void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
    // Check polygon
-   if(mState != Idle && mGlyph->path().length() == 0)
+   if(mState == Idle)
       return;
 
    // End of drawing
    if(mState == Drawing && e->button() == Qt::LeftButton) {
+      mGlyph->setFlag(QGraphicsItem::ItemIsMovable);
       qDebug() << "Polygon finished - pts:" << mGlyph->path().elementCount()
                << "~length: " << mGlyph->path().length();
-      emit(pathCreated(mGlyph->path()));
+
+      if(!mGlyph->path().isEmpty())
+         emit(pathCreated(mGlyph->path()));
+
       mGlyph = 0;
       mState = Idle;
    }
@@ -176,9 +184,16 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
       QPainterPath path = mGlyph->path();
       removeItem(mGlyph);
       delete mGlyph;
+
+      if(!path.isEmpty())
+         emit(gestureCreated(path));
+         mGlyph = 0;
+
       mGlyph = 0;
       mState = Idle;
-      emit(gestureCreated(path));
+
+      // Disable effects
+      mEffect->setEnabled(false);
    }
 
    QGraphicsScene::mouseReleaseEvent(e);

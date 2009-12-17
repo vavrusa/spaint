@@ -54,18 +54,22 @@ void Handler::initializeGestures()
 {
 
     //inicializing text and icon for all of the gesture types, which can be set
-    d->gestureTypeData[Pen]      = Info(tr("Select pen"),QIcon(":/icons/32x32/draw-pen.png"));
-    d->gestureTypeData[Eraser]   = Info(tr("Select eraser"),QIcon(":/icons/32x32/draw-eraser.png"));
-    d->gestureTypeData[Clear]    = Info(tr("Clear canvas"),QIcon(":/icons/32x32/canvas-clear.png"));
-    d->gestureTypeData[FColor]   = Info(tr("Pen color"),QIcon(":/icons/32x32/pen-color.png"));
-    d->gestureTypeData[BColor]   = Info(tr("Background color"),QIcon(":/icons/32x32/brush-color.png"));
+    d->gestureTypeData[Pen]       = Info(tr("Select pen"),QIcon(":/icons/32x32/draw-pen.png"));
+    d->gestureTypeData[Eraser]    = Info(tr("Select eraser"),QIcon(":/icons/32x32/draw-eraser.png"));
+    d->gestureTypeData[Transform] = Info(tr("Move object"),QIcon(":/icons/32x32/transform.png"));
+    d->gestureTypeData[Clear]     = Info(tr("Clear canvas"),QIcon(":/icons/32x32/canvas-clear.png"));
+    d->gestureTypeData[FColor]    = Info(tr("Pen color"),QIcon(":/icons/32x32/pen-color.png"));
+    d->gestureTypeData[BColor]    = Info(tr("Background color"),QIcon(":/icons/32x32/brush-color.png"));
+    d->gestureTypeData[Save]      = Info(tr("Save to file"),QIcon(":/icons/32x32/save-as.png"));
 
     //saving default gestures
-    d->defaultGestureMap[Pen] = DirectionList() << Up << Right;
-    d->defaultGestureMap[Eraser] = DirectionList() << Up << Left;
+    d->defaultGestureMap[Pen] = DirectionList() << Up << Left;
+    d->defaultGestureMap[Eraser] = DirectionList() << Up << Right;
     d->defaultGestureMap[Clear] = DirectionList() << Down;
     d->defaultGestureMap[FColor] = DirectionList() << Up << Right << Down << Left;
     d->defaultGestureMap[BColor] = DirectionList() << Down << Right << Up << Left;
+    d->defaultGestureMap[Transform] = DirectionList() << Up << Right << Down;
+    d->defaultGestureMap[Save] = DirectionList() << Left << Down << Right << Down << Left;
 
     //setting up gesture paths from settings/default values
     QSettings set;
@@ -82,7 +86,10 @@ void Handler::initializeGestures()
         d->gestureMap[FColor] = strToDl(set.value("Gestures/FColor").toString());
     if(set.contains("Gestures/BColor"))
         d->gestureMap[BColor] = strToDl(set.value("Gestures/BColor").toString());
-
+    if(set.contains("Gestures/Transform"))
+        d->gestureMap[Transform] = strToDl(set.value("Gestures/Transform").toString());
+    if(set.contains("Gestures/Save"))
+        d->gestureMap[Save] = strToDl(set.value("Gestures/Save").toString());
 
     //setting up gestures in recognizer
     QMapIterator<Type,DirectionList> i(d->gestureMap);
@@ -98,11 +105,13 @@ void Handler::initializeGestures()
 void Handler::uninitializeGestures()
 {
     QSettings set;
-    set.setValue("Gestures/Pen",    dlToStr(d->gestureMap[Pen]));
-    set.setValue("Gestures/Eraser", dlToStr(d->gestureMap[Eraser]));
-    set.setValue("Gestures/Clear",  dlToStr(d->gestureMap[Clear]));
-    set.setValue("Gestures/FColor", dlToStr(d->gestureMap[FColor]));
-    set.setValue("Gestures/BColor", dlToStr(d->gestureMap[BColor]));
+    set.setValue("Gestures/Pen",       dlToStr(d->gestureMap[Pen]));
+    set.setValue("Gestures/Eraser",    dlToStr(d->gestureMap[Eraser]));
+    set.setValue("Gestures/Clear",     dlToStr(d->gestureMap[Clear]));
+    set.setValue("Gestures/FColor",    dlToStr(d->gestureMap[FColor]));
+    set.setValue("Gestures/BColor",    dlToStr(d->gestureMap[BColor]));
+    set.setValue("Gestures/Transform", dlToStr(d->gestureMap[Transform]));
+    set.setValue("Gestures/Save", dlToStr(d->gestureMap[Save]));
     set.sync();
 }
 

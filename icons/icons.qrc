@@ -14,9 +14,12 @@
       <file>32x32/draw-eraser.png</file>
       <file>32x32/draw-pen.png</file>
       <file>32x32/pen-color.png</file>
+      <file>32x32/save-as.png</file>
+      <file>32x32/transform.png</file>
       <file>48x48/color-picker.png</file>
       <file>48x48/draw-pen.png</file>
       <file>48x48/draw-eraser.png</file>
       <file>48x48/fill-color.png</file>
+      <file>48x48/transform.png</file>
   </qresource>
 </RCC>

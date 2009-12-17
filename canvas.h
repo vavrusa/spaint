@@ -48,9 +48,9 @@ class Canvas : public QGraphicsScene
       NoTool = 0,// Invalid tool
       Pen,       // Pen tool
       Eraser,    // Eraser
+      Transform,  // Transform
       Brush,     // Brush
-      Picker,    // Color picker
-      Mover      // Mover
+      Picker    // Color picker
    };
 
    /** Constructor. */
