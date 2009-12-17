@@ -52,8 +52,8 @@ NetworkServer::~NetworkServer()
 
 bool NetworkServer::observe(CanvasMgr* cm)
 {
-   connect(cm, SIGNAL(canvasCreated(Canvas*)), this, SLOT(offerCanvas(Canvas*)));
-   connect(cm, SIGNAL(canvasRemoved(Canvas*)), this, SLOT(disofferCanvas(Canvas*)));
+   connect(cm, SIGNAL(canvasCreated(Canvas*,bool)), this, SLOT(offerCanvas(Canvas*,bool)));
+   connect(cm, SIGNAL(canvasRemoved(Canvas*,bool)), this, SLOT(disofferCanvas(Canvas*,bool)));
 
    return true;
 }
@@ -142,8 +142,12 @@ bool NetworkServer::offerCanvasToClient(QTcpSocket* tcpSocket, Canvas* canvas)
    d->canvasClients.insert(canvas, tcpSocket);
 }
 
-bool NetworkServer::offerCanvas(Canvas* canvas)
+bool NetworkServer::offerCanvas(Canvas* canvas, bool locally)
 {
+   // if not locally created canvas, do not offer
+   if (!locally)
+      return false;
+
    qDebug() << "NetworkServer::offerCanvas()";
 
    d->canvases << canvas;
@@ -179,6 +183,7 @@ bool NetworkServer::sendCreatedPath(Canvas* canvas, QPainterPath path)
       NetworkService::CANVASPATH_stub* stub = new NetworkService::CANVASPATH_stub;
       stub->canvas = canvas;
       stub->path = &path;
+      //stub->path = new QPainterPath(path);
 
       NetworkWorker* worker = new NetworkWorker(it.value(), NetworkService::CANVASPATH, stub);
       QThreadPool::globalInstance()->start(worker);

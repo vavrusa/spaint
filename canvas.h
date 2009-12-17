@@ -54,7 +54,7 @@ class Canvas : public QGraphicsScene
    };
 
    /** Constructor. */
-   Canvas(const QString& name = "Canvas", bool imported = false, CanvasMgr* parent = 0);
+   Canvas(const QString& name = "Canvas", CanvasMgr* parent = 0);
 
    /** Return canvas name.
      * \return canvas name
@@ -66,6 +66,9 @@ class Canvas : public QGraphicsScene
    void setName(const QString& name) {
       mName = name;
    }
+
+   /** Return items. */
+   QList<QGraphicsPathItem*> pathItems() const;
 
    /** Return color. */
    QColor color(QPalette::ColorRole role = QPalette::Foreground) {
@@ -129,16 +132,11 @@ class Canvas : public QGraphicsScene
      * e.g. by mouse/touch interface.
      * \param path new path
      */
-   void pathCreated(Canvas* canvas, QPainterPath path);
+   void pathCreated(Canvas* canvas, QGraphicsPathItem* item);
    /** Signalizing new gesture on canvas.
      * \param gesture created gesture
      */
    void gestureCreated(QPainterPath gesture);
-
-   public slots:
-   /** Create imported path
-     */
-   void importPath(QPainterPath path);
 
    protected:
    void mouseMoveEvent(QGraphicsSceneMouseEvent* e);

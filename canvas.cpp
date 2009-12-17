@@ -29,9 +29,9 @@
 #include "canvas.h"
 #include "canvasmgr.h"
 
-Canvas::Canvas(const QString& name, bool imported, CanvasMgr* parent)
+Canvas::Canvas(const QString& name, CanvasMgr* parent)
       : QGraphicsScene(parent), mState(Idle), mGlyph(0), mName(name),
-        mImported(imported), mTool(Pen), mHovered(0)
+        mTool(Pen), mHovered(0)
 {
    QSize defaultSize(defaultSizeHint());
    setSceneRect(0, 0, defaultSize.width(), defaultSize.height());
@@ -64,6 +64,19 @@ QGraphicsView* Canvas::createView(QWidget* parent)
    view->setCacheMode(QGraphicsView::CacheBackground);
    connect(this, SIGNAL(sceneRectChanged(QRectF)), view, SLOT(updateSceneRect(QRectF)));
    return view;
+}
+
+QList<QGraphicsPathItem*> Canvas::pathItems() const
+{
+   QList<QGraphicsPathItem*> list;
+   QList<QGraphicsItem*> src(QGraphicsScene::items());
+   foreach(QGraphicsItem* i, src) {
+      QGraphicsPathItem* n = dynamic_cast<QGraphicsPathItem*>(i);
+      if(n != 0)
+         list.append(n);
+   }
+
+   return list;
 }
 
 void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
@@ -171,7 +184,7 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
                << "~length: " << mGlyph->path().length();
 
       if(!mGlyph->path().isEmpty() && !mImported)
-         emit(pathCreated(this, mGlyph->path()));
+         emit(pathCreated(this, mGlyph));
 
       mGlyph = 0;
       mState = Idle;
@@ -197,18 +210,6 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
    }
 
    QGraphicsScene::mouseReleaseEvent(e);
-}
-
-void Canvas::importPath(QPainterPath path)
-{
-   qDebug() << "Canvas::createImportedPath()";
-
-   // Brush style
-   if(mBrush.color().alpha() > 0)
-      mBrush.setStyle(Qt::SolidPattern);
-   else
-      mBrush.setStyle(Qt::NoBrush);
-   addPath(path, mPen, mBrush);
 }
 
 #include "canvas.moc"

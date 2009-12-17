@@ -49,28 +49,38 @@ void CanvasMgr::init()
 {
    // Load main canvas
    create(tr("Main Canvas"));
+   //create(tr("Canvas #2"));
 }
 
-Canvas* CanvasMgr::create(const QString& name, bool imported)
+Canvas* CanvasMgr::create(const QString& name, bool locally)
 {
-   // TODO
-   Canvas* c = new Canvas(name, imported, this);
-
-   if (!imported) {
-      d->local << c;
+   /* Find and eventually return the canvas of the same name */
+   if (locally) {
+      foreach(Canvas* canvas, d->local)
+         if (canvas->name() == name)
+            return canvas;
    } else {
-      d->imported << c;
+      foreach(Canvas* canvas, d->imported)
+         if (canvas->name() == name)
+            return canvas;
    }
 
-   emit canvasCreated(c);
+   Canvas* c = new Canvas(name, this);
+
+   if (locally)
+      d->local << c;
+   else
+      d->imported << c;
+
+   emit canvasCreated(c, locally);
 
    return c;
 }
 
-bool CanvasMgr::remove(Canvas* canvas)
+bool CanvasMgr::remove(Canvas* canvas, bool locally)
 {
    // Emit signal
-   emit canvasRemoved(canvas);
+   emit canvasRemoved(canvas, locally);
 
    // TODO: remove from imported and local list
    canvas->deleteLater();
@@ -82,7 +92,7 @@ void CanvasMgr::importPath(const QString& name, QPainterPath path)
    qDebug() << "CanvasMgr::importPath(" << name << ", path)";
    foreach (Canvas* canvas, d->imported) {
       if (canvas->name() == name) {
-         canvas->importPath(path);
+         canvas->addPath(path);
          qDebug() << "CanvasMgr::importPath() .. found Canvas";
          break;
       }

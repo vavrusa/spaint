@@ -53,7 +53,7 @@ signals:
    void serverState(NetworkServer::State, const QString& msg = QString());
 
 private slots:
-   bool offerCanvas(Canvas* canvas);
+   bool offerCanvas(Canvas* canvas, bool local);
    bool disofferCanvas(Canvas* canvas);
    bool sendCreatedPath(Canvas* canvas, QPainterPath path);
    void readData();
