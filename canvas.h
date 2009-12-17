@@ -54,7 +54,7 @@ class Canvas : public QGraphicsScene
    };
 
    /** Constructor. */
-   Canvas(const QString& name = "Canvas", bool imported = false, CanvasMgr* parent = 0);
+   Canvas(const QString& name = "Canvas", CanvasMgr* parent = 0);
 
    /** Return canvas name.
      * \return canvas name

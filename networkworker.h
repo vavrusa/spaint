@@ -41,7 +41,7 @@ signals:
    void error(QAbstractSocket::SocketError);
 
 private:
-   struct Private;
+   class Private;
    Private* d;
 };
 

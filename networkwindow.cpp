@@ -94,9 +94,10 @@ void NetworkWindow::showServerState(NetworkServer::State state, const QString &m
 {
    switch (state) {
       case NetworkServer::ERR_START:
-         QMessageBox::critical(this, tr("Shared Paint Server"),
+       /*  QMessageBox::critical(this, tr("Shared Paint Server"),
                                tr("Unable to start the server: %1.")
                                .arg(msg));
+       */
          break;
 
       case NetworkServer::START:

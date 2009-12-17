@@ -29,9 +29,9 @@
 #include "canvas.h"
 #include "canvasmgr.h"
 
-Canvas::Canvas(const QString& name, bool imported, CanvasMgr* parent)
+Canvas::Canvas(const QString& name, CanvasMgr* parent)
       : QGraphicsScene(parent), mState(Idle), mGlyph(0), mName(name),
-        mImported(imported), mTool(Pen), mHovered(0)
+        mTool(Pen), mHovered(0)
 {
    QSize defaultSize(defaultSizeHint());
    setSceneRect(0, 0, defaultSize.width(), defaultSize.height());

@@ -36,13 +36,13 @@ class CanvasMgr : public QObject
 
    public slots:
    void init();
-   Canvas* create(const QString& name = QString(), bool imported = false);
+   Canvas* create(const QString& name = QString(), bool locally = true);
    void importPath(const QString& name, QPainterPath path);
-   bool remove(Canvas* canvas);
+   bool remove(Canvas* canvas, bool locally = true);
 
    signals:
-   void canvasCreated(Canvas* canvas);
-   void canvasRemoved(Canvas* canvas);
+   void canvasCreated(Canvas* canvas, bool locally = true);
+   void canvasRemoved(Canvas* canvas, bool locally = true);
 
    private:
    struct Private;
