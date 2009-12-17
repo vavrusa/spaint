@@ -23,6 +23,7 @@
 #define NETWORKSERVICE_H
 
 #include <QtNetwork>
+#include <QPainterPath>
 
 #include "canvas.h"
 #include "canvasmgr.h"
@@ -42,6 +43,15 @@ public:
       CANVAS,
       CANVASPATH,
       STRING
+   };
+
+   struct CANVAS_stub {
+      Canvas* canvas;
+   };
+
+   struct CANVASPATH_stub {
+      Canvas* canvas;
+      QPainterPath* path;
    };
 
    NetworkService(QObject *parent = 0);

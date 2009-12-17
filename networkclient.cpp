@@ -1,9 +1,8 @@
-#include <QMessageBox>
 #include <QtNetwork>
-#include <QDebug>
 
 #include "networkservice.h"
 #include "networkclient.h"
+#include "canvas.h"
 
 struct NetworkClient::Private
 {
@@ -26,8 +25,10 @@ NetworkClient::~NetworkClient()
 
 bool NetworkClient::observe(CanvasMgr* cm)
 {
-   connect(this, SIGNAL(createCanvas(QString)),
-           cm, SLOT(create(QString)));
+   connect(this, SIGNAL(createCanvas(QString,bool)),
+           cm, SLOT(create(QString,bool)));
+   connect(this, SIGNAL(createCanvasPath(QString,QPainterPath)),
+           cm, SLOT(importPath(QString,QPainterPath)));
 
    return true;
 }
@@ -67,7 +68,7 @@ bool NetworkClient::stop()
 
 void NetworkClient::receiveData()
 {
-   qDebug() << "Client::receiveData()";
+   qDebug() << "Client::receiveData(" << d->tcpSocket->bytesAvailable() << ")";
 
    QDataStream in(d->tcpSocket);
    in.setVersion(QDataStream::Qt_4_6);
@@ -95,7 +96,16 @@ void NetworkClient::receiveData()
       stream << ":"  << d->tcpSocket->peerPort() << ")";
       qDebug() << name;
 
-      emit createCanvas(name);
+      emit createCanvas(name, true);
+
+      // Canvas Paths
+      while (d->tcpSocket->bytesAvailable() > 0) {
+         qDebug() << "Received another canvas path..";
+         QPainterPath path;
+         in >> path;
+         emit createCanvasPath(name, path);
+      }
+
       break;
    }
    case NetworkService::CANVASPATH:
@@ -112,25 +122,20 @@ void NetworkClient::receiveData()
       qDebug() << name;
 
       // Canvas Path
-      QPainterPath path;
-      /*Canvas* canvas = static_cast<Canvas*>(d->data1);
-
-      QByteArray
-      out << static_cast<quint32>(canvas->name().length());
-      out << canvas->name();
-      QPainterPath* path = static_cast<QPainterPath*>(d->data2);
-      out << static_cast<quint32>(path->length());
-      out << path;
-*/
-      emit createCanvasPath(name, path);
+      while (d->tcpSocket->bytesAvailable() > 0) {
+         QPainterPath path;
+         in >> path;
+         emit createCanvasPath(name, path);
+      }
       break;
    }
    default:
       qDebug() << "NetworkClient::receiveData() Unknown dataType";
    }
 
-   QString data;
-   in >> data;
+   qDebug() << "Client::endReceiveData(" << d->tcpSocket->bytesAvailable() << ")";
+
+
 }
 
 void NetworkClient::error(QAbstractSocket::SocketError err)

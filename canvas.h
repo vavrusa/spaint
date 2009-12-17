@@ -145,6 +145,8 @@ class Canvas : public QGraphicsScene
    void mousePressEvent(QGraphicsSceneMouseEvent* e);
    void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
+   friend class NetworkWorker;
+
    private:
    int mState;
    QGraphicsPathItem* mGlyph;

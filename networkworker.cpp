@@ -19,8 +19,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
+#include <QVariant>
 #include <QRunnable>
 #include <QTcpSocket>
+#include <QGraphicsScene>
+#include <QGraphicsItem>
 #include <QPainterPath>
 
 #include "networkservice.h"
@@ -29,19 +32,19 @@
 struct NetworkWorker::Private
 {
 public:
-   Private(int _socketDescriptor, NetworkService::DataType _dataType, void* _data1, void* _data2)
-      : socketDescriptor(_socketDescriptor), tcpSocket(0), dataType(_dataType), data1(_data1), data2(_data2)
+   Private(int _socketDescriptor, NetworkService::DataType _dataType, void* _data)
+      : socketDescriptor(_socketDescriptor), tcpSocket(0), dataType(_dataType), data(_data)
    {
    }
 
    int socketDescriptor;
    QTcpSocket* tcpSocket;
    NetworkService::DataType dataType;
-   void* data1, *data2;
+   void* data;
 };
 
-NetworkWorker::NetworkWorker(int _socketDescriptor, NetworkService::DataType _dataType, void* _data1, void* _data2)
-      : QRunnable(), d(new Private(_socketDescriptor, _dataType, _data1, _data2))
+NetworkWorker::NetworkWorker(int _socketDescriptor, NetworkService::DataType _dataType, void* _data)
+      : QRunnable(), d(new Private(_socketDescriptor, _dataType, _data))
 {
 }
 
@@ -70,25 +73,23 @@ void NetworkWorker::run()
    out << static_cast<quint32>(d->dataType);
 
    switch(d->dataType) {
-   case NetworkService::STRING:
-      out << QString("String");
-      break;
    case NetworkService::CANVAS:
    {
       qDebug() << "NetworkWorker::run() sending Canvas";
-      Canvas* canvas = static_cast<Canvas*>(d->data1);
-      out << canvas->name();
+      NetworkService::CANVAS_stub* stub = static_cast<NetworkService::CANVAS_stub*>(d->data);
+      out << stub->canvas->name();
+      foreach(QGraphicsItem* item, stub->canvas->items())
+         out << item->shape();
       break;
    }
    case NetworkService::CANVASPATH:
    {
       qDebug() << "NetworkWorker::run() sending Canvas Path";
-      Canvas* canvas = static_cast<Canvas*>(d->data1);
+      NetworkService::CANVASPATH_stub* stub = static_cast<NetworkService::CANVASPATH_stub*>(d->data);
       //out << static_cast<quint32>(canvas->name().length());
-      out << canvas->name();
-      QPainterPath* path = static_cast<QPainterPath*>(d->data2);
+      out << stub->canvas->name();
       //out << static_cast<quint32>(path->length());
-      out << *path;
+      out << stub->path;
       break;
    }
    default:
@@ -97,6 +98,7 @@ void NetworkWorker::run()
 
    out.device()->seek(0);
    out << (quint32)(dataBlock.size() - sizeof(quint32));
+   qDebug() << "Bytes to send:" << (quint32)(dataBlock.size() - sizeof(quint32));
 
    d->tcpSocket->write(dataBlock);
    d->tcpSocket->waitForBytesWritten();

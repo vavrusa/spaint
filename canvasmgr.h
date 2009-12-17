@@ -23,6 +23,7 @@
 #define CANVASMGR_H
 
 #include <QString>
+#include <QPainterPath>
 #include "canvas.h"
 
 class CanvasMgr : public QObject
@@ -36,6 +37,7 @@ class CanvasMgr : public QObject
    public slots:
    void init();
    Canvas* create(const QString& name = QString(), bool imported = false);
+   void importPath(const QString& name, QPainterPath path);
    bool remove(Canvas* canvas);
 
    signals:

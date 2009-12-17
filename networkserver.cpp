@@ -107,7 +107,10 @@ bool NetworkServer::offerCanvasToClient(int sock, Canvas* canvas)
 {
    qDebug() << "NetworkServer::offerCanvasToClient()";
 
-   NetworkWorker* worker = new NetworkWorker(sock, NetworkService::CANVAS, canvas);
+   NetworkService::CANVAS_stub* stub = new NetworkService::CANVAS_stub;
+   stub->canvas = canvas;
+
+   NetworkWorker* worker = new NetworkWorker(sock, NetworkService::CANVAS, stub);
    QThreadPool::globalInstance()->start(worker);
 
    // FIXME: Pernament subscribing - wait for "SUBSCRIBE" instead
@@ -144,12 +147,15 @@ bool NetworkServer::disofferCanvas(Canvas* canvas)
 
 bool NetworkServer::sendCreatedPath(Canvas* canvas, QPainterPath path)
 {
-   qDebug() << "NetworkServer::sendCreatedPath()";
-
    QMultiMap<Canvas*, int>::iterator it = d->canvasClient.find(canvas);
    while (it != d->canvasClient.end() && it.key() == canvas) {
-      qDebug() << "NetworkServer::sendCreatedPath(canvas=" << canvas << ", client=" << it.value() << ")";
-      NetworkWorker* worker = new NetworkWorker(it.value(), NetworkService::CANVASPATH, canvas, &path);
+      qDebug() << "NetworkServer::sendCreatedPath(" << canvas << ", client=" << it.value() << ")";
+
+      NetworkService::CANVASPATH_stub* stub = new NetworkService::CANVASPATH_stub;
+      stub->canvas = canvas;
+      stub->path = &path;
+
+      NetworkWorker* worker = new NetworkWorker(it.value(), NetworkService::CANVASPATH, stub);
       QThreadPool::globalInstance()->start(worker);
       ++it;
    }

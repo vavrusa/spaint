@@ -19,11 +19,14 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
+#include <QDebug>
 #include <QList>
+#include "canvas.h"
 #include "canvasmgr.h"
 
 struct CanvasMgr::Private {
-   QList<Canvas*> list;
+   QList<Canvas*> local;
+   QList<Canvas*> imported;
 };
 
 CanvasMgr::CanvasMgr(QObject* parent)
@@ -34,7 +37,9 @@ CanvasMgr::CanvasMgr(QObject* parent)
 CanvasMgr::~CanvasMgr()
 {
    QList<Canvas*>::iterator it;
-   for(it = d->list.begin(); it < d->list.end(); ++it)
+   for(it = d->local.begin(); it < d->local.end(); ++it)
+      remove(*it);
+   for(it = d->imported.begin(); it < d->imported.end(); ++it)
       remove(*it);
 
    delete d;
@@ -51,9 +56,13 @@ Canvas* CanvasMgr::create(const QString& name, bool imported)
    // TODO
    Canvas* c = new Canvas(name, imported, this);
 
-   // Emit signal only when canvas is created locally
-   if (!imported)
-      emit canvasCreated(c);
+   if (!imported) {
+      d->local << c;
+   } else {
+      d->imported << c;
+   }
+
+   emit canvasCreated(c);
 
    return c;
 }
@@ -63,10 +72,21 @@ bool CanvasMgr::remove(Canvas* canvas)
    // Emit signal
    emit canvasRemoved(canvas);
 
-   // TODO
+   // TODO: remove from imported and local list
    canvas->deleteLater();
    return true;
 }
 
+void CanvasMgr::importPath(const QString& name, QPainterPath path)
+{
+   qDebug() << "CanvasMgr::importPath(" << name << ", path)";
+   foreach (Canvas* canvas, d->imported) {
+      if (canvas->name() == name) {
+         canvas->importPath(path);
+         qDebug() << "CanvasMgr::importPath() .. found Canvas";
+         break;
+      }
+   }
+}
 
 #include "canvasmgr.moc"

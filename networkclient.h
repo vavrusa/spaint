@@ -29,7 +29,7 @@ public:
    bool stop();
 
 signals:
-   void createCanvas(QString name);
+   void createCanvas(QString name, bool imported = true);
    void createCanvasPath(QString name, QPainterPath path);
 
 private slots:
