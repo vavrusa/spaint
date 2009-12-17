@@ -27,6 +27,7 @@ public slots:
 private slots:
    void receiveData();
    void error(QAbstractSocket::SocketError);
+   void tst(QAbstractSocket::SocketState);
 
 private:
    struct Private;

@@ -59,8 +59,8 @@ protected:
    void incomingConnection(int sock);
 
 private:
-   bool offerCanvasToClient(QTcpSocket* client, Canvas* canvas);
-   bool offerAllCanvasesToClient(QTcpSocket* client);
+   bool offerCanvasToClient(int client, Canvas* canvas);
+   bool offerAllCanvasesToClient(int client);
 
    struct Private;
    Private* d;

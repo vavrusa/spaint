@@ -18,10 +18,6 @@ public:
 NetworkClient::NetworkClient(QObject *parent)
       : QObject(parent), d(new Private)
 {
-   d->tcpSocket = new QTcpSocket(this);
-   connect(d->tcpSocket, SIGNAL(readyRead()), this, SLOT(receiveData()));
-   connect(d->tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-           this, SLOT(error(QAbstractSocket::SocketError)));
 }
 
 NetworkClient::~NetworkClient()
@@ -32,8 +28,15 @@ NetworkClient::~NetworkClient()
 
 bool NetworkClient::start(QString& addr, quint16 port)
 {
-   qDebug() << "Client::start(" << addr << "," << port << ")";
-   d->tcpSocket->abort();
+   d->tcpSocket = new QTcpSocket(this);
+   connect(d->tcpSocket, SIGNAL(readyRead()), this, SLOT(receiveData()));
+   connect(d->tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+           this, SLOT(error(QAbstractSocket::SocketError)));
+   connect(d->tcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
+           this, SLOT(tst(QAbstractSocket::SocketState)));
+
+   qDebug() << "NetworkClient::start(" << addr << "," << port << ")";
+   //d->tcpSocket->abort();
    d->tcpSocket->connectToHost(addr, port);
 
    //emit client connecting
@@ -41,8 +44,14 @@ bool NetworkClient::start(QString& addr, quint16 port)
    return true;
 }
 
+void NetworkClient::tst(QAbstractSocket::SocketState state)
+{
+   qDebug() << "Client QTcpSocket changed state." << state;
+}
+
 bool NetworkClient::stop()
 {
+
    d->tcpSocket->abort();
 
    //emit client stopping
@@ -55,22 +64,14 @@ void NetworkClient::receiveData()
    qDebug() << "Client::receiveData()";
 
    QDataStream in(d->tcpSocket);
-   in.setVersion(QDataStream::Qt_4_0);
+   in.setVersion(QDataStream::Qt_4_6);
 
-   if (d->blockSize == 0) {
-       if (d->tcpSocket->bytesAvailable() < (int)sizeof(quint16))
-           return;
-
-       in >> d->blockSize;
-   }
-
-   if (d->tcpSocket->bytesAvailable() < d->blockSize)
-       return;
+   in >> d->blockSize;
 
    QString data;
    in >> data;
 
-   qDebug() << data;
+   qDebug() << "Neco prijimam: " << d->blockSize << data.size() << data;
 
 }
 

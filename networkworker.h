@@ -27,18 +27,19 @@
 
 #include "networkservice.h"
 
-class NetworkWorker : public QRunnable
+class NetworkWorker : public QObject, public QRunnable
 {
+   Q_OBJECT
 
 public:
-   NetworkWorker(QTcpSocket*, NetworkService::DataType, void*);
+   NetworkWorker(int socketDescriptor, NetworkService::DataType dataType, void* data);
+   ~NetworkWorker();
 
    void run();
 
 private:
-   QTcpSocket*              tcpSocket;
-   NetworkService::DataType dataType;
-   QByteArray               dataBlock;
+   struct Private;
+   Private* d;
 };
 
 #endif // NETWORKWORKER_H

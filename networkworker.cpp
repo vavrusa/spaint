@@ -25,28 +25,72 @@
 #include "networkservice.h"
 #include "networkworker.h"
 
-NetworkWorker::NetworkWorker(QTcpSocket* _tcpSocket, NetworkService::DataType _dataType, void* _data)
-      : tcpSocket(_tcpSocket), dataType(_dataType), dataBlock()
+struct NetworkWorker::Private
 {
-   QDataStream out(&dataBlock, QIODevice::WriteOnly);
-   out.setVersion(QDataStream::Qt_4_0);
-   out << (quint16)0;
-   
-   switch(dataType) {
-   case NetworkService::STRING:
-      out << QString("Ahoj :)");
+public:
+   Private(int _socketDescriptor, NetworkService::DataType _dataType, void* _data)
+      : socketDescriptor(_socketDescriptor), tcpSocket(0), dataType(_dataType), data(_data)
+   {
    }
 
-   out.device()->seek(0);
-   out << (quint16)(dataBlock.size() - sizeof(quint16));
+   int socketDescriptor;
+   QTcpSocket* tcpSocket;
+   NetworkService::DataType dataType;
+   void* data;
+};
 
+NetworkWorker::NetworkWorker(int _socketDescriptor, NetworkService::DataType _dataType, void* _data)
+      : QRunnable(), d(new Private(_socketDescriptor, _dataType, _data))
+{
+}
+
+NetworkWorker::~NetworkWorker()
+{
+   delete d;
 }
 
 void NetworkWorker::run()
 {
    qDebug() << "NetworkWorker::run()";
 
-   tcpSocket->write(dataBlock);
+   qDebug() << "d->socketDescriptor=" << d->socketDescriptor;
+   d->tcpSocket = new QTcpSocket();
+
+   if (!d->tcpSocket->setSocketDescriptor(d->socketDescriptor)) {
+      qDebug() << "d->tcpSocket error in thread";
+      //emit serverState(NetworkServer::ERR_RUN, d->tcpSocket->errorString());
+      return;
+   }
+
+   /*
+   connect(d->tcpSocket, SIGNAL(disconnected()), this, SLOT(cleanConnections()));
+   connect(d->tcpSocket, SIGNAL(readyRead()), this, SLOT(receiveData()));
+   */
+   connect(d->tcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
+           this, SLOT(tst(QAbstractSocket::SocketState)));
+
+   QByteArray dataBlock;
+   QDataStream out(&dataBlock, QIODevice::WriteOnly);
+   out.setVersion(QDataStream::Qt_4_6);
+   out << (quint16)0;
+
+   switch(d->dataType) {
+   case NetworkService::STRING:
+      out << QString("String");
+      break;
+   default:
+      out << QString("What?");
+   }
+
+   out.device()->seek(0);
+   out << (quint16)(dataBlock.size() - sizeof(quint16));
+   d->tcpSocket->write(dataBlock);
+   d->tcpSocket->waitForBytesWritten();
+
+   qDebug() << "Tohle jsou data:" << dataBlock << dataBlock.size() << "pica";
+   qDebug() << dataBlock.size() << "pica";
+
+   delete d->tcpSocket;
 }
 
 #include "networkworker.moc"
