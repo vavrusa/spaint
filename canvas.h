@@ -27,6 +27,7 @@
 class CanvasMgr;
 class QPainter;
 class QGraphicsSceneMouseEvent;
+class QGraphicsBlurEffect;
 
 class Canvas : public QGraphicsScene
 {
@@ -34,6 +35,25 @@ class Canvas : public QGraphicsScene
    Q_PROPERTY(QString name READ name WRITE setName)
 
    public:
+
+   /// State tracking
+   enum State {
+      Idle    = 0x00, // Not interacting
+      Drawing = 0x01, // Drawing path
+      Gesture = 0x02  // Drawing mouse gesture
+   };
+
+   /// Tool
+   enum Tool {
+      NoTool = 0,// Invalid tool
+      Pen,       // Pen tool
+      Eraser,    // Eraser
+      Brush,     // Brush
+      Picker,    // Color picker
+      Mover      // Mover
+   };
+
+   /** Constructor. */
    Canvas(const QString& name = "Canvas", CanvasMgr* parent = 0);
 
    /** Return canvas name.
@@ -73,28 +93,28 @@ class Canvas : public QGraphicsScene
       mPen.setWidth(width);
    }
 
+   /** Return tool. */
+   Tool tool() {
+      return mTool;
+   }
+
+   /** Set tool. */
+   void setTool(Tool tool) {
+      mTool = tool;
+   }
+
+   /** Reimplement remove. */
+   void removeItem(QGraphicsItem* item) {
+      if(item == mHovered)
+         mHovered = 0;
+      QGraphicsScene::removeItem(item);
+   }
+
    /** Create associated canvas view.
      * \param parent - parent widget for view
      * \return view associated with canvas
      */
    QGraphicsView* createView(QWidget* parent = 0);
-
-   /// State tracking
-   enum State {
-      Idle    = 0x00, // Not interacting
-      Drawing = 0x01, // Drawing path
-      Gesture = 0x02  // Drawing mouse gesture
-   };
-
-   /// Tool
-   enum Tool {
-      NoTool = 0,// Invalid tool
-      Pen,       // Pen tool
-      Eraser,    // Eraser
-      Brush,     // Brush
-      Picker,    // Color picker
-      Mover      // Mover
-   };
 
    /** Return default canvas size.
        \return canvas size
@@ -126,7 +146,9 @@ class Canvas : public QGraphicsScene
    QString mName;
    QPen mPen;
    QBrush mBrush;
-
+   Tool mTool;
+   QGraphicsItem* mHovered;
+   QGraphicsBlurEffect* mEffect;
 };
 
 #endif // CANVAS_H

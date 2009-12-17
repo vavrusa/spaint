@@ -24,10 +24,10 @@
 
 #include <QGraphicsScene>
 #include <QPalette>
+#include "canvas.h"
 class QGraphicsSceneWheelEvent;
 class QGraphicsView;
 class QPainter;
-class Canvas;
 
 class CanvasContainment : public QGraphicsScene
 {
@@ -55,6 +55,7 @@ class CanvasContainment : public QGraphicsScene
 
    private slots:
    void updateLayout(const QRectF& newRect);
+   void changeTool(Canvas::Tool tool);
    void changeColor(QPalette::ColorRole role, const QColor& color);
    void changeThickness(int num);
 

@@ -107,6 +107,8 @@ void Overlay::selectIcon(GraphicsIcon* icon)
    foreach(GraphicsIcon* i, d->icons) {
       i->setActivated(i == icon);
    }
+
+   emit toolChanged(d->tool);
 }
 
 void Overlay::pickColor(QPalette::ColorRole role)

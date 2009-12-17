@@ -22,13 +22,16 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsPathItem>
 #include <QGraphicsView>
+#include <QGraphicsBlurEffect>
 #include <QPainterPath>
+#include <QCursor>
 #include <QDebug>
 #include "canvas.h"
 #include "canvasmgr.h"
 
 Canvas::Canvas(const QString& name, CanvasMgr* parent)
-      : QGraphicsScene(parent), mState(Idle), mGlyph(0), mName(name)
+      : QGraphicsScene(parent), mState(Idle), mGlyph(0), mName(name),
+        mTool(Pen), mHovered(0)
 {
    QSize defaultSize(defaultSizeHint());
    setSceneRect(0, 0, defaultSize.width(), defaultSize.height());
@@ -37,6 +40,11 @@ Canvas::Canvas(const QString& name, CanvasMgr* parent)
    mPen = QPen(Qt::black);
    mBrush = QBrush(QColor(255, 255, 255, 0));
    mPen.setWidth(1);
+
+   // Create effect
+   mEffect = new QGraphicsBlurEffect(this);
+   mEffect->setBlurHints(QGraphicsBlurEffect::PerformanceHint);
+   mEffect->setBlurRadius(6.0);
 }
 
 QGraphicsView* Canvas::createView(QWidget* parent)
@@ -48,6 +56,7 @@ QGraphicsView* Canvas::createView(QWidget* parent)
    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    view->setBackgroundBrush(Qt::white);
+   view->setMouseTracking(true);
 
    // TODO: Antialiasing is too CPU intensive, investigate
    //view->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
@@ -60,8 +69,22 @@ QGraphicsView* Canvas::createView(QWidget* parent)
 void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
    // Don't process events when not painting
-   if(mState == Idle || mGlyph == 0)
+   if(mState == Idle || mGlyph == 0) {
+
+      // Eraser
+      if(mTool == Eraser) {
+         mHovered = itemAt(e->scenePos());
+         if(mHovered != 0) {
+            mEffect->setEnabled(true);
+            mHovered->setGraphicsEffect(mEffect);
+         }
+         else
+            mEffect->setEnabled(false);
+         return;
+      }
+
       return;
+   }
 
    QPointF pt = e->scenePos();
 
@@ -95,17 +118,28 @@ void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 
 void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
+   // Eraser
+   if(mTool == Eraser && e->button() == Qt::LeftButton) {
+      if(mHovered != 0 && mEffect->isEnabled()) {
+         removeItem(mHovered);
+      }
+      return;
+   }
+
    // Left mouse starts drawing
    if(mState == Idle && e->button() == Qt::LeftButton) {
 
-      // Brush pattern
+      // Brush style
       if(mBrush.color().alpha() > 0)
          mBrush.setStyle(Qt::SolidPattern);
       else
          mBrush.setStyle(Qt::NoBrush);
 
-      mGlyph = addPath(QPainterPath(e->scenePos()), mPen, mBrush);
-      mState = Drawing;
+      // Pen
+      if(mTool == Pen) {
+         mGlyph = addPath(QPainterPath(e->scenePos()), mPen, mBrush);
+         mState = Drawing;
+      }
    }
 
    // Right mouse starts gesture
@@ -139,11 +173,12 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
    if(mState == Gesture && e->button() == Qt::RightButton) {
       qDebug() << "Gesture finished - pts:" << mGlyph->path().elementCount()
                << "~length: " << mGlyph->path().length();
-      emit(gestureCreated(mGlyph->path()));
+      QPainterPath path = mGlyph->path();
       removeItem(mGlyph);
       delete mGlyph;
       mGlyph = 0;
       mState = Idle;
+      emit(gestureCreated(path));
    }
 
    QGraphicsScene::mouseReleaseEvent(e);

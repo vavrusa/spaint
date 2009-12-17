@@ -27,6 +27,7 @@ NumberIcon::NumberIcon(QGraphicsItem *parent)
    : GraphicsIcon(QPixmap(), parent), mNum(1), mDiff(0), mColor(Qt::black)
 {
    resize(48, 48);
+   setCursor(Qt::SizeVerCursor);
    setAcceptedMouseButtons(Qt::LeftButton);
 }
 

@@ -27,6 +27,7 @@
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 #include <QSequentialAnimationGroup>
+#include <QApplication>
 #include <QDebug>
 #include <QMap>
 #include "canvascontainment.h"
@@ -78,6 +79,8 @@ CanvasContainment::CanvasContainment(QWidget *parent)
            this,       SLOT(changeColor(QPalette::ColorRole,QColor)));
    connect(d->overlay, SIGNAL(thicknessChanged(int)),
            this,       SLOT(changeThickness(int)));
+   connect(d->overlay, SIGNAL(toolChanged(Canvas::Tool)),
+           this,       SLOT(changeTool(Canvas::Tool)));
    addItem(d->overlay);
    d->overlay->setOpacity(0.0);
 
@@ -158,10 +161,18 @@ void CanvasContainment::renderCanvas(QIODevice& device, Canvas* c)
 
 void CanvasContainment::gesture(int code)
 {
+   Canvas* c = *d->current;
+   if(c == 0)
+      return;
+
    switch(code)
    {
-   case Gesture::Pen:   d->overlay->setTool(Canvas::Pen); break;
-   case Gesture::Eraser: d->overlay->setTool(Canvas::Eraser); break;
+   case Gesture::Pen:
+      d->overlay->setTool(Canvas::Pen);
+      break;
+   case Gesture::Eraser:
+      d->overlay->setTool(Canvas::Eraser);
+      break;
    case Gesture::Clear: clearCanvas(); break;
    case Gesture::FColor: d->overlay->pickColor(QPalette::Foreground); break;
    case Gesture::BColor: d->overlay->pickColor(QPalette::Background); break;
@@ -244,6 +255,7 @@ void CanvasContainment::focusToCanvas(Canvas* c)
       d->overlay->changeColor(QPalette::Foreground, c->color(QPalette::Foreground));
       d->overlay->changeColor(QPalette::Background, c->color(QPalette::Background));
       d->overlay->changeThickness(c->thickness());
+      changeTool(d->overlay->tool());
 
       // Run group
       d->anim->start();
@@ -274,6 +286,31 @@ void CanvasContainment::updateLayout(const QRectF& newRect)
 
    // Current
    focusToCanvas(*d->current);
+}
+
+void CanvasContainment::changeTool(Canvas::Tool tool)
+{
+   if(*d->current == 0)
+      return;
+
+   // Check tool
+   if(tool == Canvas::NoTool)
+      tool = Canvas::Pen;
+
+   // Update cursor
+   QGraphicsProxyWidget* proxy = d->map[*d->current];
+   switch(tool)
+   {
+   case Canvas::Pen:
+      proxy->widget()->setCursor(Qt::CrossCursor);
+      break;
+   default:
+      proxy->widget()->setCursor(Qt::ArrowCursor);
+      break;
+   }
+
+   // Propagate tool change
+   (*d->current)->setTool(tool);
 }
 
 void CanvasContainment::changeColor(QPalette::ColorRole role, const QColor& color)

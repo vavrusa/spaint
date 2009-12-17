@@ -47,6 +47,9 @@ class Overlay : public QGraphicsWidget
    /** Thickness changed. */
    void thicknessChanged(int);
 
+   /** Tool changed. */
+   void toolChanged(Canvas::Tool);
+
    public slots:
 
    /** Pick color. */
