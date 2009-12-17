@@ -22,7 +22,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsPathItem>
 #include <QGraphicsView>
-#include <QGraphicsBlurEffect>
+#include <QGraphicsColorizeEffect>
 #include <QPainterPath>
 #include <QCursor>
 #include <QDebug>
@@ -42,9 +42,9 @@ Canvas::Canvas(const QString& name, CanvasMgr* parent)
    mPen.setWidth(1);
 
    // Create effect
-   mEffect = new QGraphicsBlurEffect(this);
-   mEffect->setBlurHints(QGraphicsBlurEffect::PerformanceHint);
-   mEffect->setBlurRadius(6.0);
+   mEffect = new QGraphicsColorizeEffect(this);
+   mEffect->setColor(Qt::red);
+   mEffect->setStrength(0.75);
 }
 
 QGraphicsView* Canvas::createView(QWidget* parent)
@@ -130,8 +130,6 @@ void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
       return;
    }
 
-   QGraphicsScene::mousePressEvent(e);
-
    // Left mouse starts drawing
    if(mState == Idle && e->button() == Qt::LeftButton) {
 
@@ -156,6 +154,8 @@ void Canvas::mousePressEvent(QGraphicsSceneMouseEvent* e)
       mGlyph = addPath(QPainterPath(), pen);
       mState = Gesture;
    }
+
+   QGraphicsScene::mousePressEvent(e);
 }
 
 void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
