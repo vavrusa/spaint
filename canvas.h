@@ -54,7 +54,7 @@ class Canvas : public QGraphicsScene
    };
 
    /** Constructor. */
-   Canvas(const QString& name = "Canvas", CanvasMgr* parent = 0);
+   Canvas(const QString& name = "Canvas", bool imported = false, CanvasMgr* parent = 0);
 
    /** Return canvas name.
      * \return canvas name
@@ -129,11 +129,16 @@ class Canvas : public QGraphicsScene
      * e.g. by mouse/touch interface.
      * \param path new path
      */
-   void pathCreated(QPainterPath path);
+   void pathCreated(Canvas* canvas, QPainterPath path);
    /** Signalizing new gesture on canvas.
      * \param gesture created gesture
      */
    void gestureCreated(QPainterPath gesture);
+
+   public slots:
+   /** Create imported path
+     */
+   void importPath(QPainterPath path);
 
    protected:
    void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
@@ -144,6 +149,7 @@ class Canvas : public QGraphicsScene
    int mState;
    QGraphicsPathItem* mGlyph;
    QString mName;
+   bool mImported;
    QPen mPen;
    QBrush mBrush;
    Tool mTool;

@@ -80,11 +80,13 @@ void NetworkClient::receiveData()
 
    switch(dataType) {
    case NetworkService::STRING:
-      qDebug() << "NetworkClient::receiveData(): String :)";
+      qDebug() << "NetworkClient::receiveData() String";
       break;
    case NetworkService::CANVAS:
    {
-      qDebug() << "NetworkClient::receiveData(): Canvas :)";
+      qDebug() << "NetworkClient::receiveData() Canvas";
+
+      // Canvas name
       QString name;
       QTextStream stream(&name);
       in >> name;
@@ -92,11 +94,39 @@ void NetworkClient::receiveData()
       stream << ", " << d->tcpSocket->peerAddress().toString();
       stream << ":"  << d->tcpSocket->peerPort() << ")";
       qDebug() << name;
+
       emit createCanvas(name);
       break;
    }
+   case NetworkService::CANVASPATH:
+   {
+      qDebug() << "NetworkClient::receiveData() Canvas Path";
+
+      // Canvas name
+      QString name;
+      QTextStream stream(&name);
+      in >> name;
+      stream << " (" << d->tcpSocket->peerName();
+      stream << ", " << d->tcpSocket->peerAddress().toString();
+      stream << ":"  << d->tcpSocket->peerPort() << ")";
+      qDebug() << name;
+
+      // Canvas Path
+      QPainterPath path;
+      /*Canvas* canvas = static_cast<Canvas*>(d->data1);
+
+      QByteArray
+      out << static_cast<quint32>(canvas->name().length());
+      out << canvas->name();
+      QPainterPath* path = static_cast<QPainterPath*>(d->data2);
+      out << static_cast<quint32>(path->length());
+      out << path;
+*/
+      emit createCanvasPath(name, path);
+      break;
+   }
    default:
-      qDebug() << "NetworkClient::receiveData(): Unknown dataType";
+      qDebug() << "NetworkClient::receiveData() Unknown dataType";
    }
 
    QString data;

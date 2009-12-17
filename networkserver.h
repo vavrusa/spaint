@@ -23,6 +23,7 @@
 #define NETWORKSERVER_H
 
 #include <QTcpServer>
+#include <QPainterPath>
 
 #include "canvasmgr.h"
 #include "canvas.h"
@@ -54,6 +55,7 @@ signals:
 private slots:
    bool offerCanvas(Canvas* canvas);
    bool disofferCanvas(Canvas* canvas);
+   bool sendCreatedPath(Canvas* canvas, QPainterPath path);
    void cleanConnections();
 
 protected:

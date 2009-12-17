@@ -46,13 +46,15 @@ void CanvasMgr::init()
    create(tr("Main Canvas"));
 }
 
-Canvas* CanvasMgr::create(const QString& name)
+Canvas* CanvasMgr::create(const QString& name, bool imported)
 {
    // TODO
-   Canvas* c = new Canvas(name, this);
+   Canvas* c = new Canvas(name, imported, this);
 
-   // Emit signal
-   emit canvasCreated(c);
+   // Emit signal only when canvas is created locally
+   if (!imported)
+      emit canvasCreated(c);
+
    return c;
 }
 

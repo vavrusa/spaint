@@ -29,9 +29,9 @@
 #include "canvas.h"
 #include "canvasmgr.h"
 
-Canvas::Canvas(const QString& name, CanvasMgr* parent)
+Canvas::Canvas(const QString& name, bool imported, CanvasMgr* parent)
       : QGraphicsScene(parent), mState(Idle), mGlyph(0), mName(name),
-        mTool(Pen), mHovered(0)
+        mImported(imported), mTool(Pen), mHovered(0)
 {
    QSize defaultSize(defaultSizeHint());
    setSceneRect(0, 0, defaultSize.width(), defaultSize.height());
@@ -170,8 +170,8 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
       qDebug() << "Polygon finished - pts:" << mGlyph->path().elementCount()
                << "~length: " << mGlyph->path().length();
 
-      if(!mGlyph->path().isEmpty())
-         emit(pathCreated(mGlyph->path()));
+      if(!mGlyph->path().isEmpty() && !mImported)
+         emit(pathCreated(this, mGlyph->path()));
 
       mGlyph = 0;
       mState = Idle;
@@ -199,5 +199,10 @@ void Canvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
    QGraphicsScene::mouseReleaseEvent(e);
 }
 
+void Canvas::importPath(QPainterPath path)
+{
+   qDebug() << "Canvas::createImportedPath()";
+   //mGlyph = addPath(QPainterPath(), pen);
+}
 
 #include "canvas.moc"

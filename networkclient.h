@@ -1,7 +1,8 @@
 #ifndef NETWORKCLIENT_H
 #define NETWORKCLIENT_H
 
-#include <QObject>
+#include <QString>
+#include <QPainterPath>
 
 #include "canvasmgr.h"
 #include "canvas.h"
@@ -29,6 +30,7 @@ public:
 
 signals:
    void createCanvas(QString name);
+   void createCanvasPath(QString name, QPainterPath path);
 
 private slots:
    void receiveData();

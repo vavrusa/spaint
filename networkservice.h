@@ -40,7 +40,7 @@ public:
 
    enum DataType {
       CANVAS,
-      PATH,
+      CANVASPATH,
       STRING
    };
 

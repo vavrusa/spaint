@@ -35,7 +35,7 @@ class CanvasMgr : public QObject
 
    public slots:
    void init();
-   Canvas* create(const QString& name = QString());
+   Canvas* create(const QString& name = QString(), bool imported = false);
    bool remove(Canvas* canvas);
 
    signals:

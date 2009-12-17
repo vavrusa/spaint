@@ -32,7 +32,7 @@ class NetworkWorker : public QObject, public QRunnable
    Q_OBJECT
 
 public:
-   NetworkWorker(int socketDescriptor, NetworkService::DataType dataType, void* data);
+   NetworkWorker(int socketDescriptor, NetworkService::DataType dataType, void* data1 = 0, void* data2 = 0);
    ~NetworkWorker();
 
    void run();

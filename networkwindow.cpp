@@ -36,8 +36,8 @@
 #include "networkservice.h"
 
 // Const
-#define DEFAULT_WIDTH 400
-#define DEFAULT_HEIGHT 300
+#define DEFAULT_WIDTH 200
+#define DEFAULT_HEIGHT 150
 
 struct NetworkWindow::Private
 {

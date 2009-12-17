@@ -22,6 +22,7 @@
 #include <QtNetwork>
 #include <QThreadPool>
 #include <QList>
+#include <QMap>
 
 #include "networkserver.h"
 #include "networkworker.h"
@@ -34,6 +35,8 @@ public:
 
    QList<int> clients;
    QList<Canvas*> canvases;
+   QMultiMap<Canvas*, int> canvasClient;
+   // TODO: Client doesn't have to be subscribed to canvas actions (offer state only)
 };
 
 NetworkServer::NetworkServer(QObject* parent)
@@ -106,6 +109,9 @@ bool NetworkServer::offerCanvasToClient(int sock, Canvas* canvas)
 
    NetworkWorker* worker = new NetworkWorker(sock, NetworkService::CANVAS, canvas);
    QThreadPool::globalInstance()->start(worker);
+
+   // FIXME: Pernament subscribing - wait for "SUBSCRIBE" instead
+   d->canvasClient.insert(canvas, sock);
 }
 
 bool NetworkServer::offerCanvas(Canvas* canvas)
@@ -113,6 +119,11 @@ bool NetworkServer::offerCanvas(Canvas* canvas)
    qDebug() << "NetworkServer::offerCanvas()";
 
    d->canvases << canvas;
+
+   // TODO: Subscribing to canvas data (offer), don't do it pernamently
+
+   connect(canvas, SIGNAL(pathCreated(Canvas*,QPainterPath)),
+           this, SLOT(sendCreatedPath(Canvas*,QPainterPath)));
 
    foreach (int client, d->clients)
       offerCanvasToClient(client, canvas);
@@ -131,6 +142,17 @@ bool NetworkServer::disofferCanvas(Canvas* canvas)
    return true;
 }
 
-//void receiveData()
+bool NetworkServer::sendCreatedPath(Canvas* canvas, QPainterPath path)
+{
+   qDebug() << "NetworkServer::sendCreatedPath()";
+
+   QMultiMap<Canvas*, int>::iterator it = d->canvasClient.find(canvas);
+   while (it != d->canvasClient.end() && it.key() == canvas) {
+      qDebug() << "NetworkServer::sendCreatedPath(canvas=" << canvas << ", client=" << it.value() << ")";
+      NetworkWorker* worker = new NetworkWorker(it.value(), NetworkService::CANVASPATH, canvas, &path);
+      QThreadPool::globalInstance()->start(worker);
+      ++it;
+   }
+}
 
 #include "networkserver.moc"
