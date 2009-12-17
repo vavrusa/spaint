@@ -99,6 +99,7 @@ bool MainWindow::observe(CanvasMgr* cm)
    // Observe canvases
    connect(cm,   SIGNAL(canvasCreated(Canvas*)), d->containment, SLOT(addCanvas(Canvas*)));
    connect(cm,   SIGNAL(canvasRemoved(Canvas*)), d->containment, SLOT(removeCanvas(Canvas*)));
+   connect(this, SIGNAL(canvasRequested(QString)), cm, SLOT(create(QString)));
 
    // Observe gestures
    connect(&d->gh, SIGNAL(recognized(int)), d->containment, SLOT(gesture(int)));
@@ -123,6 +124,7 @@ QMenuBar* MainWindow::createMenuBar()
    QMenuBar* bar = new QMenuBar(this);
 
    QMenu* sessionMenu = bar->addMenu(tr("&File"));
+   sessionMenu->addAction(QIcon(":/icons/16x16/canvas-add.png"), tr("&Create"), this, SLOT(createCanvas()));
    sessionMenu->addAction(QIcon(":/icons/16x16/canvas-add.png"), tr("N&etwork"), d->netWin, SLOT(show()));
    sessionMenu->addAction(QIcon(":/icons/16x16/save-as.png"), tr("&Save Image"), this, SLOT(renderCanvas()), tr("Ctrl+S"));
    sessionMenu->addSeparator();
@@ -210,6 +212,12 @@ void MainWindow::gesture(int code)
 {
    if(code == Gesture::Save)
       renderCanvas();
+}
+
+void MainWindow::createCanvas()
+{
+   static int reqid = 0;
+   emit canvasRequested(tr("Local #") + QString::number(++reqid));
 }
 
 #include "mainwindow.moc"

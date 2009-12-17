@@ -38,6 +38,9 @@ class MainWindow : public QMainWindow
    bool observe(CanvasMgr* cm);
    bool observe(NetworkService* net);
 
+   signals:
+   void canvasRequested(QString);
+
    protected:
    void saveSettings();
    void loadSettings();
@@ -45,6 +48,7 @@ class MainWindow : public QMainWindow
 
    private slots:
    void about();
+   void createCanvas();
    void gesture(int code);
    void renderCanvas();
 
