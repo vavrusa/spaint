@@ -118,7 +118,7 @@ void Canvas::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 
    // Measure distance from last point
    // TODO: sample in time intervals
-   int difference = (mState == Drawing) ? 5 : 50;
+   int difference = (mState == Drawing) ? 5 : 30;
    static QPointF lastPos = pt;
    if((pt - lastPos).toPoint().manhattanLength() > difference) {
 
