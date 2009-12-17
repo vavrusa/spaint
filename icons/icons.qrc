@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="icons">
+      <file>16x16/user-online.png</file>
+      <file>16x16/user-offline.png</file>
+      <file>16x16/network-wired.png</file>
+      <file>16x16/network-wired-activated.png</file>
       <file>16x16/exit.png</file>
       <file>16x16/canvas-add.png</file>
       <file>16x16/canvas-remove.png</file>
@@ -8,13 +12,18 @@
       <file>16x16/configure.png</file>
       <file>16x16/help-contents.png</file>
       <file>16x16/application.png</file>
-      <file>16x16/user-offline.png</file>
-      <file>16x16/user-online.png</file>
-      <file>16x16/network-wired-activated.png</file>
-      <file>16x16/network-wired.png</file>
+      <file>32x32/brush-color.png</file>
+      <file>32x32/canvas-clear.png</file>
+      <file>32x32/draw-brush.png</file>
+      <file>32x32/draw-eraser.png</file>
+      <file>32x32/draw-pen.png</file>
+      <file>32x32/pen-color.png</file>
+      <file>32x32/save-as.png</file>
+      <file>32x32/transform.png</file>
       <file>48x48/color-picker.png</file>
-      <file>48x48/draw-brush.png</file>
+      <file>48x48/draw-pen.png</file>
       <file>48x48/draw-eraser.png</file>
       <file>48x48/fill-color.png</file>
+      <file>48x48/transform.png</file>
   </qresource>
 </RCC>

@@ -45,6 +45,7 @@ class MainWindow : public QMainWindow
 
    private slots:
    void about();
+   void gesture(int code);
    void renderCanvas();
 
    private:

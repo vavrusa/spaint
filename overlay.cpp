@@ -22,15 +22,19 @@
 #include "overlay.h"
 #include "graphicsicon.h"
 #include "colorsicon.h"
+#include "numbericon.h"
 
 /** Private data. */
 class Overlay::Private
 {
    public:
    Private() {
+      tool = Canvas::NoTool;
    }
 
-   QList<GraphicsIcon*> icons;
+   ColorsIcon* colors;
+   Canvas::Tool tool;
+   QMap<Canvas::Tool, GraphicsIcon*> icons;
    QGraphicsLinearLayout* layout;
 };
 
@@ -45,24 +49,37 @@ Overlay::Overlay(QGraphicsWidget *parent) :
 
    // Create buttons
    d->icons.clear();
-   d->icons.append(new GraphicsIcon(QPixmap(":icons/48x48/draw-brush.png"), this));
-   d->icons.append(new GraphicsIcon(QPixmap(":icons/48x48/fill-color.png"), this));
-   d->icons.append(new GraphicsIcon(QPixmap(":icons/48x48/draw-eraser.png"), this));
-   d->icons.append(new GraphicsIcon(QPixmap(":icons/48x48/color-picker.png"), this));
+   d->icons.insert(Canvas::Pen,    new GraphicsIcon(QPixmap(":icons/48x48/draw-pen.png"), this));
+   d->icons.insert(Canvas::Eraser, new GraphicsIcon(QPixmap(":icons/48x48/draw-eraser.png"), this));
+   d->icons.insert(Canvas::Transform, new GraphicsIcon(QPixmap(":icons/48x48/transform.png"), this));
+   d->icons.insert(Canvas::Picker, new GraphicsIcon(QPixmap(":icons/48x48/color-picker.png"), this));
 
    // Append buttons to layout
-   foreach(GraphicsIcon* icon, d->icons) {
+   QList<GraphicsIcon*> list = d->icons.values();
+   foreach(GraphicsIcon* icon, list) {
       d->layout->addItem(icon);
       connect(icon, SIGNAL(selected(GraphicsIcon*)), this, SLOT(selectIcon(GraphicsIcon*)));
    }
 
+   // Append number icon
+   NumberIcon* thickness = new NumberIcon(this);
+   d->layout->addItem(thickness);
+   connect(thickness, SIGNAL(numberShifted(int)),
+           this,      SLOT(changeThickness(int)));
+   connect(this,      SIGNAL(thicknessChanged(int)),
+           thickness, SLOT(setNumber(int)));
+
    // Append colors icon
-   ColorsIcon* colors = new ColorsIcon(this);
-   d->layout->addItem(colors);
-   connect(colors, SIGNAL(colorPicked(QPalette::ColorRole,QColor)),
+   d->colors = new ColorsIcon(this);
+   d->layout->addItem(d->colors);
+   connect(d->colors, SIGNAL(colorPicked(QPalette::ColorRole,QColor)),
            this,   SLOT(changeColor(QPalette::ColorRole,QColor)));
    connect(this,   SIGNAL(colorChanged(QPalette::ColorRole,QColor)),
-           colors, SLOT(setColor(QPalette::ColorRole,QColor)));
+           d->colors, SLOT(setColor(QPalette::ColorRole,QColor)));
+
+   // Connect thickness to color
+   connect(this,      SIGNAL(colorChanged(QPalette::ColorRole,QColor)),
+           thickness, SLOT(setColor(QPalette::ColorRole,QColor)));
 }
 
 Overlay::~Overlay()
@@ -70,15 +87,43 @@ Overlay::~Overlay()
    delete d;
 }
 
+Canvas::Tool Overlay::tool()
+{
+   return d->tool;
+}
+
+void Overlay::setTool(Canvas::Tool tool)
+{
+   selectIcon(d->icons[tool]);
+}
+
 void Overlay::selectIcon(GraphicsIcon* icon)
 {
-   foreach(GraphicsIcon* i, d->icons)
+   // Find tool
+   d->tool = d->icons.key(icon, Canvas::NoTool);
+   qDebug("Selected icon, tool %d", d->tool);
+
+   // Update icons
+   foreach(GraphicsIcon* i, d->icons) {
       i->setActivated(i == icon);
+   }
+
+   emit toolChanged(d->tool);
+}
+
+void Overlay::pickColor(QPalette::ColorRole role)
+{
+   d->colors->pickColor(role);
 }
 
 void Overlay::changeColor(QPalette::ColorRole role, const QColor& color)
 {
    emit colorChanged(role, color);
+}
+
+void Overlay::changeThickness(int num)
+{
+   emit thicknessChanged(num);
 }
 
 #include "overlay.moc"

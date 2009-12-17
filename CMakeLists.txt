@@ -38,6 +38,7 @@ set(project_src         main.cpp
                         overlay.cpp
                         graphicsicon.cpp
                         colorsicon.cpp
+                        numbericon.cpp
                         gestureeditor.cpp
                         gestureeditorcanvas.cpp
                         )
@@ -53,10 +54,10 @@ set(project_headers     canvas.h
                         mainwindow.h
                         gesturehandler.h
                         mousegesturerecognizer.h
-                        defines.h
                         overlay.h
                         graphicsicon.h
                         colorsicon.h
+                        numbericon.h
                         gestureeditor.h
                         gestureeditorcanvas.h
                         )
@@ -82,6 +83,7 @@ add_subdirectory(doc)
 
 # Targets
 add_executable(${PROJECT_NAME}        ${project_src}
+                                      ${project_headers}
                                       ${project_i18n}
                                       )
 target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES}

@@ -1,7 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 Brno University of Technology,                     *
- *   Faculty of Information Technology                                     *
- *   Author(s): Marek Vavrusa    <xvavru00 AT stud.fit.vutbr.cz>           *
+ *   Copyright (C) 2009 Marek Vavrusa <marek@vavrusa.com>                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,50 +17,54 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#ifndef CANVASCONTAINMENT_H
-#define CANVASCONTAINMENT_H
+#ifndef NUMBERICON_HPP
+#define NUMBERICON_HPP
+#include "graphicsicon.h"
 
-#include <QGraphicsScene>
-#include <QPalette>
-#include "canvas.h"
-class QGraphicsSceneWheelEvent;
-class QGraphicsView;
-class QPainter;
-
-class CanvasContainment : public QGraphicsScene
+class NumberIcon : public GraphicsIcon
 {
    Q_OBJECT
 
    public:
-   CanvasContainment(QWidget *parent = 0);
-   ~CanvasContainment();
 
-   QGraphicsView* view();
+   /** Explicit constructor. */
+   explicit NumberIcon(QGraphicsItem *parent = 0);
+
+   /** Paint event. */
+   void paint(QPainter* p, const QStyleOptionGraphicsItem* opt, QWidget* w = 0);
+
+   public slots:
+
+   /** Set number. */
+   void setNumber(int num) {
+      mNum = num;
+      update();
+   }
+
+   /** Set color. */
+   void setColor(QPalette::ColorRole role, const QColor& color) {
+      if(role == QPalette::Foreground) {
+         mColor = color;
+         update();
+      }
+   }
 
    signals:
 
-   public slots:
-   void gesture(int code);
-   void addCanvas(Canvas* c);
-   void removeCanvas(Canvas* c = 0);
-   void focusToCanvas(Canvas* c);
-   void clearCanvas(Canvas* c = 0);
-   void renderCanvas(QIODevice& device, Canvas* c = 0);
+   /** Color changed. */
+   void numberShifted(int num);
 
    protected:
-   void drawBackground(QPainter* p, const QRectF& re);
-   void wheelEvent(QGraphicsSceneWheelEvent* e);
 
-   private slots:
-   void updateLayout(const QRectF& newRect);
-   void changeTool(Canvas::Tool tool);
-   void changeColor(QPalette::ColorRole role, const QColor& color);
-   void changeThickness(int num);
+   /** Mouse press. */
+   void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
+   void mousePressEvent(QGraphicsSceneMouseEvent* e);
+   void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
 
    private:
-   struct Private;
-   Private* d;
-
+   int mDiff;
+   int mNum;
+   QColor mColor;
 };
 
-#endif
+#endif // NUMBERICON_HPP

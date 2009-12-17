@@ -75,9 +75,12 @@ void ColorsIcon::pickColor(QPalette::ColorRole role)
 {
    // TODO: QColorDialog is bugged. Corrupts alpha when no adjustment occurs.
    QColorDialog dlg;
-   dlg.setCurrentColor(role == QPalette::Foreground ? mPen : mBrush);
    dlg.setOption(QColorDialog::DontUseNativeDialog);
    dlg.setOption(QColorDialog::ShowAlphaChannel);
+   dlg.setCurrentColor(role == QPalette::Foreground ? mPen : mBrush);
+   dlg.setWindowTitle(role == QPalette::Foreground ?
+                      tr("Select pen color") :
+                      tr("Select brush color"));
 
    // Execute dialog
    if(dlg.exec() == QDialog::Accepted) {

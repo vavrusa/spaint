@@ -103,6 +103,7 @@ void GraphicsIcon::timerEvent(QTimerEvent* e)
 }
 
 void GraphicsIcon::setActivated(bool value) {
+
    d->isActivated = value;
    setAcceptHoverEvents(!value); // Activated does not accept hover
 
@@ -114,6 +115,7 @@ void GraphicsIcon::setActivated(bool value) {
    // Activate
    if(value) {
       d->dist = 1.0;
+      update();
    }
    // Fade out
    else {

@@ -26,6 +26,8 @@
 #include <QPainterPath>
 #include <QPair>
 #include <QList>
+#include <QString>
+#include <QIcon>
 #include "canvas.h"
 #include "canvasmgr.h"
 #include "mousegesturerecognizer.h"
@@ -33,11 +35,18 @@
 namespace Gesture
 {
 
-typedef enum Type {
-   Pen = 0,
-   Brush = 1,
-}gestureType;
+enum Type {
+   Pen,
+   Brush,
+   Eraser,
+   Transform,
+   FColor,
+   BColor,
+   Clear,
+   Save
+};
 
+typedef QPair<QString, QIcon> Info;
 
 class Handler : public MouseGestureRecognizer
 {
@@ -47,13 +56,14 @@ class Handler : public MouseGestureRecognizer
    Handler(QObject* parent = 0);
    ~Handler();
    bool observe(CanvasMgr* cm);
-   DirectionList getGesture(gestureType type);              //gets direction list of gesture
-   void setGesture(gestureType type, DirectionList dl);     //changes directions of gesture
-   void resetGesture(gestureType type);                      //set gestures directions to default
+   DirectionList getGesture(Type type);              //gets direction list of gesture
+   void setGesture(Type type, DirectionList dl);     //changes directions of gesture
+   void resetGesture(Type type);                      //set gestures directions to default
 
    //converting string <-> DirectionList
    DirectionList strToDl (QString str);
    QString dlToStr (DirectionList dl);
+   const QMap<Type,Info>& getTypes();            //returns label and icons mapped to type
 
    public slots:
    bool start();              //start/stop handling gestures
@@ -63,15 +73,11 @@ class Handler : public MouseGestureRecognizer
    void letCanvasGo(Canvas* cnvs);             //disconnecting from destroyed canvas
 
    protected:
-   void initializeGestures(void);               //sets all gestures either from settings or from default values
-   void uninitializeGestures(void);             //saves all changed gestures to settings
-
-   protected slots:
-   void debugGesture(int code);
+   void initializeGestures();               //sets all gestures either from settings or from default values
+   void uninitializeGestures();             //saves all changed gestures to settings
 
    signals:
    void somethingChanged();
-
 
    private:
    class Private;

@@ -27,6 +27,7 @@
 class CanvasMgr;
 class QPainter;
 class QGraphicsSceneMouseEvent;
+class QGraphicsBlurEffect;
 
 class Canvas : public QGraphicsScene
 {
@@ -34,6 +35,25 @@ class Canvas : public QGraphicsScene
    Q_PROPERTY(QString name READ name WRITE setName)
 
    public:
+
+   /// State tracking
+   enum State {
+      Idle    = 0x00, // Not interacting
+      Drawing = 0x01, // Drawing path
+      Gesture = 0x02  // Drawing mouse gesture
+   };
+
+   /// Tool
+   enum Tool {
+      NoTool = 0,// Invalid tool
+      Pen,       // Pen tool
+      Eraser,    // Eraser
+      Transform,  // Transform
+      Brush,     // Brush
+      Picker    // Color picker
+   };
+
+   /** Constructor. */
    Canvas(const QString& name = "Canvas", CanvasMgr* parent = 0);
 
    /** Return canvas name.
@@ -48,19 +68,46 @@ class Canvas : public QGraphicsScene
    }
 
    /** Return color. */
-   const QColor& color(QPalette::ColorRole role = QPalette::Foreground) {
+   QColor color(QPalette::ColorRole role = QPalette::Foreground) {
       if(role == QPalette::Background)
-         return mBrush;
-      else
-         return mPen;
+         return mBrush.color();
+
+      return mPen.color();
    }
 
    /** Set color. */
    void setColor(QPalette::ColorRole role, const QColor& color) {
       if(role == QPalette::Background)
-         mBrush = color;
+         mBrush.setColor(color);
       else
-         mPen = color;
+         mPen.setColor(color);
+   }
+
+   /** Return thickness. */
+   int thickness() {
+      return mPen.width();
+   }
+
+   /** Set thickness. */
+   void setThickness(int width) {
+      mPen.setWidth(width);
+   }
+
+   /** Return tool. */
+   Tool tool() {
+      return mTool;
+   }
+
+   /** Set tool. */
+   void setTool(Tool tool) {
+      mTool = tool;
+   }
+
+   /** Reimplement remove. */
+   void removeItem(QGraphicsItem* item) {
+      if(item == mHovered)
+         mHovered = 0;
+      QGraphicsScene::removeItem(item);
    }
 
    /** Create associated canvas view.
@@ -68,18 +115,6 @@ class Canvas : public QGraphicsScene
      * \return view associated with canvas
      */
    QGraphicsView* createView(QWidget* parent = 0);
-
-   /// State tracking
-   enum State {
-      Idle    = 0x00, // Not interacting
-      Drawing = 0x01, // Drawing path
-      Gesture = 0x02  // Drawing mouse gesture
-   };
-
-   /// Tool
-   enum Tool {
-      Pen     = 0x00  // Pen tool
-   };
 
    /** Return default canvas size.
        \return canvas size
@@ -109,8 +144,11 @@ class Canvas : public QGraphicsScene
    int mState;
    QGraphicsPathItem* mGlyph;
    QString mName;
-   QColor mPen, mBrush;
-
+   QPen mPen;
+   QBrush mBrush;
+   Tool mTool;
+   QGraphicsItem* mHovered;
+   QGraphicsBlurEffect* mEffect;
 };
 
 #endif // CANVAS_H

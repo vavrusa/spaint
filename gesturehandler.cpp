@@ -30,9 +30,9 @@ using namespace Gesture;
 class Handler::Private
 {
    public:
-    QMap<gestureType,DirectionList> gestureMap;
-    QMap<gestureType,DirectionList> defaultGestureMap;
-    QVector<Canvas*> activeCanvases;
+    QMap<Type,DirectionList> gestureMap;
+    QMap<Type,DirectionList> defaultGestureMap;
+    QMap<Type,Info> gestureTypeData;
     bool isRunning;
 };
 
@@ -52,31 +52,47 @@ Handler::~Handler()
 
 void Handler::initializeGestures()
 {
-    //saving default gestures
-    DirectionList dl;
-    dl<<Up<<Left;
-    d->defaultGestureMap[Pen] = dl;
 
-    dl.clear();
-    dl<<Left<<Down;
-    d->defaultGestureMap[Brush] = dl;
+    //inicializing text and icon for all of the gesture types, which can be set
+    d->gestureTypeData[Pen]       = Info(tr("Select pen"),QIcon(":/icons/32x32/draw-pen.png"));
+    d->gestureTypeData[Eraser]    = Info(tr("Select eraser"),QIcon(":/icons/32x32/draw-eraser.png"));
+    d->gestureTypeData[Transform] = Info(tr("Move object"),QIcon(":/icons/32x32/transform.png"));
+    d->gestureTypeData[Clear]     = Info(tr("Clear canvas"),QIcon(":/icons/32x32/canvas-clear.png"));
+    d->gestureTypeData[FColor]    = Info(tr("Pen color"),QIcon(":/icons/32x32/pen-color.png"));
+    d->gestureTypeData[BColor]    = Info(tr("Background color"),QIcon(":/icons/32x32/brush-color.png"));
+    d->gestureTypeData[Save]      = Info(tr("Save to file"),QIcon(":/icons/32x32/save-as.png"));
+
+    //saving default gestures
+    d->defaultGestureMap[Pen] = DirectionList() << Up << Left;
+    d->defaultGestureMap[Eraser] = DirectionList() << Up << Right;
+    d->defaultGestureMap[Clear] = DirectionList() << Down;
+    d->defaultGestureMap[FColor] = DirectionList() << Up << Right << Down << Left;
+    d->defaultGestureMap[BColor] = DirectionList() << Down << Right << Up << Left;
+    d->defaultGestureMap[Transform] = DirectionList() << Up << Right << Down;
+    d->defaultGestureMap[Save] = DirectionList() << Left << Down << Right << Down << Left;
 
     //setting up gesture paths from settings/default values
     QSettings set;
+
     //pen gesture
+    d->gestureMap = d->defaultGestureMap;
     if(set.contains("Gestures/Pen"))
         d->gestureMap[Pen] = strToDl(set.value("Gestures/Pen").toString());
-    else
-        d->gestureMap[Pen] = d->defaultGestureMap[Pen];
-
-    //brush gesture
-    if(set.contains("Gestures/Brush"))
-        d->gestureMap[Brush] = strToDl(set.value("Gestures/Brush").toString());
-    else
-        d->gestureMap[Brush] = d->defaultGestureMap[Brush];
+    if(set.contains("Gestures/Eraser"))
+        d->gestureMap[Eraser] = strToDl(set.value("Gestures/Eraser").toString());
+    if(set.contains("Gestures/Clear"))
+        d->gestureMap[Clear] = strToDl(set.value("Gestures/Clear").toString());
+    if(set.contains("Gestures/FColor"))
+        d->gestureMap[FColor] = strToDl(set.value("Gestures/FColor").toString());
+    if(set.contains("Gestures/BColor"))
+        d->gestureMap[BColor] = strToDl(set.value("Gestures/BColor").toString());
+    if(set.contains("Gestures/Transform"))
+        d->gestureMap[Transform] = strToDl(set.value("Gestures/Transform").toString());
+    if(set.contains("Gestures/Save"))
+        d->gestureMap[Save] = strToDl(set.value("Gestures/Save").toString());
 
     //setting up gestures in recognizer
-    QMapIterator<gestureType,DirectionList> i(d->gestureMap);
+    QMapIterator<Type,DirectionList> i(d->gestureMap);
     while (i.hasNext())
     {
         i.next();
@@ -84,24 +100,19 @@ void Handler::initializeGestures()
     }
 
     emit somethingChanged();
-
-    connect(this, SIGNAL(recognized(int)), this, SLOT(debugGesture(int)));
 }
 
 void Handler::uninitializeGestures()
 {
     QSettings set;
-    //save changed gestures
-    if(d->defaultGestureMap[Pen] != d->gestureMap[Pen])
-        set.setValue("Gestures/Pen", dlToStr(d->gestureMap[Pen]));
-
-    if(d->defaultGestureMap[Brush] != d->gestureMap[Brush])
-        set.setValue("Gestures/Brush", dlToStr(d->gestureMap[Brush]));
-}
-
-void Handler::debugGesture(int code)
-{
-   qDebug() << "Gesture recognized: " << code;
+    set.setValue("Gestures/Pen",       dlToStr(d->gestureMap[Pen]));
+    set.setValue("Gestures/Eraser",    dlToStr(d->gestureMap[Eraser]));
+    set.setValue("Gestures/Clear",     dlToStr(d->gestureMap[Clear]));
+    set.setValue("Gestures/FColor",    dlToStr(d->gestureMap[FColor]));
+    set.setValue("Gestures/BColor",    dlToStr(d->gestureMap[BColor]));
+    set.setValue("Gestures/Transform", dlToStr(d->gestureMap[Transform]));
+    set.setValue("Gestures/Save", dlToStr(d->gestureMap[Save]));
+    set.sync();
 }
 
 bool Handler::observe(CanvasMgr* cm)
@@ -111,19 +122,19 @@ bool Handler::observe(CanvasMgr* cm)
     return true;
 }
 
-DirectionList Handler::getGesture(gestureType type)
+DirectionList Handler::getGesture(Type type)
 {
     return d->gestureMap[type];
 }
 
-void Handler::setGesture(gestureType type, DirectionList dl)
+void Handler::setGesture(Type type, DirectionList dl)
 {
     clearGestureDefinitions();
 
     d->gestureMap[type] = dl;
 
     //redelcaring of gestures
-    QMapIterator<gestureType,DirectionList> i(d->gestureMap);
+    QMapIterator<Type,DirectionList> i(d->gestureMap);
     while (i.hasNext())
     {
         i.next();
@@ -133,7 +144,7 @@ void Handler::setGesture(gestureType type, DirectionList dl)
     emit somethingChanged();
 }
 
-void Handler::resetGesture(gestureType type)
+void Handler::resetGesture(Type type)
 {
     d->gestureMap[type] = d->defaultGestureMap[type];
     emit somethingChanged();
@@ -188,6 +199,11 @@ QString Handler::dlToStr(DirectionList dl)
 
 }
 
+const QMap<Type,Info>& Handler::getTypes()
+{
+   return d->gestureTypeData;
+}
+
 bool Handler::start()
 {
     return d->isRunning = true;
@@ -201,12 +217,10 @@ bool Handler::stop()
 void Handler::handleCanvas(Canvas *cnvs)
 {
     connect(cnvs, SIGNAL(gestureCreated(QPainterPath)), this, SLOT(handleGesture(QPainterPath)));
-    d->activeCanvases.push_back(cnvs);
 }
 
 void Handler::letCanvasGo(Canvas* cnvs)
 {
-    d->activeCanvases.remove(d->activeCanvases.indexOf(cnvs));
     disconnect(cnvs, SIGNAL(gestureCreated(QPainterPath)), this, SLOT(handleGesture(QPainterPath)));
 }
 

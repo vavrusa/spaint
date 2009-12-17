@@ -66,7 +66,10 @@ MainWindow::MainWindow(QWidget* parent)
    setCentralWidget(d->containment->view());
 
    //construct gesture editor
-   d->ge = new Gesture::GestureEditor(&d->gh);
+   d->ge = new Gesture::GestureEditor(&d->gh, this);
+   d->ge->setModal(true);
+   d->ge->hide();
+
    // Load settings
    loadSettings();
 
@@ -81,7 +84,7 @@ MainWindow::~MainWindow()
 {
    delete d->netWin;
    delete d->containment;
-   delete d->ge;
+   d->ge->deleteLater(); // Never delete QObject with delete
    delete d;
 }
 
@@ -98,6 +101,10 @@ bool MainWindow::observe(CanvasMgr* cm)
    connect(cm,   SIGNAL(canvasRemoved(Canvas*)), d->containment, SLOT(removeCanvas(Canvas*)));
 
    // Observe gestures
+   connect(&d->gh, SIGNAL(recognized(int)), d->containment, SLOT(gesture(int)));
+   connect(&d->gh, SIGNAL(recognized(int)), this, SLOT(gesture(int)));
+
+   // Start gesture recognizer
    d->gh.observe(cm);
    d->gh.start();
    return true;
@@ -197,6 +204,12 @@ void MainWindow::loadSettings()
       // Defaults
       resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
    }
+}
+
+void MainWindow::gesture(int code)
+{
+   if(code == Gesture::Save)
+      renderCanvas();
 }
 
 #include "mainwindow.moc"
