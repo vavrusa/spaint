@@ -57,38 +57,36 @@ void NetworkWorker::run()
    d->tcpSocket = new QTcpSocket();
 
    if (!d->tcpSocket->setSocketDescriptor(d->socketDescriptor)) {
-      qDebug() << "d->tcpSocket error in thread";
-      //emit serverState(NetworkServer::ERR_RUN, d->tcpSocket->errorString());
+      qDebug() << "NetworkWorker::run() d->tcpSocket error in thread";
       return;
    }
-
-   /*
-   connect(d->tcpSocket, SIGNAL(disconnected()), this, SLOT(cleanConnections()));
-   connect(d->tcpSocket, SIGNAL(readyRead()), this, SLOT(receiveData()));
-   */
-   connect(d->tcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
-           this, SLOT(tst(QAbstractSocket::SocketState)));
 
    QByteArray dataBlock;
    QDataStream out(&dataBlock, QIODevice::WriteOnly);
    out.setVersion(QDataStream::Qt_4_6);
-   out << (quint16)0;
+   out << (quint32)0;
+
+   out << static_cast<quint32>(d->dataType);
 
    switch(d->dataType) {
    case NetworkService::STRING:
       out << QString("String");
       break;
+   case NetworkService::CANVAS:
+   {
+      Canvas* canvas = static_cast<Canvas*>(d->data);
+      out << canvas->name();
+      break;
+   }
    default:
-      out << QString("What?");
+      qDebug() << "NetworkWorker::run() Unknown dataType in thread";
    }
 
    out.device()->seek(0);
-   out << (quint16)(dataBlock.size() - sizeof(quint16));
+   out << (quint32)(dataBlock.size() - sizeof(quint32));
+
    d->tcpSocket->write(dataBlock);
    d->tcpSocket->waitForBytesWritten();
-
-   qDebug() << "Tohle jsou data:" << dataBlock << dataBlock.size() << "pica";
-   qDebug() << dataBlock.size() << "pica";
 
    delete d->tcpSocket;
 }

@@ -44,8 +44,6 @@ void CanvasMgr::init()
 {
    // Load main canvas
    create(tr("Main Canvas"));
-   create("Test #1");
-   create("Test #2");
 }
 
 Canvas* CanvasMgr::create(const QString& name)

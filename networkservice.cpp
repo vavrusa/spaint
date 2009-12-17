@@ -34,6 +34,7 @@ public:
    {}
 
    QList<Canvas*> offeredCanvases;
+   CanvasMgr* cm;
 };
 
 NetworkService::NetworkService(QObject* parent)
@@ -59,7 +60,12 @@ NetworkService::~NetworkService()
 
 bool NetworkService::observe(CanvasMgr* cm)
 {
+   // Observe server
    server->observe(cm);
+
+   // For future clients
+   d->cm = cm;
+
    return true;
 }
 
@@ -78,6 +84,8 @@ bool NetworkService::startClient(QString host, quint16 port)
    clients->push_back(client);
    client->start(host, port);
 
+   // Observe client
+   client->observe(d->cm);
    return true;
 }
 

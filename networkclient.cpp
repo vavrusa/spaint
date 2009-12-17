@@ -8,11 +8,10 @@
 struct NetworkClient::Private
 {
 public:
-   Private() : tcpSocket(0), blockSize(0)
+   Private() : tcpSocket(0)
    {}
 
    QTcpSocket* tcpSocket;
-   quint16 blockSize;
 };
 
 NetworkClient::NetworkClient(QObject *parent)
@@ -22,8 +21,15 @@ NetworkClient::NetworkClient(QObject *parent)
 
 NetworkClient::~NetworkClient()
 {
-   delete d->tcpSocket;
    delete d;
+}
+
+bool NetworkClient::observe(CanvasMgr* cm)
+{
+   connect(this, SIGNAL(createCanvas(QString)),
+           cm, SLOT(create(QString)));
+
+   return true;
 }
 
 bool NetworkClient::start(QString& addr, quint16 port)
@@ -66,13 +72,35 @@ void NetworkClient::receiveData()
    QDataStream in(d->tcpSocket);
    in.setVersion(QDataStream::Qt_4_6);
 
-   in >> d->blockSize;
+   quint32 blockSize;
+   in >> blockSize;
+
+   quint32 dataType;
+   in >> dataType;
+
+   switch(dataType) {
+   case NetworkService::STRING:
+      qDebug() << "NetworkClient::receiveData(): String :)";
+      break;
+   case NetworkService::CANVAS:
+   {
+      qDebug() << "NetworkClient::receiveData(): Canvas :)";
+      QString name;
+      QTextStream stream(&name);
+      in >> name;
+      stream << " (" << d->tcpSocket->peerName();
+      stream << ", " << d->tcpSocket->peerAddress().toString();
+      stream << ":"  << d->tcpSocket->peerPort() << ")";
+      qDebug() << name;
+      emit createCanvas(name);
+      break;
+   }
+   default:
+      qDebug() << "NetworkClient::receiveData(): Unknown dataType";
+   }
 
    QString data;
    in >> data;
-
-   qDebug() << "Neco prijimam: " << d->blockSize << data.size() << data;
-
 }
 
 void NetworkClient::error(QAbstractSocket::SocketError err)

@@ -24,6 +24,7 @@
 
 #include <QTcpServer>
 
+#include "canvasmgr.h"
 #include "canvas.h"
 
 class NetworkServer : public QTcpServer

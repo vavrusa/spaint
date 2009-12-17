@@ -37,6 +37,9 @@ public:
 
    void run();
 
+signals:
+   void error(QAbstractSocket::SocketError);
+
 private:
    struct Private;
    Private* d;

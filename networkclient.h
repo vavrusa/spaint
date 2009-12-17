@@ -3,6 +3,9 @@
 
 #include <QObject>
 
+#include "canvasmgr.h"
+#include "canvas.h"
+
 class NetworkClient : public QObject
 {
    Q_OBJECT
@@ -20,9 +23,12 @@ public:
    NetworkClient(QObject *parent = 0);
    ~NetworkClient();
 
-public slots:
+   bool observe(CanvasMgr* cm);
    bool start(QString& addr, quint16 port);
    bool stop();
+
+signals:
+   void createCanvas(QString name);
 
 private slots:
    void receiveData();

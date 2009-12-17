@@ -57,18 +57,18 @@ bool NetworkServer::observe(CanvasMgr* cm)
 
 bool NetworkServer::start(quint16 port)
 {
-   emit(serverState(NetworkServer::START));
+   emit serverState(NetworkServer::START);
 
    if (!this->listen(QHostAddress::Any, port)) {
         this->close();
         qDebug() << "Server error";
-        emit(serverState(NetworkServer::ERR_START, this->errorString()));
+        emit serverState(NetworkServer::ERR_START, this->errorString());
         return false;
    }
 
    qDebug() << "Server listening on port " << port << "...";
 
-   emit(serverState(NetworkServer::RUN));
+   emit serverState(NetworkServer::RUN);
    return true;
 }
 
@@ -79,7 +79,7 @@ bool NetworkServer::stop()
    // foreach threads -> wait||terminate()
    // foreach sockets -> disconnect()
 
-   emit(serverState(NetworkServer::STOP));
+   emit serverState(NetworkServer::STOP);
    return true;
 }
 
@@ -87,8 +87,8 @@ void NetworkServer::incomingConnection(int sock)
 {
    qDebug() << "server::incomingConnection(" << sock << ")";
 
-   foreach (Canvas* canvas, d->canvases) {
-      offerCanvasToClient(sock, canvas); break;}
+   foreach (Canvas* canvas, d->canvases)
+      offerCanvasToClient(sock, canvas);
 }
 
 void NetworkServer::cleanConnections()
@@ -104,9 +104,8 @@ bool NetworkServer::offerCanvasToClient(int sock, Canvas* canvas)
 {
    qDebug() << "NetworkServer::offerCanvasToClient()";
 
-    NetworkWorker* worker = new NetworkWorker(sock, NetworkService::STRING, canvas);// static_cast<void*>(&canvas));
-    QThreadPool::globalInstance()->start(worker);
-
+   NetworkWorker* worker = new NetworkWorker(sock, NetworkService::CANVAS, canvas);
+   QThreadPool::globalInstance()->start(worker);
 }
 
 bool NetworkServer::offerCanvas(Canvas* canvas)
