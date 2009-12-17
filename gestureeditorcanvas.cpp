@@ -90,10 +90,6 @@ void GestureEditorCanvas::paintEvent(QPaintEvent* )
         painter.drawLine(d->mouseStart,d->mousePos);
     }
 
-    pen.setColor(QColor(215, 0, 25, 64)); // Transparent red
-    pen.setWidth(8);
-    painter.setPen(pen);
-
     //qDebug()<<"count:"<<d->activeDirections.count();
     int curX = 0, curY = 0;
 
@@ -129,6 +125,15 @@ void GestureEditorCanvas::paintEvent(QPaintEvent* )
     curX = width()/2 - (maxX + minX) * (d->step/2);
     curY = height()/2 - (maxY + minY) * (d->step/2);
 
+    pen.setWidth(8);
+    pen.setColor(QColor(25,0,215, 64));   // Transparent blue
+    painter.setPen(pen);
+
+    painter.drawLine(curX+10,curY+10,curX-10,curY-10);
+    painter.drawLine(curX+10,curY-10,curX-10,curY+10);
+
+    pen.setColor(QColor(215, 0, 25, 64)); // Transparent red
+    painter.setPen(pen);
 
     //drawing arrows
     for(int i = 0; i< d->activeDirections.count(); i++)
