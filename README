@@ -16,8 +16,8 @@ Vojtech Vitek (V-Teq) <vojtech.vitek -at- gmail.com>
 Prerequisites
 -------------
 G++ (GCC)
-CMake >=2.6
-Qt >=4.4.0
+CMake >= 2.6
+Qt >= 4.6.0-beta
 
 Howto INSTALL
 ------------- 
